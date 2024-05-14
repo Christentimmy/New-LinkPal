@@ -154,7 +154,7 @@ class _WalkThroughState extends State<WalkThrough> {
               onTap: () {
                 if (_currentPage.value == 2) {
                   print("Going to login screen");
-                  Get.offAllNamed(AppRoutes.login);
+                  Get.offAllNamed(AppRoutes.signin);
                 }
                 _pageController.nextPage(
                   duration: const Duration(milliseconds: 100),

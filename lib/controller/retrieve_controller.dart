@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +21,7 @@ class RetrieveController extends GetxController {
     final String? token = await TokenStorage().getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Invalid token, login again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
     try {
       final response = await http.get(
@@ -34,7 +33,7 @@ class RetrieveController extends GetxController {
       if (response.statusCode == 401) {
         Get.toNamed(AppRoutes.verification, arguments: {
           "action": () {
-            Get.offAllNamed(AppRoutes.login);
+            Get.offAllNamed(AppRoutes.signin);
           }
         });
         return CustomSnackbar.show(
@@ -83,7 +82,7 @@ class RetrieveController extends GetxController {
     final String? token = await TokenStorage().getToken();
     if (token == null) {
       CustomSnackbar.show("Error", "Invalid token, login again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
     try {
       final response = await http.delete(
@@ -95,7 +94,7 @@ class RetrieveController extends GetxController {
         return CustomSnackbar.show("Error", "Unauthorized");
       }
       CustomSnackbar.show("Success", " account deleted successfully");
-      Get.toNamed(AppRoutes.login);
+      Get.toNamed(AppRoutes.signin);
     } catch (e) {
       return CustomSnackbar.show("Error", e.toString());
     }

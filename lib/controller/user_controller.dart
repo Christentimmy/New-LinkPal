@@ -22,7 +22,7 @@ class UserController extends GetxController {
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
     var uri = Uri.parse("$baseUrl/user/video");
     var request = http.MultipartRequest("POST", uri);
@@ -52,7 +52,7 @@ class UserController extends GetxController {
             email: _retrieveController.userModel.value!.email);
         return Get.offAllNamed(AppRoutes.verification, arguments: {
           "action": () {
-            Get.offAllNamed(AppRoutes.introduction);
+            Get.offAllNamed(AppRoutes.introductionVideo);
           }
         });
       }
@@ -82,7 +82,7 @@ class UserController extends GetxController {
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
 
     var fileStream = http.ByteStream(image.openRead());
@@ -141,7 +141,7 @@ class UserController extends GetxController {
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
 
     try {
@@ -178,7 +178,7 @@ class UserController extends GetxController {
       }
 
       CustomSnackbar.show("Success", "Location Uploaded Successfully");
-      Get.offAllNamed(AppRoutes.introduction);
+      Get.offAllNamed(AppRoutes.introductionVideo);
     } catch (e) {
       debugPrint(e.toString());
       CustomSnackbar.show("Error", e.toString());

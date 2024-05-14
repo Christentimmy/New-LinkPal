@@ -82,7 +82,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   ),
                   PinCodeTextField(
                     hintCharacter: "",
-                    
                     keyboardType: TextInputType.number,
                     textStyle: const TextStyle(
                       fontWeight: FontWeight.w600,

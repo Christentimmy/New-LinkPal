@@ -208,7 +208,7 @@ class AuthController extends GetxController {
     String? token = await _tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.login);
+      return Get.toNamed(AppRoutes.signin);
     }
     try {
       final response = await http.post(
@@ -244,7 +244,7 @@ class AuthController extends GetxController {
     String? token = await _tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      Get.toNamed(AppRoutes.login);
+      Get.toNamed(AppRoutes.signin);
       return false;
     }
     try {

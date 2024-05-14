@@ -333,7 +333,7 @@ class SignUp extends StatelessWidget {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  Get.toNamed(AppRoutes.login);
+                                  Get.toNamed(AppRoutes.signin);
                                 },
                                 child: const Text(
                                   "Log In",

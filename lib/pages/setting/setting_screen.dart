@@ -135,7 +135,7 @@ class _SettingScreenState extends State<SettingScreen> {
               GestureDetector(
                 onTap: () {
                   _tokenStorage.storeToken("");
-                  Get.offAllNamed(AppRoutes.login);
+                  Get.offAllNamed(AppRoutes.signin);
                 },
                 child: Container(
                   height: 50,
