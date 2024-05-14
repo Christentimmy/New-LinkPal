@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
@@ -9,21 +8,11 @@ import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
-import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
 // ignore: must_be_immutable
 class SignUp extends StatelessWidget {
   SignUp({super.key});
-
-  final Rx<Uint8List?> _image = Rx<Uint8List?>(null);
-
-  Future<void> _selectImageFromGallery() async {
-    Uint8List? _file = await selectImage();
-    if (_file != null) {
-      _image.value = _file;
-    }
-  }
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -86,59 +75,7 @@ class SignUp extends StatelessWidget {
                   const SizedBox(
                     height: 20,
                   ),
-                  // Align(
-                  //   alignment: Alignment.center,
-                  //   child: Stack(
-                  //     children: [
-                  //       Obx(
-                  //         () => Container(
-                  //           width: 120,
-                  //           height: 120,
-                  //           decoration: BoxDecoration(
-                  //             image: _image.value != null
-                  //                 ? DecorationImage(
-                  //                     image: MemoryImage(_image.value!),
-                  //                     fit: BoxFit.cover,
-                  //                   )
-                  //                 : null,
-                  //             shape: BoxShape.circle,
-                  //             color: AppColor.lightgrey,
-                  //           ),
-                  //           alignment: Alignment.center,
-                  //           child: _image.value != null
-                  //               ? null
-                  //               : const Padding(
-                  //                   padding: EdgeInsets.all(30.0),
-                  //                   child: Icon(
-                  //                     Icons.person,
-                  //                     size: 50,
-                  //                   ),
-                  //                 ),
-                  //         ),
-                  //       ),
-                  //       Positioned(
-                  //         right: 5,
-                  //         bottom: 5,
-                  //         child: GestureDetector(
-                  //           onTap: _selectImageFromGallery,
-                  //           child: Container(
-                  //             height: 30,
-                  //             width: 30,
-                  //             decoration: BoxDecoration(
-                  //               border: Border.all(
-                  //                 width: 1,
-                  //                 color: Colors.black,
-                  //               ),
-                  //               shape: BoxShape.circle,
-                  //               color: Colors.grey.shade300,
-                  //             ),
-                  //             child: const Icon(Icons.camera_alt, size: 13),
-                  //           ),
-                  //         ),
-                  //       )
-                  //     ],
-                  //   ),
-                  // ),
+
                   Center(
                     child: Container(
                       height: 80,
@@ -146,7 +83,7 @@ class SignUp extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/logo1.png"),
+                          image: AssetImage("assets/images/newlogo.jpeg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -300,7 +237,6 @@ class SignUp extends StatelessWidget {
                               ontap: () {
                                 if (_formKey.value.currentState!.validate() &&
                                     _timePickedByUser.value != null) {
-                                     
                                   _authController.signUpUSer(
                                     name: _fullNameController.text.trim(),
                                     email: _emailController.text.trim(),

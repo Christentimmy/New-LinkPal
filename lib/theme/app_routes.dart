@@ -37,25 +37,24 @@ class AppRoutes {
   static const String initial = '/';
   static const String walkthrough = '/walkthrough';
   static const String introductionVideo = '/introductionVideo';
-  static const String homesceen = '/homescreen';
+  static const String homescreen = '/homescreen';
   static const String dashboard = '/dashboard';
   static const String verification = '/Verification';
   static const String signin = '/signin';
   static const String signup = '/signup';
   static const String forgotPassword = '/forgotPassword';
-  static const String interest = '/forgotPassword';
+  static const String interest = '/interest';
   static const String uploadPicture = '/uploadPicture';
   static const String locationAccess = '/locationAccess';
   static const String errorFace = '/errorFace';
   static const String faceIdReq = '/faceIdReq';
   static const String successFace = '/successFace';
   static const String createPost = '/createPost';
-  static const String home = '/home';
   static const String notification = '/notification';
   static const String chat = '/chat';
   static const String message = '/message';
   static const String allpost = '/allpost';
-  static const String editProfile= '/editProfile';
+  static const String editProfile = '/editProfile';
   static const String profile = '/profile';
   static const String blockedUser = '/blockedUser';
   static const String changePassword = '/changePassword';
@@ -131,7 +130,7 @@ class RouteHandler {
       page: () => const MessageScreen(),
     ),
     GetPage(
-      name: AppRoutes.home,
+      name: AppRoutes.homescreen,
       page: () => const HomeScreen(),
     ),
     GetPage(
@@ -151,20 +150,14 @@ class RouteHandler {
       page: () => IntroductionVideoScreen(),
     ),
     GetPage(
-      name: AppRoutes.homesceen,
-      page: () => const HomeScreen(),
-    ),
-    GetPage(
       name: AppRoutes.dashboard,
       page: () => DashBoardScreen(),
     ),
     GetPage(
       name: AppRoutes.verification,
       page: () {
-        final VoidCallback action = Get.arguments["action"];
-        return VerificationScreen(
-          onClickButtonNext: action
-        );
+        final VoidCallback? action = Get.arguments?["action"];
+        return VerificationScreen(onClickButtonNext: action ?? () {});
       },
     ),
     GetPage(
@@ -189,7 +182,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.locationAccess,
-      page: () =>  LocationAccessScreen(),
+      page: () => LocationAccessScreen(),
     ),
     GetPage(
       name: AppRoutes.errorFace,

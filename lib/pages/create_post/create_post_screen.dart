@@ -98,7 +98,8 @@ class CreatePostScreen extends StatelessWidget {
                   "Post Now",
                   style: TextStyle(
                     color: AppColor.white,
-                    fontSize: 18,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

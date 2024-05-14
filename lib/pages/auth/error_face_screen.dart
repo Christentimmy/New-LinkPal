@@ -23,14 +23,14 @@ class ErrorFaceScreen extends StatelessWidget {
             const Text(
               "Face Not Recognized",
               style: TextStyle(
-                fontSize: 25,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Text(
               "Face not recognized. Please try again",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 17,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -50,7 +50,8 @@ class ErrorFaceScreen extends StatelessWidget {
                 child: const Text(
                   "Try Again",
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 16,
+                    color: Colors.white,
                   ),
                 ),
               ),

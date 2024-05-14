@@ -78,7 +78,8 @@ class FaceReqIdScreen extends StatelessWidget {
                   child: const Text(
                     "Scan my face",
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 17,
+                      color: Colors.white,
                     ),
                   ),
                 ),
