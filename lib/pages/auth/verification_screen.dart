@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/timer_controller.dart';
+import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -27,7 +27,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   final TextEditingController _pinController = TextEditingController();
   final _timerController = Get.put(TimerController());
   final _retrieveController = Get.put(RetrieveController());
-  final _authController = Get.put(AuthController());
+  final _verificationController = Get.put(VerificationMethods());
 
   RxBool _isVerify = false.obs;
 
@@ -119,13 +119,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     animationDuration: const Duration(milliseconds: 300),
                     enableActiveFill: true,
                     onCompleted: (value) async {
-                      _isVerify.value = await _authController.verifyOTP(
+                      _isVerify.value = await _verificationController.verifyOTP(
                         otp: _pinController.text,
                         token: widget.token,
                       );
                     },
                     onEditingComplete: () async {
-                      _isVerify.value = await _authController.verifyOTP(
+                      _isVerify.value = await _verificationController.verifyOTP(
                         otp: _pinController.text,
                         token: widget.token,
                       );
@@ -160,7 +160,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
                       // },
                       ontap: _isVerify.value ? widget.onClickButtonNext : () {},
-                      child: _authController.isloading.value
+                      child: _verificationController.isloading.value
                           ? const Loader()
                           : const Text(
                               "Next",
@@ -182,7 +182,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             : GestureDetector(
                                 onTap: () {
                                   _timerController.startTimer();
-                                  _authController.sendOTP(
+                                  _verificationController.sendOTP(
                                     emailOrPhoneNumber: widget.isEmailType
                                         ? _retrieveController
                                             .userModel.value!.email

@@ -11,6 +11,7 @@ import 'package:linkingpal/pages/auth/sign_in_screen.dart';
 import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
 import 'package:linkingpal/pages/auth/upload_profile_picture.dart';
+import 'package:linkingpal/pages/auth/verification_checker.dart';
 import 'package:linkingpal/pages/auth/verification_screen.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/dashboard_screen.dart';
@@ -65,6 +66,7 @@ class AppRoutes {
   static const String terms = '/terms';
   static const String swipe = '/swipe';
   static const String swipedCardProfile = '/swipedCardProfile';
+  static const String verificationChecker = '/verificationChecker';
 }
 
 class RouteHandler {
@@ -201,6 +203,10 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.successFace,
       page: () => const SuccessFaceScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.verificationChecker,
+      page: () => VerificationChecker(),
     ),
   ];
 }

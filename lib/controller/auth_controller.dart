@@ -15,7 +15,6 @@ class AuthController extends GetxController {
   final _retrieveController = Get.put(RetrieveController());
   final _tokenStorage = Get.put(TokenStorage());
 
-
   Future<void> loginUser({
     required String email,
     required String password,
@@ -39,63 +38,14 @@ class AuthController extends GetxController {
 
       final responseData = await json.decode(response.body);
       final userModel = UserModel.fromJson(responseData["data"]);
-      _retrieveController.getUserDetails();
-      debugPrint(
-        "your phone number: ${_retrieveController.userModel.value!.isPhoneVerified}",
-      );
-      debugPrint(
-        "your email number: ${_retrieveController.userModel.value!.isEmailVerified}",
-      );
-      debugPrint(
-          "your account: ${_retrieveController.userModel.value!.isVerified}");
+      String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
+      _retrieveController.getUserDetails();
 
       //if user email is not verified
-      if (!userModel.isEmailVerified) {
-        CustomSnackbar.show("Error", "Email not verified");
-        var tempToken = await sendOTP(
-          emailOrPhoneNumber: email,
-          parameter: "email",
-        );
-        Get.toNamed(AppRoutes.verification, arguments: {
-          "token": tempToken,
-          "isEmailType": true,
-          "action": () async {
-            //After email is verified successfully, check if the phone number is verified
-            if (!userModel.isPhoneVerified) {
-              var tempToken = await sendOTP(
-                emailOrPhoneNumber: userModel.mobileNumber.toString(),
-                parameter: "mobile_number",
-              );
-              Get.toNamed(AppRoutes.verification, arguments: {
-                "action": () {
-                  Get.offAllNamed(AppRoutes.dashboard);
-                },
-                "token": tempToken,
-                "isEmailType": false,
-              });
-
-              return CustomSnackbar.show("Error", "Mobile number not verified");
-            }
-          },
-        });
-        return;
-      }
-
-      if (!userModel.isPhoneVerified) {
-        var tempToken = await sendOTP(
-          emailOrPhoneNumber: userModel.mobileNumber.toString(),
-          parameter: "mobile_number",
-        );
-        Get.toNamed(AppRoutes.verification, arguments: {
-          "action": () {
-            Get.offAllNamed(AppRoutes.dashboard);
-          },
-          "token": tempToken,
-          "isEmailType": false,
-        });
-
-        return CustomSnackbar.show("Error", "Mobile number not verified");
+      if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
+        CustomSnackbar.show("Error", "Account not verified");
+        return Get.toNamed(AppRoutes.verificationChecker);
       }
 
       if (userModel.video.isEmpty) {
@@ -105,7 +55,7 @@ class AuthController extends GetxController {
       }
 
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", "Unexpected error occurred");
+        CustomSnackbar.show("Error", message);
         return;
       }
 
@@ -152,15 +102,7 @@ class AuthController extends GetxController {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
 
-      String tempToken =
-          await sendOTP(emailOrPhoneNumber: email, parameter: "email");
-      Get.toNamed(AppRoutes.verification, arguments: {
-        "action": () {
-          Get.offAllNamed(AppRoutes.interest);
-        },
-        "token": tempToken,
-        "isEmailType": true,
-      });
+      Get.toNamed(AppRoutes.verificationChecker);
     } catch (e) {
       CustomSnackbar.show("Error", e.toString());
       debugPrint(e.toString());
@@ -226,105 +168,6 @@ class AuthController extends GetxController {
       CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
-    }
-  }
-
-  Future<String> sendOTP({
-    required String emailOrPhoneNumber,
-    required String parameter,
-  }) async {
-    String? token = await _tokenStorage.getToken();
-    if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
-      Get.toNamed(AppRoutes.signin);
-      return "";
-    }
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/send-otp"),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({parameter: emailOrPhoneNumber}),
-      );
-      var decodedResponce = await json.decode(response.body);
-      print(decodedResponce);
-      if (response.statusCode == 400) {
-        CustomSnackbar.show(
-          "Error",
-          "Please fill in either mobile number or email for verification",
-        );
-        return "";
-      }
-      if (response.statusCode == 401) {
-        CustomSnackbar.show("Error", "User Not Found");
-        return "";
-      }
-      CustomSnackbar.show(
-        "Success",
-        "An OTP has been sent to your email",
-      );
-      return decodedResponce["token"];
-    } catch (e) {
-      debugPrint(e.toString());
-      CustomSnackbar.show("Error", "Unexpected Error");
-      return "";
-    }
-  }
-
-  Future<bool> verifyOTP({required String otp, required String token}) async {
-    isloading.value = true;
-    // String? token = await _tokenStorage.getToken();
-    // if (token!.isEmpty) {
-    //   CustomSnackbar.show("Error", "Login Again");
-    //   Get.toNamed(AppRoutes.signin);
-    //   return false;
-    // }
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/verify-otp"),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({"otp": otp}),
-      );
-      print(response.body);
-      if (response.statusCode == 400) {
-        isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
-          "Error occurred whilst verifying your OTP",
-        );
-        return false;
-      }
-      if (response.statusCode == 401) {
-        isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
-          "Wrong otp detected",
-        );
-        return false;
-      }
-      if (response.statusCode == 403) {
-        isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
-          "OTP expired. Please request a new one",
-        );
-        return false;
-      }
-      CustomSnackbar.show(
-        "Success",
-        "A password reset OTP has been sent to your email",
-      );
-
-      return true;
-    } catch (e) {
-      CustomSnackbar.show("Error", e.toString());
-      isloading.value = false;
-      return false;
     }
   }
 }

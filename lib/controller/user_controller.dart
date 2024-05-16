@@ -4,16 +4,16 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  final _authController = Get.put(AuthController());
+  final _verificationController = Get.put(VerificationMethods());
   final _retrieveController = Get.put(RetrieveController());
 
   Future<void> uploadVideo({required File video}) async {
@@ -48,7 +48,7 @@ class UserController extends GetxController {
           "Error",
           "Please verify your email address and mobile number",
         );
-       String tempToken = await _authController.sendOTP(
+       String tempToken = await _verificationController.sendOTP(
           emailOrPhoneNumber: _retrieveController.userModel.value!.email,
           parameter: "email",
         );
