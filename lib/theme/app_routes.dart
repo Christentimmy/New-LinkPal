@@ -158,9 +158,11 @@ class RouteHandler {
       page: () {
         final VoidCallback action = Get.arguments["action"];
         final String tempToken = Get.arguments["token"];
+        final bool isEmailType = Get.arguments["isEmailType"];
         return VerificationScreen(
           onClickButtonNext: action,
           token: tempToken,
+          isEmailType: isEmailType,
         );
       },
     ),

@@ -71,7 +71,7 @@ class UserController extends GetxController {
 
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     } finally {
       isloading.value = false;
     }

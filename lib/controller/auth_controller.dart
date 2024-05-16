@@ -15,22 +15,6 @@ class AuthController extends GetxController {
   final _retrieveController = Get.put(RetrieveController());
   final _tokenStorage = Get.put(TokenStorage());
 
-  // Future<void> checkTokenAndNavigate() async {
-  //   String? token = await _tokenStorage.getToken();
-  //   if (token != null) {
-  //     var decodedToken = JwtDecoder.decode(token);
-  //     int expiryTime = decodedToken["iat"];
-  //     var currentTime = DateTime.now().microsecondsSinceEpoch ~/ 1000;
-  //     if (expiryTime < currentTime) {
-  //       Get.offAllNamed(AppRoutes.dashboard);
-  //       _tokenStorage.storeToken(token);
-  //     } else {
-  //       Get.offAllNamed(AppRoutes.login);
-  //     }
-  //   } else {
-  //     Get.offAllNamed(AppRoutes.login);
-  //   }
-  // }
 
   Future<void> loginUser({
     required String email,
@@ -53,30 +37,53 @@ class AuthController extends GetxController {
         return;
       }
 
-      // if (response.statusCode != 200) {
-      //   CustomSnackbar.show("Error", "Unexpected error occurred");
-      //   return;
-      // }
-
       final responseData = await json.decode(response.body);
       final userModel = UserModel.fromJson(responseData["data"]);
-      _retrieveController.refresh();
+      _retrieveController.getUserDetails();
+      debugPrint(
+        "your phone number: ${_retrieveController.userModel.value!.isPhoneVerified}",
+      );
+      debugPrint(
+        "your email number: ${_retrieveController.userModel.value!.isEmailVerified}",
+      );
+      debugPrint(
+          "your account: ${_retrieveController.userModel.value!.isVerified}");
       _tokenStorage.storeToken(responseData["token"]);
-      print(responseData["token"]);
 
+      //if user email is not verified
       if (!userModel.isEmailVerified) {
-        var tempToken = sendOTP(emailOrPhoneNumber: email, parameter: "email");
+        CustomSnackbar.show("Error", "Email not verified");
+        var tempToken = await sendOTP(
+          emailOrPhoneNumber: email,
+          parameter: "email",
+        );
         Get.toNamed(AppRoutes.verification, arguments: {
-          "action": () {
-            Get.offAllNamed(AppRoutes.dashboard);
-          },
           "token": tempToken,
+          "isEmailType": true,
+          "action": () async {
+            //After email is verified successfully, check if the phone number is verified
+            if (!userModel.isPhoneVerified) {
+              var tempToken = await sendOTP(
+                emailOrPhoneNumber: userModel.mobileNumber.toString(),
+                parameter: "mobile_number",
+              );
+              Get.toNamed(AppRoutes.verification, arguments: {
+                "action": () {
+                  Get.offAllNamed(AppRoutes.dashboard);
+                },
+                "token": tempToken,
+                "isEmailType": false,
+              });
+
+              return CustomSnackbar.show("Error", "Mobile number not verified");
+            }
+          },
         });
-        return CustomSnackbar.show("Error", "Email not verified");
+        return;
       }
 
       if (!userModel.isPhoneVerified) {
-        var tempToken = sendOTP(
+        var tempToken = await sendOTP(
           emailOrPhoneNumber: userModel.mobileNumber.toString(),
           parameter: "mobile_number",
         );
@@ -85,17 +92,22 @@ class AuthController extends GetxController {
             Get.offAllNamed(AppRoutes.dashboard);
           },
           "token": tempToken,
+          "isEmailType": false,
         });
-        CustomSnackbar.show("Error", "Mobile number not verified");
+
+        return CustomSnackbar.show("Error", "Mobile number not verified");
+      }
+
+      if (userModel.video.isEmpty) {
+        Get.toNamed(AppRoutes.introductionVideo);
+        CustomSnackbar.show("Error", "Video not uploaded");
         return;
       }
 
-      // if (userModel.video.isEmpty) {
-
-      //   Get.toNamed(AppRoutes.introduction);
-      //   CustomSnackbar.show("Error", "Video not uploaded");
-      //   return;
-      // }
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", "Unexpected error occurred");
+        return;
+      }
 
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
@@ -140,12 +152,14 @@ class AuthController extends GetxController {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
 
-      String tempToken = await sendOTP(emailOrPhoneNumber: email, parameter: "email");
+      String tempToken =
+          await sendOTP(emailOrPhoneNumber: email, parameter: "email");
       Get.toNamed(AppRoutes.verification, arguments: {
         "action": () {
           Get.offAllNamed(AppRoutes.interest);
         },
-        "token":tempToken,
+        "token": tempToken,
+        "isEmailType": true,
       });
     } catch (e) {
       CustomSnackbar.show("Error", e.toString());
@@ -196,12 +210,16 @@ class AuthController extends GetxController {
         "A password reset OTP has been sent to your email",
       );
 
+      //todo: a token is missing here
+
       Get.toNamed(
         AppRoutes.verification,
         arguments: {
           "action": () {
             // Get.offAllNamed(AppRoutes.dashboard);
-          }
+          },
+          "isEmailType": true,
+          "token": "",
         },
       );
     } catch (e) {
@@ -230,6 +248,8 @@ class AuthController extends GetxController {
         },
         body: json.encode({parameter: emailOrPhoneNumber}),
       );
+      var decodedResponce = await json.decode(response.body);
+      print(decodedResponce);
       if (response.statusCode == 400) {
         CustomSnackbar.show(
           "Error",
@@ -245,7 +265,6 @@ class AuthController extends GetxController {
         "Success",
         "An OTP has been sent to your email",
       );
-      var decodedResponce = await json.decode(response.body);
       return decodedResponce["token"];
     } catch (e) {
       debugPrint(e.toString());

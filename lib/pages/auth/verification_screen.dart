@@ -11,10 +11,12 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 class VerificationScreen extends StatefulWidget {
   final VoidCallback onClickButtonNext;
   final String token;
+  final bool isEmailType;
   const VerificationScreen({
     super.key,
     required this.onClickButtonNext,
     required this.token,
+    required this.isEmailType,
   });
 
   @override
@@ -73,7 +75,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   Obx(
                     () => Text(
                       textAlign: TextAlign.center,
-                      "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.email ?? ""}",
+                      widget.isEmailType
+                          ? "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.email ?? ""}"
+                          : "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.isPhoneVerified ?? ""}",
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColor.textfieldText,
@@ -179,8 +183,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                 onTap: () {
                                   _timerController.startTimer();
                                   _authController.sendOTP(
-                                    emailOrPhoneNumber: _retrieveController
-                                        .userModel.value!.email,
+                                    emailOrPhoneNumber: widget.isEmailType
+                                        ? _retrieveController
+                                            .userModel.value!.email
+                                        : _retrieveController
+                                            .userModel.value!.mobileNumber
+                                            .toString(),
                                     parameter: "email",
                                   );
                                 },
