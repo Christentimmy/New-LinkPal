@@ -18,17 +18,17 @@ class _WalkThroughState extends State<WalkThrough> {
 
   final RxList _introPages = [
     [
-      "assets/images/walkOne.png",
+      "assets/images/net.jpg",
       "Lorem ipsum dolor sit amet, consecteturelit.Lorem ipsum dolor sit amet, elit.",
-      "Lorem Ipsum",
+      "Netflix and Chill",
     ],
     [
-      "assets/images/walkTwo.png",
+      "assets/images/massage.jpg",
       "Lorem ipsum dolor sit amet, consecteturelit.Lorem ipsum dolor sit amet, elit.",
-      "Lorem ipsum",
+      "Massage",
     ],
     [
-      "assets/images/walkthroughThree.png",
+      "assets/images/dinner.jpg",
       "Lorem ipsum dolor sit amet, consecteturelit.Lorem ipsum dolor sit amet, elit.",
       "Lorem ipsum",
     ],

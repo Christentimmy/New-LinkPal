@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -12,8 +13,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
+    NetworkController();
     Future.delayed(const Duration(milliseconds:1050), () {
-      print("wtf1");
       Get.offAllNamed(AppRoutes.walkthrough);
     });
     super.initState();

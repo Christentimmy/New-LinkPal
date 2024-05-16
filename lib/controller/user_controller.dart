@@ -48,12 +48,15 @@ class UserController extends GetxController {
           "Error",
           "Please verify your email address and mobile number",
         );
-        _authController.sendOTP(
-            email: _retrieveController.userModel.value!.email);
+       String tempToken = await _authController.sendOTP(
+          emailOrPhoneNumber: _retrieveController.userModel.value!.email,
+          parameter: "email",
+        );
         return Get.offAllNamed(AppRoutes.verification, arguments: {
           "action": () {
             Get.offAllNamed(AppRoutes.introductionVideo);
-          }
+          }, 
+          "token": tempToken,
         });
       }
       if (message == "Please upload a mp4 or mkv video") {

@@ -156,8 +156,12 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.verification,
       page: () {
-        final VoidCallback? action = Get.arguments?["action"];
-        return VerificationScreen(onClickButtonNext: action ?? () {});
+        final VoidCallback action = Get.arguments["action"];
+        final String tempToken = Get.arguments["token"];
+        return VerificationScreen(
+          onClickButtonNext: action,
+          token: tempToken,
+        );
       },
     ),
     GetPage(

@@ -10,7 +10,12 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerificationScreen extends StatefulWidget {
   final VoidCallback onClickButtonNext;
-  const VerificationScreen({super.key, required this.onClickButtonNext});
+  final String token;
+  const VerificationScreen({
+    super.key,
+    required this.onClickButtonNext,
+    required this.token,
+  });
 
   @override
   State<VerificationScreen> createState() => _VerificationScreenState();
@@ -110,10 +115,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     animationDuration: const Duration(milliseconds: 300),
                     enableActiveFill: true,
                     onCompleted: (value) async {
-                      _isVerify.value = await _authController.verifyOTP(otp: _pinController.text);
+                      _isVerify.value = await _authController.verifyOTP(
+                        otp: _pinController.text,
+                        token: widget.token,
+                      );
                     },
-                    onEditingComplete: () async{
-                      _isVerify.value = await _authController.verifyOTP(otp: _pinController.text);
+                    onEditingComplete: () async {
+                      _isVerify.value = await _authController.verifyOTP(
+                        otp: _pinController.text,
+                        token: widget.token,
+                      );
                     },
                     // onCompleted: (v) async {
                     //   print(v);
@@ -145,13 +156,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
                       // },
                       ontap: _isVerify.value ? widget.onClickButtonNext : () {},
-                      child:  _authController.isloading.value ? const Loader() : const Text(
-                        "Next",
-                        style: TextStyle(
-                          color: AppColor.white,
-                          fontSize: 18,
-                        ),
-                      ),
+                      child: _authController.isloading.value
+                          ? const Loader()
+                          : const Text(
+                              "Next",
+                              style: TextStyle(
+                                color: AppColor.white,
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -166,8 +179,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                 onTap: () {
                                   _timerController.startTimer();
                                   _authController.sendOTP(
-                                      email: _retrieveController
-                                          .userModel.value!.email);
+                                    emailOrPhoneNumber: _retrieveController
+                                        .userModel.value!.email,
+                                    parameter: "email",
+                                  );
                                 },
                                 child: const Text(
                                   "Resend",

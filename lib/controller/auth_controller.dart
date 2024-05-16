@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
-// import 'package:linkingpal/models/user_model.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
@@ -59,30 +59,36 @@ class AuthController extends GetxController {
       // }
 
       final responseData = await json.decode(response.body);
-      // final userModel = UserModel.fromJson(responseData["data"]);
+      final userModel = UserModel.fromJson(responseData["data"]);
       _retrieveController.refresh();
       _tokenStorage.storeToken(responseData["token"]);
+      print(responseData["token"]);
 
-      // if (!userModel.isEmailVerified) {
-      //   sendOTP(email: email);
-      //   Get.toNamed(AppRoutes.verification, arguments: {
-      //     "action": () {
-      //       Get.offAllNamed(AppRoutes.dashboard);
-      //     }
-      //   });
-      //   return CustomSnackbar.show("Error", "Email not verified");
-      // }
+      if (!userModel.isEmailVerified) {
+        var tempToken = sendOTP(emailOrPhoneNumber: email, parameter: "email");
+        Get.toNamed(AppRoutes.verification, arguments: {
+          "action": () {
+            Get.offAllNamed(AppRoutes.dashboard);
+          },
+          "token": tempToken,
+        });
+        return CustomSnackbar.show("Error", "Email not verified");
+      }
 
-      // if (!userModel.isPhoneVerified) {
-      //   sendOTP(email: email);
-      //   Get.toNamed(AppRoutes.verification, arguments: {
-      //     "action": () {
-      //       Get.offAllNamed(AppRoutes.dashboard);
-      //     }
-      //   });
-      //   CustomSnackbar.show("Error", "Mobile number not verified");
-      //   return;
-      // }
+      if (!userModel.isPhoneVerified) {
+        var tempToken = sendOTP(
+          emailOrPhoneNumber: userModel.mobileNumber.toString(),
+          parameter: "mobile_number",
+        );
+        Get.toNamed(AppRoutes.verification, arguments: {
+          "action": () {
+            Get.offAllNamed(AppRoutes.dashboard);
+          },
+          "token": tempToken,
+        });
+        CustomSnackbar.show("Error", "Mobile number not verified");
+        return;
+      }
 
       // if (userModel.video.isEmpty) {
 
@@ -90,7 +96,7 @@ class AuthController extends GetxController {
       //   CustomSnackbar.show("Error", "Video not uploaded");
       //   return;
       // }
-     
+
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       CustomSnackbar.show("Error", "An unexpected error occurred");
@@ -134,11 +140,12 @@ class AuthController extends GetxController {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
 
-      sendOTP(email: email);
+      String tempToken = await sendOTP(emailOrPhoneNumber: email, parameter: "email");
       Get.toNamed(AppRoutes.verification, arguments: {
         "action": () {
           Get.offAllNamed(AppRoutes.interest);
-        }
+        },
+        "token":tempToken,
       });
     } catch (e) {
       CustomSnackbar.show("Error", e.toString());
@@ -204,11 +211,15 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> sendOTP({required String email}) async {
+  Future<String> sendOTP({
+    required String emailOrPhoneNumber,
+    required String parameter,
+  }) async {
     String? token = await _tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.signin);
+      Get.toNamed(AppRoutes.signin);
+      return "";
     }
     try {
       final response = await http.post(
@@ -217,36 +228,40 @@ class AuthController extends GetxController {
           "Content-Type": "application/json",
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({"email": email}),
+        body: json.encode({parameter: emailOrPhoneNumber}),
       );
       if (response.statusCode == 400) {
-        return CustomSnackbar.show(
+        CustomSnackbar.show(
           "Error",
           "Please fill in either mobile number or email for verification",
         );
+        return "";
       }
       if (response.statusCode == 401) {
-        return CustomSnackbar.show("Error", "User Not Found");
+        CustomSnackbar.show("Error", "User Not Found");
+        return "";
       }
       CustomSnackbar.show(
         "Success",
         "An OTP has been sent to your email",
       );
-      print(response.body);
+      var decodedResponce = await json.decode(response.body);
+      return decodedResponce["token"];
     } catch (e) {
       debugPrint(e.toString());
       CustomSnackbar.show("Error", "Unexpected Error");
+      return "";
     }
   }
 
-  Future<bool> verifyOTP({required String otp}) async {
+  Future<bool> verifyOTP({required String otp, required String token}) async {
     isloading.value = true;
-    String? token = await _tokenStorage.getToken();
-    if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
-      Get.toNamed(AppRoutes.signin);
-      return false;
-    }
+    // String? token = await _tokenStorage.getToken();
+    // if (token!.isEmpty) {
+    //   CustomSnackbar.show("Error", "Login Again");
+    //   Get.toNamed(AppRoutes.signin);
+    //   return false;
+    // }
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/verify-otp"),
@@ -258,7 +273,7 @@ class AuthController extends GetxController {
       );
       print(response.body);
       if (response.statusCode == 400) {
-         isloading.value = false;
+        isloading.value = false;
         CustomSnackbar.show(
           "Error",
           "Error occurred whilst verifying your OTP",
@@ -266,7 +281,7 @@ class AuthController extends GetxController {
         return false;
       }
       if (response.statusCode == 401) {
-         isloading.value = false;
+        isloading.value = false;
         CustomSnackbar.show(
           "Error",
           "Wrong otp detected",
@@ -274,7 +289,7 @@ class AuthController extends GetxController {
         return false;
       }
       if (response.statusCode == 403) {
-         isloading.value = false;
+        isloading.value = false;
         CustomSnackbar.show(
           "Error",
           "OTP expired. Please request a new one",
