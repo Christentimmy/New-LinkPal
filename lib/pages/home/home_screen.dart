@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 import 'package:linkingpal/theme/app_theme.dart';
@@ -16,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _retrieveController = Get.put(RetrieveController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,11 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color.fromARGB(50, 158, 158, 158),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5),
+          padding: const EdgeInsets.symmetric(horizontal: 15.0),
           child: Column(
             children: [
-              const SizedBox(height: 10),
-              const UserNameWidget(),
+              const SizedBox(height: 4),
+              UserNameWidget(controller: _retrieveController),
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(
@@ -526,59 +527,85 @@ class Extra extends StatelessWidget {
 }
 
 class UserNameWidget extends StatelessWidget {
+  final RetrieveController controller;
   const UserNameWidget({
     super.key,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(50),
-          child: CachedNetworkImage(
-            width: 45,
-            height: 45,
-            fit: BoxFit.cover,
-            errorWidget: (context, url, error) => const Center(
-              child: Icon(Icons.error),
+    return Obx(
+      () => Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: CachedNetworkImage(
+              width: 45,
+              height: 45,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) => const Center(
+                child: Icon(Icons.error),
+              ),
+              imageUrl: controller.userModel.value?.image ?? "",
+              progressIndicatorBuilder: (context, url, progress) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.grey.shade300,
+                  ),
+                );
+              },
             ),
-            imageUrl:
-                "https://images.unsplash.com/photo-1508184964240-ee96bb9677a7?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            progressIndicatorBuilder: (context, url, progress) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: Colors.grey.shade300,
-                ),
-              );
-            },
           ),
-        ),
-        const SizedBox(width: 8),
-        const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Hello!",
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.black54,
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Hello!",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black54,
+                ),
+              ),
+              Text(
+                controller.userModel.value?.name ?? "",
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () {
+              Get.to(() => const NotificationScreen());
+            },
+            child: Container(
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(2, 2),
+                    spreadRadius: 5,
+                    blurRadius: 10,
+                    color: Colors.black.withOpacity(0.1),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.notifications,
+                color: Colors.blue,
+                size: 18,
               ),
             ),
-            Text(
-              "Timmy Christen",
-              style: TextStyle(
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        GestureDetector(
-          onTap: () {
-            Get.to(() => const NotificationScreen());
-          },
-          child: Container(
+          ),
+          const SizedBox(width: 10),
+          Container(
             height: 40,
             width: 40,
             alignment: Alignment.center,
@@ -595,31 +622,13 @@ class UserNameWidget extends StatelessWidget {
               ],
             ),
             child: const Icon(
-              Icons.notifications,
+              Icons.search,
               color: Colors.blue,
+              size: 18,
             ),
           ),
-        ),
-        // const SizedBox(width: 10),
-        // Container(
-        //   height: 50,
-        //   width: 50,
-        //   alignment: Alignment.center,
-        //   decoration: BoxDecoration(
-        //     shape: BoxShape.circle,
-        //     color: Colors.white,
-        //     boxShadow: [
-        //       BoxShadow(
-        //         offset: const Offset(2, 2),
-        //         spreadRadius: 5,
-        //         blurRadius: 10,
-        //         color: Colors.black.withOpacity(0.1),
-        //       ),
-        //     ],
-        //   ),
-        //   child: const Icon(Icons.search, color: Colors.blue),
-        // ),
-      ],
+        ],
+      ),
     );
   }
 }

@@ -71,8 +71,6 @@ class UserController extends GetxController {
   Future<void> uploadPicture({required XFile image}) async {
     isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
-
-    isloading.value = true;
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
@@ -182,8 +180,38 @@ class UserController extends GetxController {
     }
   }
 
-  // Future<void> uploadInterest(require String )async{
+  Future<void> uploadInterest({required List<String> interests}) async {
+    isloading.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
 
-  // }
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/user/mood"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: json.encode({
+          "mood": interests,
+        }),
+      );
+      var decodedResponse = json.decode(response.body);
+      if (response.statusCode == 400) {
+        return CustomSnackbar.show('Error', decodedResponse["message"]);
+      }
 
+      CustomSnackbar.show("Success", 'You have selected your interest');
+      Get.offAllNamed(AppRoutes.locationAccess);
+    } catch (e) {
+      debugPrint(e.toString());
+      CustomSnackbar.show("Error", e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
 }

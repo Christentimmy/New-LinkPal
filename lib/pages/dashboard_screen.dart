@@ -40,7 +40,7 @@ class DashBoardScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: Obx(() => SafeArea(child: _pages[_currentIndex.value])),
+      body: Obx(() => _pages[_currentIndex.value]),
     );
   }
 }

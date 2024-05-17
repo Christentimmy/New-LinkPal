@@ -28,8 +28,10 @@ class VerificationMethods extends GetxController {
     });
   }
 
-  Future<void> verifyPhone(
-      {required String phoneNumber, required BuildContext context}) async {
+  Future<void> verifyPhone({
+    required String phoneNumber,
+    required BuildContext context,
+  }) async {
     String tempToken = await sendOTP(
       emailOrPhoneNumber:
           _retrieveController.userModel.value?.mobileNumber.toString() ?? "",

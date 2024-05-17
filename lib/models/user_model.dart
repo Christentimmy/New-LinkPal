@@ -13,6 +13,7 @@ class UserModel {
   final String dob;
   final List mood;
   final int mobileNumber;
+  final String image;
 
   const UserModel({
     required this.email,
@@ -29,6 +30,7 @@ class UserModel {
     required this.dob,
     required this.mood,
     required this.mobileNumber,
+    required this.image,
   });
 
   factory UserModel.fromJson(var json) {
@@ -47,6 +49,8 @@ class UserModel {
       dob: json["dob"] ?? "",
       mood: json["mood"] ?? [],
       mobileNumber: json["mobile_number"] ?? 0,
+      image: json["avater"] ?? "",
     );
   }
 }
+

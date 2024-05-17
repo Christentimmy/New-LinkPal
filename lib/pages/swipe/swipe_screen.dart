@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 
@@ -16,6 +15,8 @@ class SwipeScreen extends StatefulWidget {
 }
 
 class SwipeScreenState extends State<SwipeScreen> {
+  final _retrieveController = Get.put(RetrieveController());
+
   List<String> cards = [
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
     "https://images.unsplash.com/photo-1496440737103-cd596325d314?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
@@ -34,8 +35,8 @@ class SwipeScreenState extends State<SwipeScreen> {
           child: Column(
             children: [
               widget1(
+                controller: _retrieveController,
                 onTap1: () {
-                  // Get.to(() => MessageScreen());
                   Get.to(() => const MessageScreen());
                 },
                 onTap: () {
@@ -136,16 +137,21 @@ class SwipeScreenState extends State<SwipeScreen> {
     );
   }
 
-  Padding widget1({required VoidCallback onTap, required VoidCallback onTap1}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(60),
-            child: CachedNetworkImage(
-                height: 60,
-                width: 60,
+  Obx widget1({
+    required VoidCallback onTap,
+    required VoidCallback onTap1,
+    required RetrieveController controller,
+  }) {
+    return Obx(
+      () => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(60),
+              child: CachedNetworkImage(
+                height: 44,
+                width: 45,
                 fit: BoxFit.cover,
                 placeholder: (context, url) {
                   return Center(
@@ -155,78 +161,86 @@ class SwipeScreenState extends State<SwipeScreen> {
                   );
                 },
                 errorWidget: (context, url, error) => const Center(
-                      child: Icon(Icons.error),
+                  child: Icon(Icons.error),
+                ),
+                imageUrl: controller.userModel.value?.image ??
+                    "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Hello!",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.black54,
+                  ),
+                ),
+                Text(
+                  controller.userModel.value?.name ?? "",
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: onTap1,
+              child: Container(
+                height: 45,
+                width: 45,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      offset: const Offset(2, 2),
+                      spreadRadius: 5,
+                      blurRadius: 10,
+                      color: Colors.black.withOpacity(0.1),
                     ),
-                imageUrl:
-                    "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"),
-          ),
-          const SizedBox(width: 8),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Hello!",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
+                  ],
+                ),
+                child: const Icon(
+                  Icons.message,
+                  color: Colors.blue,
+                  size: 15,
                 ),
               ),
-              Text(
-                "Timmy Christen",
-                style: TextStyle(
-                  fontSize: 18,
+            ),
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                height: 40,
+                width: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      offset: const Offset(2, 2),
+                      spreadRadius: 5,
+                      blurRadius: 10,
+                      color: Colors.black.withOpacity(0.1),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.filter_list,
+                  color: Colors.blue,
+                  size: 15,
                 ),
               ),
-            ],
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: onTap1,
-            child: Container(
-              height: 50,
-              width: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    offset: const Offset(2, 2),
-                    spreadRadius: 5,
-                    blurRadius: 10,
-                    color: Colors.black.withOpacity(0.1),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.message,
-                color: Colors.blue,
-              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              height: 50,
-              width: 50,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    offset: const Offset(2, 2),
-                    spreadRadius: 5,
-                    blurRadius: 10,
-                    color: Colors.black.withOpacity(0.1),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.filter_list, color: Colors.blue),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

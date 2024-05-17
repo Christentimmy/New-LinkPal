@@ -42,7 +42,7 @@ class AuthController extends GetxController {
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
       _retrieveController.getUserDetails();
-      print(userModel.isPhoneVerified);
+      print("image :${userModel.image}");
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
