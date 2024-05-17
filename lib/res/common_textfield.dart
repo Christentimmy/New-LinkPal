@@ -28,6 +28,7 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      style: const TextStyle(fontSize: 14),
       validator: passwordValidator ??
           (value) {
             if (value!.isEmpty) {
@@ -112,6 +113,7 @@ class CustomBioTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      style: const TextStyle(fontSize: 14),
       validator: passwordValidator ??
           (value) {
             if (value!.isEmpty) {

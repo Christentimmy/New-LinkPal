@@ -6,8 +6,9 @@ import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:lottie/lottie.dart';
 
-class VerificationChecker extends StatelessWidget {
-  VerificationChecker({super.key});
+class VerificationCheckerScreen extends StatelessWidget {
+  final VoidCallback onClickedToProceed;
+  VerificationCheckerScreen({super.key, required this.onClickedToProceed});
 
   final _retrieveController = Get.put(RetrieveController());
   final _verificationCheckerMethod = Get.put(VerificationMethods());
@@ -46,38 +47,38 @@ class VerificationChecker extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      offset: Offset(0, 3),
-                      blurRadius: 3,
-                      color: Colors.black12,
-                    ),
-                  ],
-                ),
-                child: Obx(
-                  () => ListTile(
-                    title: const Text("Email Verification"),
-                    trailing:
-                        _retrieveController.userModel.value?.isEmailVerified ??
-                                false
-                            ? const Icon(
-                                Icons.check,
-                                color: Colors.green,
-                              )
-                            : const Icon(
-                                Icons.cancel,
-                                color: Colors.red,
-                              ),
-                    onTap: () {
-                      _verificationCheckerMethod.verifyEmail(
-                        email: _retrieveController.userModel.value!.email,
-                      );
-                    },
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    offset: Offset(0, 3),
+                    blurRadius: 3,
+                    color: Colors.black12,
                   ),
-                )),
+                ],
+              ),
+              child: Obx(
+                () => ListTile(
+                  title: const Text("Email Verification"),
+                  trailing: _retrieveController.userModel.value!.isEmailVerified
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        )
+                      : const Icon(
+                          Icons.cancel,
+                          color: Colors.red,
+                        ),
+                  onTap: () {
+                    _verificationCheckerMethod.verifyEmail(
+                      email: _retrieveController.userModel.value!.email,
+                      context: context,
+                    );
+                  },
+                ),
+              ),
+            ),
             const SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
@@ -91,26 +92,27 @@ class VerificationChecker extends StatelessWidget {
                   ),
                 ],
               ),
-              child: ListTile(
-                title: const Text("Phone Verification"),
-                trailing:
-                    _retrieveController.userModel.value?.isPhoneVerified ??
-                            false
-                        ? const Icon(
-                            Icons.check,
-                            color: Colors.green,
-                          )
-                        : const Icon(
-                            Icons.cancel,
-                            color: Colors.red,
-                          ),
-                onTap: () {
-                  _verificationCheckerMethod.verifyPhone(
-                    phoneNumber: _retrieveController
-                        .userModel.value!.mobileNumber
-                        .toString(),
-                  );
-                },
+              child: Obx(
+                () => ListTile(
+                  title: const Text("Phone Verification"),
+                  trailing: _retrieveController.userModel.value!.isPhoneVerified
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        )
+                      : const Icon(
+                          Icons.cancel,
+                          color: Colors.red,
+                        ),
+                  onTap: () {
+                    _verificationCheckerMethod.verifyPhone(
+                      phoneNumber: _retrieveController
+                          .userModel.value!.mobileNumber
+                          .toString(),
+                      context: context,
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -122,6 +124,8 @@ class VerificationChecker extends StatelessWidget {
                     "Error",
                     "Kindly verify your necessary details",
                   );
+                } else {
+                  onClickedToProceed();
                 }
               },
               child: const Text(

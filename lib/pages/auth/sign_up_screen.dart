@@ -21,8 +21,9 @@ class SignUp extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final _authController = Get.put(AuthController());
 
-  final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
+  final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
+
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
@@ -241,7 +242,7 @@ class SignUp extends StatelessWidget {
                                     name: _fullNameController.text.trim(),
                                     email: _emailController.text.trim(),
                                     mobileNumber: _phoneNumberController.text,
-                                    dob: _timePickedByUser.value.toString(),
+                                    dob: _timePickedByUser.value!,
                                     password: _passwordController.text,
                                     bio: _bioController.text,
                                   );

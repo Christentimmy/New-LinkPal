@@ -4,17 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
-import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  final _verificationController = Get.put(VerificationMethods());
-  final _retrieveController = Get.put(RetrieveController());
 
   Future<void> uploadVideo({required File video}) async {
     final tokenStorage = Get.put(TokenStorage());
@@ -48,15 +44,10 @@ class UserController extends GetxController {
           "Error",
           "Please verify your email address and mobile number",
         );
-       String tempToken = await _verificationController.sendOTP(
-          emailOrPhoneNumber: _retrieveController.userModel.value!.email,
-          parameter: "email",
-        );
-        return Get.offAllNamed(AppRoutes.verification, arguments: {
-          "action": () {
-            Get.offAllNamed(AppRoutes.introductionVideo);
-          }, 
-          "token": tempToken,
+        return Get.toNamed(AppRoutes.verificationChecker, arguments: {
+          "onClickToProceed": () {
+            Get.toNamed(AppRoutes.introductionVideo);
+          }
         });
       }
       if (message == "Please upload a mp4 or mkv video") {
@@ -109,7 +100,7 @@ class UserController extends GetxController {
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
       var decodedResponse = json.decode(responseBody);
-      debugPrint(decodedResponse);
+      debugPrint(decodedResponse.toString());
       if (response.statusCode == 403) {
         return CustomSnackbar.show(
           "Error",
@@ -126,6 +117,7 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
+      Get.toNamed(AppRoutes.interest);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -189,4 +181,9 @@ class UserController extends GetxController {
       isloading.value = false;
     }
   }
+
+  // Future<void> uploadInterest(require String )async{
+
+  // }
+
 }

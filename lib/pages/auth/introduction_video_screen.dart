@@ -84,11 +84,10 @@ class IntroductionVideoScreen extends StatelessWidget {
               onTap: () {
                 // Get.to(() => DashBoardScreen());
                 if (_videoFile.value != null) {
-                   _userController.uploadVideo(video: _videoFile.value!);
+                  _userController.uploadVideo(video: _videoFile.value!);
                 } else {
                   CustomSnackbar.show("Error", "Select a video");
                 }
-               
               },
               child: Container(
                 height: 50,

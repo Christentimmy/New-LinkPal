@@ -87,11 +87,9 @@ class LocationAccessScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 10,
+                height: 50,
               ),
-              const SizedBox(
-                height: 40,
-              ),
+             
             ],
           ),
         ),

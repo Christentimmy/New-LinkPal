@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:location/location.dart';
 
@@ -40,6 +41,7 @@ class LocationController extends GetxController {
         "Success",
         "Latitude: ${locationData.value!.latitude}, Longitude: ${locationData.value!.longitude}",
       );
+      Get.toNamed(AppRoutes.introductionVideo);
     } catch (e) {
       CustomSnackbar.show("Error", e.toString());
     } finally {

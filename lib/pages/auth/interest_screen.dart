@@ -108,7 +108,6 @@ class InterestScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Container(),
               ],
             ),
           ),

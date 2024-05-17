@@ -29,7 +29,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _verificationController = Get.put(VerificationMethods());
 
-  RxBool _isVerify = false.obs;
+  final RxBool _isVerify = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +77,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       textAlign: TextAlign.center,
                       widget.isEmailType
                           ? "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.email ?? ""}"
-                          : "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.isPhoneVerified ?? ""}",
+                          : "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.mobileNumber ?? ""}",
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColor.textfieldText,
@@ -120,21 +120,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     enableActiveFill: true,
                     onCompleted: (value) async {
                       _isVerify.value = await _verificationController.verifyOTP(
-                        otp: _pinController.text,
+                        otp: value,
                         token: widget.token,
                       );
+                      if (_isVerify.value) {
+                        widget.onClickButtonNext();
+                      }
                     },
-                    onEditingComplete: () async {
-                      _isVerify.value = await _verificationController.verifyOTP(
-                        otp: _pinController.text,
-                        token: widget.token,
-                      );
-                    },
-                    // onCompleted: (v) async {
-                    //   print(v);
-                    //   _isVerify.value =
-                    //       await _authController.verifyOTP(otp: v);
-                    // },
                     boxShadows: const [
                       BoxShadow(
                         color: Colors.black,
@@ -155,10 +147,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   const SizedBox(height: 40),
                   Obx(
                     () => CustomButton(
-                      // ontap: () {
-                      //   Get.to(() => InterestScreen());
-
-                      // },
                       ontap: _isVerify.value ? widget.onClickButtonNext : () {},
                       child: _verificationController.isloading.value
                           ? const Loader()

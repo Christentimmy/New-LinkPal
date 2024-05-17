@@ -31,6 +31,7 @@ class AuthController extends GetxController {
           "password": password,
         }),
       );
+
       if (response.statusCode == 401) {
         CustomSnackbar.show("Error", "Check your credentials again");
         return;
@@ -41,11 +42,15 @@ class AuthController extends GetxController {
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
       _retrieveController.getUserDetails();
+      print(userModel.isPhoneVerified);
 
-      //if user email is not verified
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
-        return Get.toNamed(AppRoutes.verificationChecker);
+        return Get.toNamed(AppRoutes.verificationChecker, arguments: {
+          "onClickToProceed": () {
+            Get.toNamed(AppRoutes.dashboard);
+          }
+        });
       }
 
       if (userModel.video.isEmpty) {
@@ -72,7 +77,7 @@ class AuthController extends GetxController {
     required String name,
     required String email,
     required String mobileNumber,
-    required String dob,
+    required DateTime dob,
     required String password,
     required String bio,
   }) async {
@@ -81,11 +86,12 @@ class AuthController extends GetxController {
       Object userObject = {
         "name": name,
         "email": email,
-        "mobileNumber": mobileNumber,
-        "dob": dob,
+        "mobile_number": mobileNumber,
+        "dob": dob.toUtc().toIso8601String(),
         "password": password,
         "bio": bio,
       };
+      
       final responce = await http.post(
         Uri.parse("$baseUrl/auth/signup"),
         headers: {
@@ -93,16 +99,22 @@ class AuthController extends GetxController {
         },
         body: json.encode(userObject),
       );
-
+      var decodedResponseBody = json.decode(responce.body);
       if (responce.statusCode == 400) {
-        return CustomSnackbar.show("Error", "Email already exist");
+        return CustomSnackbar.show("Error", decodedResponseBody["error"].toString());
       }
 
       if (responce.statusCode != 200) {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
 
-      Get.toNamed(AppRoutes.verificationChecker);
+      Get.toNamed(AppRoutes.verificationChecker, arguments: {
+        "onClickToProceed": () {
+          Get.toNamed(AppRoutes.uploadPicture);
+        }
+      });
+      _tokenStorage.storeToken(decodedResponseBody["token"]);
+      _retrieveController.getUserDetails();
     } catch (e) {
       CustomSnackbar.show("Error", e.toString());
       debugPrint(e.toString());

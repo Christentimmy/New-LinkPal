@@ -11,7 +11,7 @@ import 'package:linkingpal/pages/auth/sign_in_screen.dart';
 import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
 import 'package:linkingpal/pages/auth/upload_profile_picture.dart';
-import 'package:linkingpal/pages/auth/verification_checker.dart';
+import 'package:linkingpal/pages/auth/verification_checker_screen.dart';
 import 'package:linkingpal/pages/auth/verification_screen.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/dashboard_screen.dart';
@@ -206,7 +206,10 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.verificationChecker,
-      page: () => VerificationChecker(),
+      page: (){
+        final VoidCallback onClickedToProceed = Get.arguments["onClickToProceed"];
+        return VerificationCheckerScreen(onClickedToProceed: onClickedToProceed);
+      },
     ),
   ];
 }

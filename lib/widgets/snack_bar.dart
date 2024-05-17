@@ -14,7 +14,7 @@ class CustomSnackbar {
       backgroundColor: Colors.deepPurple,
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM, 
-      duration: const Duration(seconds: 3), 
+      duration: const Duration(seconds: 5), 
       isDismissible: true, 
       forwardAnimationCurve: Curves.easeOutBack,
       reverseAnimationCurve: Curves.easeIn,
