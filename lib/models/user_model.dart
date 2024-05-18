@@ -49,7 +49,7 @@ class UserModel {
       dob: json["dob"] ?? "",
       mood: json["mood"] ?? [],
       mobileNumber: json["mobile_number"] ?? 0,
-      image: json["avater"] ?? "",
+      image: json["avatar"] ?? "",
     );
   }
 }

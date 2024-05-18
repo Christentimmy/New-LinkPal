@@ -42,15 +42,18 @@ class CustomTextField extends StatelessWidget {
       textInputAction: action ?? TextInputAction.done,
       keyboardType: type,
       decoration: InputDecoration(
+        labelStyle: const TextStyle(
+          fontSize: 13,
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 10,
         ),
         labelText: hintText,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(icon, size: 18),
         suffixIcon: IconButton(
           onPressed: suffixTap,
-          icon: Icon(suffixICon),
+          icon: Icon(suffixICon, size: 18,),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),

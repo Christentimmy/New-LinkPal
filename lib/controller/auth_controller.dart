@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -13,6 +13,7 @@ class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxBool isloading = false.obs;
   final _retrieveController = Get.put(RetrieveController());
+  final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
 
   Future<void> loginUser({
@@ -42,7 +43,6 @@ class AuthController extends GetxController {
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
       _retrieveController.getUserDetails();
-      print("image :${userModel.image}");
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -91,7 +91,7 @@ class AuthController extends GetxController {
         "password": password,
         "bio": bio,
       };
-      
+
       final responce = await http.post(
         Uri.parse("$baseUrl/auth/signup"),
         headers: {
@@ -101,7 +101,8 @@ class AuthController extends GetxController {
       );
       var decodedResponseBody = json.decode(responce.body);
       if (responce.statusCode == 400) {
-        return CustomSnackbar.show("Error", decodedResponseBody["error"].toString());
+        return CustomSnackbar.show(
+            "Error", decodedResponseBody["error"].toString());
       }
 
       if (responce.statusCode != 200) {
@@ -124,23 +125,31 @@ class AuthController extends GetxController {
   }
 
   Future<void> changePassword({required String password}) async {
+    isloading.value = true;
+    FocusManager.instance.primaryFocus?.unfocus();
     try {
       final responce = await http.post(
-        Uri.parse("uri"),
+        Uri.parse("$baseUrl/auth/change-password"),
         headers: {
           "Content-Type": "application/json",
         },
         body: json.encode({"password": password}),
       );
-      if (responce.statusCode == 400) {
-        return CustomSnackbar.show("Error", "Bad request");
-      }
+      var decodedResponce = await json.decode(responce.body);
+
       if (responce.statusCode != 200) {
-        return CustomSnackbar.show("Error", "An error occured, Try again!!");
+        return CustomSnackbar.show(
+          "Error",
+          decodedResponce["message"].toString(),
+        );
       }
+      CustomSnackbar.show("Success", "Password changed successfully");
       Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
+      print(e);
       CustomSnackbar.show("Error", e.toString());
+    } finally {
+      isloading.value = false;
     }
   }
 
@@ -159,21 +168,31 @@ class AuthController extends GetxController {
         return CustomSnackbar.show("Error", "User Not Found");
       }
 
-      CustomSnackbar.show(
-        "Success",
-        "A password reset OTP has been sent to your email",
+      var decodedResponce = await json.decode(response.body);
+
+      String tempToken = await _verificationController.sendOTP(
+        emailOrPhoneNumber: email,
+        parameter: "email",
       );
 
-      //todo: a token is missing here
+      //todo: change the logic because the forgotpassword have otp
+
+      String? extractedCode = _verificationController
+          .extractFourDigitCode(decodedResponce["message"].toString());
+
+      CustomSnackbar.show(
+        "Success",
+        "A password reset OTP has been sent to you $extractedCode",
+      );
 
       Get.toNamed(
         AppRoutes.verification,
         arguments: {
           "action": () {
-            // Get.offAllNamed(AppRoutes.dashboard);
+            Get.toNamed(AppRoutes.changePassword);
           },
           "isEmailType": true,
-          "token": "",
+          "token": tempToken,
         },
       );
     } catch (e) {
@@ -182,4 +201,5 @@ class AuthController extends GetxController {
       isloading.value = false;
     }
   }
+
 }

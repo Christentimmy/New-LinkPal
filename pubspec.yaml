@@ -54,6 +54,7 @@ dependencies:
   location: ^6.0.2
   internet_connection_checker: ^1.0.0+1
   connectivity: ^3.0.6
+  mockito: ^5.4.4
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +67,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.13.1
+  test: ^1.24.9
 
 
 flutter_launcher_icons:
