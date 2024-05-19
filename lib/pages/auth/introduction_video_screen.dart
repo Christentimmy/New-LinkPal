@@ -13,7 +13,6 @@ class IntroductionVideoScreen extends StatelessWidget {
   IntroductionVideoScreen({super.key});
 
   final Rx<File?> _videoFile = Rx<File?>(null);
-
   final _userController = Get.put(UserController());
 
   final Rx<VideoPlayerController?> _videoPlayeController =
@@ -33,6 +32,7 @@ class IntroductionVideoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(_videoPlayeController.value?.value.duration);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Introduction Video"),

@@ -64,8 +64,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: const Text("Edit Profile"),
+        automaticallyImplyLeading: true,
+        title: const Text(
+          "Edit Profile",
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

@@ -187,7 +187,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             const Spacer(),
                             GestureDetector(
                               onTap: () {
-
                                 _pageController.nextPage(
                                   duration: const Duration(milliseconds: 600),
                                   curve: Curves.easeInOut,

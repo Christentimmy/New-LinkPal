@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:image_picker/image_picker.dart';
+
 
 selectImage() async {
   ImagePicker imagePicker = ImagePicker();
@@ -28,7 +28,7 @@ Future<XFile?> selectImageInFileFormat() async {
   return null;
 }
 
-selectVideo() async {
+Future<File?> selectVideo() async {
   ImagePicker imagePicker = ImagePicker();
   XFile? video = await imagePicker.pickVideo(
     source: ImageSource.gallery,
@@ -37,4 +37,6 @@ selectVideo() async {
   if (video != null) {
     return File(video.path);
   }
+
+  return null; //
 }
