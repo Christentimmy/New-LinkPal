@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
@@ -26,17 +25,14 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _fullNameController = TextEditingController();
-
   TextEditingController _bioController = TextEditingController();
-
   final _retrieveController = Get.put(RetrieveController());
-
-  final _locationControllerGet = Get.put(LocationController());
 
   final RxBool _serviceEnabled = false.obs;
   final Rx<PermissionStatus> _permissionGranted = PermissionStatus.denied.obs;
   Rx<LocationData?> locationData = Rx<LocationData?>(null);
   Location location = Location();
+  final Rx<XFile?> _image = Rx<XFile?>(null);
 
   @override
   void initState() {
@@ -48,11 +44,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _bioController = TextEditingController(
       text: _retrieveController.userModel.value!.bio,
     );
+    _image.value == null;
   }
 
   final RxBool _isloading = false.obs;
-
-  final Rx<XFile?> _image = Rx<XFile?>(null);
+  final RxBool _isloadingLocation = false.obs;
 
   final _userController = Get.put(UserController());
 
@@ -145,7 +141,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    updateUserLocation();
+                  },
                   child: Obx(
                     () => Container(
                       height: 50,
@@ -158,8 +156,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           color: Colors.grey,
                         ),
                       ),
-                      child: _locationControllerGet.isloading.value
-                          ? const Loader()
+                      child: _isloadingLocation.value
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                              color: Colors.deepOrangeAccent,
+                            ))
                           : const Text(
                               "Update location",
                               style: TextStyle(
@@ -227,7 +228,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         updateUserProfile(
           image: image,
         );
-        CustomSnackbar.show("Success", "Details update successfully");
       }
 
       if (name.isNotEmpty && bio.isNotEmpty) {
@@ -239,7 +239,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       _retrieveController.getUserDetails();
-      Get.toNamed(AppRoutes.profile);
+      await Future.delayed(const Duration(seconds: 2));
+      Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -291,17 +292,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           "An error occured, try again",
         );
       }
-      CustomSnackbar.show(
-        "Success",
-        "Profile Image Uploaded Successfully",
-      );
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
   Future<void> updateUserLocation() async {
-    _isloading.value = true;
+    _isloadingLocation.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
     try {
       _serviceEnabled.value = await location.serviceEnabled();
       if (!_serviceEnabled.value) {
@@ -320,19 +324,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       locationData.value = await location.getLocation();
-      _userController.uploadLocation(
-        lang: locationData.value!.latitude!,
-        long: locationData.value!.longitude!,
+      final response = await http.post(
+        Uri.parse("https://linkingpal.dasimems.com/v1/user/location"),
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          "latitude": locationData.value!.latitude!,
+          "longitude": locationData.value!.longitude!,
+        }),
       );
+      final decodedBody = json.decode(response.body);
+      print(decodedBody);
+      if (response.statusCode == 403) {
+        return CustomSnackbar.show(
+          "Error",
+          "Please verify your email address and mobile number",
+        );
+      }
+      if (response.statusCode == 400) {
+        return CustomSnackbar.show(
+          "Error",
+          "Bad request",
+        );
+      }
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show(
+          "Error",
+          "An error occured, try again",
+        );
+      }
       CustomSnackbar.show(
         "Success",
         "Details update successfully",
       );
-      Get.toNamed(AppRoutes.profile);
+      _retrieveController.getUserDetails();
+      Get.offAllNamed(AppRoutes.dashboard);
+      print(_retrieveController.userModel.value!.latitude);
+      print(_retrieveController.userModel.value!.longitude);
     } catch (e) {
+      print(e);
       CustomSnackbar.show("Error", e.toString());
     } finally {
-      _isloading.value = false;
+      _isloadingLocation.value = false;
     }
   }
 }

@@ -117,11 +117,11 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.editProfile,
-      page: () => EditProfileScreen(),
+      page: () => const EditProfileScreen(),
     ),
     GetPage(
       name: AppRoutes.profile,
-      page: () => const ProfileScreen(),
+      page: () => ProfileScreen(),
     ),
     GetPage(
       name: AppRoutes.chat,
@@ -182,7 +182,10 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.interest,
-      page: () => InterestScreen(),
+      page: (){
+         final VoidCallback action = Get.arguments["action"];
+         return InterestScreen(onClickWhatNext: action);
+      },
     ),
     GetPage(
       name: AppRoutes.uploadPicture,

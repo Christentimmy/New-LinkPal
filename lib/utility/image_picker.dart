@@ -30,7 +30,10 @@ Future<XFile?> selectImageInFileFormat() async {
 
 selectVideo() async {
   ImagePicker imagePicker = ImagePicker();
-  XFile? video = await imagePicker.pickVideo(source: ImageSource.gallery);
+  XFile? video = await imagePicker.pickVideo(
+    source: ImageSource.gallery,
+    maxDuration: const Duration(seconds: 5),
+  );
   if (video != null) {
     return File(video.path);
   }

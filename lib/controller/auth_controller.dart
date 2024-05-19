@@ -42,9 +42,7 @@ class AuthController extends GetxController {
       final userModel = UserModel.fromJson(responseData["data"]);
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
-      _retrieveController.getUserDetails();
-      print("latitude: ${_retrieveController.userModel.value!.latitude}");
-      print("longitude: ${_retrieveController.userModel.value!.longitude}");
+      print(responseData);
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -65,8 +63,9 @@ class AuthController extends GetxController {
         CustomSnackbar.show("Error", message);
         return;
       }
-
+      _retrieveController.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard);
+      
     } catch (e) {
       CustomSnackbar.show("Error", "An unexpected error occurred");
       debugPrint(e.toString());
@@ -225,6 +224,4 @@ class AuthController extends GetxController {
       return CustomSnackbar.show("Error", e.toString());
     }
   }
-
-
 }

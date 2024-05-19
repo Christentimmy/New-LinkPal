@@ -55,7 +55,7 @@ class UserModel {
       mobileNumber: json["mobile_number"] ?? 0,
       image: json["avatar"] ?? "",
       latitude: json["latitude"] ?? "",
-      longitude: json["latitude"] ?? "",
+      longitude: json["longitude"] ?? "",
      );
   }
 }

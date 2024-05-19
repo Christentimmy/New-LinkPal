@@ -23,6 +23,18 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
+      appBar: AppBar(
+      
+        centerTitle: true,
+        title: const Text(
+          "Settings",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -30,15 +42,6 @@ class _SettingScreenState extends State<SettingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
-              const Center(
-                child: Text(
-                  "Settings",
-                  style: TextStyle(
-                    fontSize: 25,
-                  ),
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height / 20),
               Row(
                 children: [
                   const Text(

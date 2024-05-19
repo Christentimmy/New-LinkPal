@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 
 class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
+  final _retrieveController = Get.put(RetrieveController());
 
   Future<void> uploadVideo({required File video}) async {
     final tokenStorage = Get.put(TokenStorage());
@@ -117,7 +119,11 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.interest);
+      Get.toNamed(AppRoutes.interest, arguments: {
+        "action": () {
+          Get.toNamed(AppRoutes.locationAccess);
+        }
+      });
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -182,7 +188,10 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> uploadInterest({required List<String> interests}) async {
+  Future<void> uploadInterest({
+    required List<String> interests,
+    required VoidCallback onClickWhatNext,
+  }) async {
     isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
@@ -204,11 +213,18 @@ class UserController extends GetxController {
       );
       var decodedResponse = json.decode(response.body);
       if (response.statusCode == 400) {
-        return CustomSnackbar.show('Error', decodedResponse["message"]);
+        CustomSnackbar.show('Error', decodedResponse["message"]);
+        return onClickWhatNext();
       }
 
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decodedResponse["message"]);
+        return onClickWhatNext();
+      }
+
+      _retrieveController.getUserDetails();
       CustomSnackbar.show("Success", 'You have selected your interest');
-      Get.offAllNamed(AppRoutes.locationAccess);
+      onClickWhatNext();
     } catch (e) {
       debugPrint(e.toString());
       CustomSnackbar.show("Error", e.toString());
@@ -242,6 +258,7 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", "Bad Request");
       }
 
+      _retrieveController.getUserDetails();
       // CustomSnackbar.show("Success", "Details changed successfully");
     } catch (e) {
       print(e.toString());
@@ -249,17 +266,16 @@ class UserController extends GetxController {
     }
   }
 
-  int calculateAge({required String dateString}) {
+  int calculateAge(String dateString) {
     DateTime birthDate = DateTime.parse(dateString);
     DateTime currentDate = DateTime.now();
 
     int age = currentDate.year - birthDate.year;
-    int month1 = currentDate.month;
-    int month2 = birthDate.month;
 
     // Adjust age if the birth date has not occurred yet this year
-    if (month2 > month1 ||
-        (month2 == month1 && currentDate.day < birthDate.day)) {
+    if (currentDate.month < birthDate.month ||
+        (currentDate.month == birthDate.month &&
+            currentDate.day < birthDate.day)) {
       age--;
     }
 
@@ -270,17 +286,11 @@ class UserController extends GetxController {
     required String latitude,
     required String longitude,
   }) async {
-     List<Placemark> placemarks = await placemarkFromCoordinates(
+    List<Placemark> placemarks = await placemarkFromCoordinates(
       double.parse(latitude),
       double.parse(longitude),
     );
     String? city = placemarks[0].subAdministrativeArea;
     return city ?? "";
   }
-
-   
-  
-
 }
-
-  

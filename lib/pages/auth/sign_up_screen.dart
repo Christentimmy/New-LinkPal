@@ -247,6 +247,7 @@ class SignUp extends StatelessWidget {
                                     bio: _bioController.text,
                                   );
                                 }
+                                FocusManager.instance.primaryFocus?.unfocus();
                               },
                               child: _authController.isloading.value
                                   ? const Loader()

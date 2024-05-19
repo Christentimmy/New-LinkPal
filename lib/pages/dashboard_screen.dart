@@ -13,7 +13,7 @@ class DashBoardScreen extends StatelessWidget {
     const HomeScreen(),
     const SwipeScreen(),
     const CreatePostScreen(),
-    const ProfileScreen(),
+    ProfileScreen(),
     const SettingScreen()
   ].obs;
 

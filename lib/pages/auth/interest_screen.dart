@@ -6,7 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class InterestScreen extends StatelessWidget {
-  InterestScreen({super.key});
+  final VoidCallback onClickWhatNext;
+  InterestScreen({super.key, required this.onClickWhatNext});
 
   final TextEditingController _searchController = TextEditingController();
   final _userController = Get.put(UserController());
@@ -32,27 +33,6 @@ class InterestScreen extends StatelessWidget {
     [FontAwesomeIcons.personHiking, "Hiking or outdoor activities"],
     [FontAwesomeIcons.gamepad, "Playing board games or video games"],
     [FontAwesomeIcons.compass, "Traveling buddy"],
-    [FontAwesomeIcons.paintbrush, "Art"],
-    [FontAwesomeIcons.earthAmericas, "Crypto"],
-    [FontAwesomeIcons.canadianMapleLeaf, "Botany"],
-    [FontAwesomeIcons.car, "Cars"],
-    [FontAwesomeIcons.houseUser, "Real Estate"],
-    [FontAwesomeIcons.microchip, "Technology"],
-    [FontAwesomeIcons.dog, "Dogs"],
-    [FontAwesomeIcons.dove, "Birds"],
-    [FontAwesomeIcons.notesMedical, "Health care"],
-    [FontAwesomeIcons.bookAtlas, "Geography"],
-    [FontAwesomeIcons.buildingColumns, "Finance"],
-    [FontAwesomeIcons.cat, "Cats"],
-    [FontAwesomeIcons.flagCheckered, "LGBTQ"],
-    [FontAwesomeIcons.brain, "Mental Health"],
-    [FontAwesomeIcons.laptop, "Programming"],
-    [FontAwesomeIcons.film, "Cinema"],
-    [FontAwesomeIcons.baseball, "Sports"],
-    [FontAwesomeIcons.compass, "Travel"],
-    [FontAwesomeIcons.camera, "Photography"],
-    [FontAwesomeIcons.palette, "Design"],
-    [FontAwesomeIcons.planeArrival, "UFO"],
   ];
 
   final RxInt _selectedIndex = (-1).obs;
@@ -67,11 +47,13 @@ class InterestScreen extends StatelessWidget {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
+          
             if (_choosenValue.value.isNotEmpty) {
               _userController.uploadInterest(
                 interests: [
                   _choosenValue.value,
                 ],
+                onClickWhatNext: onClickWhatNext,
               );
             } else {
               CustomSnackbar.show("Error", "Pick one interest");
@@ -115,7 +97,8 @@ class InterestScreen extends StatelessWidget {
                                         _selectedIndex.value = index;
                                         _choosenValue.value =
                                             _allIntetrest[index][1];
-                                        print(_choosenValue.value);
+
+                                              print(_choosenValue.value);
                                       },
                                       child: Obx(
                                         () => Chip(
