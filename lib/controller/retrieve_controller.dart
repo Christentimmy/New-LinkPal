@@ -49,54 +49,5 @@ class RetrieveController extends GetxController {
       debugPrint(e.toString());
     }
   }
-
-  Future<void> updateUserDetails({
-    required String name,
-    required String bio,
-  }) async {
-    final String? token = await TokenStorage().getToken();
-    if (token == null) {
-      CustomSnackbar.show("Error", "Invalid token, login again");
-      return Get.toNamed(AppRoutes.dashboard);
-    }
-    try {
-      final response = await http.patch(
-        Uri.parse("uri"),
-        headers: {'Authorization': 'Bearer $token'},
-        body: json.encode({"name": name, "bio": bio}),
-      );
-      if (response.statusCode == 401) {
-        return CustomSnackbar.show("Error", "Unauthorized");
-      }
-      if (response.statusCode == 400) {
-        return CustomSnackbar.show("Error", "Bad Request");
-      }
-
-      CustomSnackbar.show("Success", "Details changed successfully");
-    } catch (e) {
-      return CustomSnackbar.show("Error", e.toString());
-    }
-  }
-
-  Future<void> deleteAccount() async {
-    final String? token = await TokenStorage().getToken();
-    if (token == null) {
-      CustomSnackbar.show("Error", "Invalid token, login again");
-      return Get.toNamed(AppRoutes.signin);
-    }
-    try {
-      final response = await http.delete(
-        Uri.parse("uri"),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 401) {
-        return CustomSnackbar.show("Error", "Unauthorized");
-      }
-      CustomSnackbar.show("Success", " account deleted successfully");
-      Get.toNamed(AppRoutes.signin);
-    } catch (e) {
-      return CustomSnackbar.show("Error", e.toString());
-    }
-  }
+ 
 }

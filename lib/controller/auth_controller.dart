@@ -43,6 +43,8 @@ class AuthController extends GetxController {
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
       _retrieveController.getUserDetails();
+      print("latitude: ${_retrieveController.userModel.value!.latitude}");
+      print("longitude: ${_retrieveController.userModel.value!.longitude}");
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -201,5 +203,28 @@ class AuthController extends GetxController {
       isloading.value = false;
     }
   }
+
+  Future<void> deleteAccount() async {
+    final String? token = await TokenStorage().getToken();
+    if (token == null) {
+      CustomSnackbar.show("Error", "Invalid token, login again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+    try {
+      final response = await http.delete(
+        Uri.parse("uri"),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 401) {
+        return CustomSnackbar.show("Error", "Unauthorized");
+      }
+      CustomSnackbar.show("Success", " account deleted successfully");
+      Get.toNamed(AppRoutes.signin);
+    } catch (e) {
+      return CustomSnackbar.show("Error", e.toString());
+    }
+  }
+
 
 }

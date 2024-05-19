@@ -1,18 +1,67 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:linkingpal/controller/location_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
+import 'package:linkingpal/utility/image_picker.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/snack_bar.dart';
+import 'package:location/location.dart';
 
-class EditProfileScreen extends StatelessWidget {
-  EditProfileScreen({super.key});
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _bioController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  TextEditingController _fullNameController = TextEditingController();
+
+  TextEditingController _bioController = TextEditingController();
+
+  final _retrieveController = Get.put(RetrieveController());
+
+  final _locationControllerGet = Get.put(LocationController());
+
+  final RxBool _serviceEnabled = false.obs;
+  final Rx<PermissionStatus> _permissionGranted = PermissionStatus.denied.obs;
+  Rx<LocationData?> locationData = Rx<LocationData?>(null);
+  Location location = Location();
+
+  @override
+  void initState() {
+    super.initState();
+    _fullNameController = TextEditingController(
+      text: _retrieveController.userModel.value!.name,
+    );
+
+    _bioController = TextEditingController(
+      text: _retrieveController.userModel.value!.bio,
+    );
+  }
+
+  final RxBool _isloading = false.obs;
+
+  final Rx<XFile?> _image = Rx<XFile?>(null);
+
+  final _userController = Get.put(UserController());
+
+  void _pickImageForUser() async {
+    final imagePicked = await selectImageInFileFormat();
+    if (imagePicked != null) {
+      _image.value = imagePicked;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,20 +81,35 @@ class EditProfileScreen extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Stack(
                     children: [
-                      Container(
-                        width: 150,
-                        height: 150,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              "https://img.freepik.com/free-photo/pretty-smiling-joyfully-female-with-fair-hair-dressed-casually-looking-with-satisfaction_176420-15187.jpg",
+                      Obx(
+                        () => Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 2,
+                              color: Colors.grey,
                             ),
-                            fit: BoxFit.cover,
+                            image: _image.value != null
+                                ? DecorationImage(
+                                    image: FileImage(
+                                      File(_image.value!.path),
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                : DecorationImage(
+                                    image: NetworkImage(
+                                      _retrieveController
+                                              .userModel.value?.image ??
+                                          "",
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                            shape: BoxShape.circle,
+                            color: AppColor.lightgrey,
                           ),
-                          shape: BoxShape.circle,
-                          color: AppColor.lightgrey,
+                          alignment: Alignment.center,
                         ),
-                        alignment: Alignment.center,
                       ),
                       Positioned(
                         right: 5,
@@ -62,7 +126,9 @@ class EditProfileScreen extends StatelessWidget {
                             color: Colors.grey.shade300,
                           ),
                           child: IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _pickImageForUser();
+                            },
                             icon: const Icon(Icons.camera_alt),
                           ),
                         ),
@@ -78,32 +144,31 @@ class EditProfileScreen extends StatelessWidget {
                   icon: Icons.person,
                 ),
                 const SizedBox(height: 20),
-                CustomTextField(
-                  hintText: "Email",
-                  controller: _emailController,
-                  isObscureText: false,
-                  icon: Icons.email,
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  hintText: "Location",
-                  controller: _locationController,
-                  isObscureText: false,
-                  icon: Icons.location_on,
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  hintText: "Phone Number",
-                  controller: _phoneController,
-                  isObscureText: false,
-                  icon: Icons.phone,
-                ),
-                const SizedBox(height: 20),
-                CustomTextField(
-                  hintText: "Age",
-                  controller: _ageController,
-                  isObscureText: false,
-                  icon: Icons.date_range,
+                GestureDetector(
+                  onTap: () {},
+                  child: Obx(
+                    () => Container(
+                      height: 50,
+                      padding: const EdgeInsets.only(left: 20),
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          width: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      child: _locationControllerGet.isloading.value
+                          ? const Loader()
+                          : const Text(
+                              "Update location",
+                              style: TextStyle(
+                                color: AppColor.black,
+                                fontSize: 14,
+                              ),
+                            ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 CustomBioTextField(
@@ -113,16 +178,33 @@ class EditProfileScreen extends StatelessWidget {
                   icon: Icons.person_2,
                 ),
                 const SizedBox(height: 25),
-                CustomButton(
-                  ontap: () {
-                    Get.back();
-                  },
-                  child: const Text(
-                    "Update",
-                    style: TextStyle(
-                      color: AppColor.white,
-                      fontSize: 18,
-                    ),
+                Obx(
+                  () => CustomButton(
+                    ontap: () {
+                      if (_fullNameController.text.isEmpty &&
+                          _image.value == null &&
+                          _bioController.text.isEmpty) {
+                        return CustomSnackbar.show("Error", "Fields unchanged");
+                      } else {
+                        globalUpdate(
+                          image: _image.value,
+                          name: _fullNameController.text,
+                          bio: _bioController.text,
+                          context: context,
+                        );
+                        _retrieveController.getUserDetails();
+                      }
+                    },
+                    child: _isloading.value
+                        ? const Loader()
+                        : const Text(
+                            "Update",
+                            style: TextStyle(
+                              color: AppColor.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -131,5 +213,126 @@ class EditProfileScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void globalUpdate({
+    required XFile? image,
+    required String name,
+    required String bio,
+    required BuildContext context,
+  }) async {
+    _isloading.value = true;
+    try {
+      if (image != null) {
+        updateUserProfile(
+          image: image,
+        );
+        CustomSnackbar.show("Success", "Details update successfully");
+      }
+
+      if (name.isNotEmpty && bio.isNotEmpty) {
+        _userController.updateUserDetails(
+          name: name,
+          bio: bio,
+        );
+        CustomSnackbar.show("Success", "Details update successfully");
+      }
+
+      _retrieveController.getUserDetails();
+      Get.toNamed(AppRoutes.profile);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      _isloading.value = false;
+    }
+  }
+
+  void updateUserProfile({
+    required XFile image,
+  }) async {
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    var fileStream = http.ByteStream(image.openRead());
+    var length = await image.length();
+    var multipartFile = http.MultipartFile(
+      'avatar',
+      fileStream,
+      length,
+      filename: image.path.split('/').last,
+    );
+
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse("https://linkingpal.dasimems.com/v1/user/image"),
+    );
+    request.headers['Authorization'] = token;
+    request.files.add(multipartFile);
+
+    try {
+      // Send the request
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+      var decodedResponse = json.decode(responseBody);
+      debugPrint(decodedResponse.toString());
+      if (response.statusCode == 403) {
+        return CustomSnackbar.show(
+          "Error",
+          "Please verify your email address and mobile number",
+        );
+      }
+      if (response.statusCode != 200) {
+        CustomSnackbar.show(
+          "Error",
+          "An error occured, try again",
+        );
+      }
+      CustomSnackbar.show(
+        "Success",
+        "Profile Image Uploaded Successfully",
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> updateUserLocation() async {
+    _isloading.value = true;
+    try {
+      _serviceEnabled.value = await location.serviceEnabled();
+      if (!_serviceEnabled.value) {
+        _serviceEnabled.value = await location.requestService();
+        if (!_serviceEnabled.value) {
+          return;
+        }
+      }
+
+      _permissionGranted.value = await location.hasPermission();
+      if (_permissionGranted.value == PermissionStatus.denied) {
+        _permissionGranted.value = await location.requestPermission();
+        if (_permissionGranted.value != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      locationData.value = await location.getLocation();
+      _userController.uploadLocation(
+        lang: locationData.value!.latitude!,
+        long: locationData.value!.longitude!,
+      );
+      CustomSnackbar.show(
+        "Success",
+        "Details update successfully",
+      );
+      Get.toNamed(AppRoutes.profile);
+    } catch (e) {
+      CustomSnackbar.show("Error", e.toString());
+    } finally {
+      _isloading.value = false;
+    }
   }
 }

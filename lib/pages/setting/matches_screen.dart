@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 
 class MatchesScreen extends StatefulWidget {
   const MatchesScreen({super.key});
@@ -23,37 +25,44 @@ class _MatchesScreenState extends State<MatchesScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white54,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(1, 1),
-                          color: Colors.black.withOpacity(0.3),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.black,
+                  GestureDetector(
+                    onTap: () {
+                      Get.back();
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(1, 1),
+                            color: Colors.black.withOpacity(0.3),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.black,
+                        size: 23,
+                      ),
                     ),
                   ),
                   const Text(
                     "My Matches",
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   Container(
-                    height: 45,
-                    width: 45,
+                    height: 40,
+                    width: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: Colors.white54,
+                      color: Colors.grey.shade200,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -65,13 +74,14 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     child: const Icon(
                       Icons.menu,
                       color: Colors.black,
+                      size: 23,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
               Container(
-                height: 50,
+                height: 45,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
@@ -95,7 +105,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
               Expanded(
                 child: GridView.builder(
                   itemCount: 10,
@@ -113,8 +123,8 @@ class _MatchesScreenState extends State<MatchesScreen> {
                           // Image
                           ClipRRect(
                             borderRadius: BorderRadius.circular(20),
-                            child: Image.asset(
-                              "assets/rena.jpg",
+                            child: Image.network(
+                              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
                               fit: BoxFit.cover,
                               height: 250,
                               width: double.infinity,
@@ -202,7 +212,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
           width: MediaQuery.of(context).size.width / 2.1,
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/rena.jpg"),
+              image: NetworkImage(
+                "https://unsplash.com/photos/woman-in-black-brassiere-and-panty-set-Y9ksK2aKzkU",
+              ),
               fit: BoxFit.cover,
             ),
           ),
@@ -226,7 +238,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
           width: MediaQuery.of(context).size.width / 2.1,
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/rena.jpg"),
+              image: NetworkImage(
+                "https://unsplash.com/photos/woman-in-black-brassiere-and-panty-set-Y9ksK2aKzkU",
+              ),
               fit: BoxFit.cover,
             ),
           ),

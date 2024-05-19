@@ -12,10 +12,28 @@ class InterestScreen extends StatelessWidget {
   final _userController = Get.put(UserController());
 
   final List _allIntetrest = [
-    [FontAwesomeIcons.planeDeparture, "Avation"],
+    [FontAwesomeIcons.music, "Clubbing"],
+    [FontAwesomeIcons.breadSlice, "Having breakfast"],
+    [FontAwesomeIcons.utensils, "Going out for lunch"],
+    [FontAwesomeIcons.wineGlassEmpty, "Having dinner together"],
+    [FontAwesomeIcons.martiniGlassCitrus, "Going for drinks"],
+    [FontAwesomeIcons.dumbbell, "Working out at the gym"],
+    [FontAwesomeIcons.handsPraying, "Attending church/mosque"],
+    [FontAwesomeIcons.planeDeparture, "Going on holiday trips"],
+    [FontAwesomeIcons.spa, "Getting spa treatments"],
+    [FontAwesomeIcons.bagShopping, "Shopping together"],
+    [FontAwesomeIcons.tv, "Watching Netflix and chilling"],
+    [FontAwesomeIcons.calendarDays, "Being event or party partners"],
+    [FontAwesomeIcons.utensils, "Cooking and chilling"],
+    [FontAwesomeIcons.smoking, "Smoking together"],
+    [FontAwesomeIcons.book, "Studying together"],
+    [FontAwesomeIcons.basketball, "Playing sports"],
+    [FontAwesomeIcons.music, "Going to concerts"],
+    [FontAwesomeIcons.personHiking, "Hiking or outdoor activities"],
+    [FontAwesomeIcons.gamepad, "Playing board games or video games"],
+    [FontAwesomeIcons.compass, "Traveling buddy"],
     [FontAwesomeIcons.paintbrush, "Art"],
     [FontAwesomeIcons.earthAmericas, "Crypto"],
-    [FontAwesomeIcons.breadSlice, "Baking"],
     [FontAwesomeIcons.canadianMapleLeaf, "Botany"],
     [FontAwesomeIcons.car, "Cars"],
     [FontAwesomeIcons.houseUser, "Real Estate"],
@@ -32,11 +50,9 @@ class InterestScreen extends StatelessWidget {
     [FontAwesomeIcons.film, "Cinema"],
     [FontAwesomeIcons.baseball, "Sports"],
     [FontAwesomeIcons.compass, "Travel"],
-    [FontAwesomeIcons.gamepad, "Gaming"],
     [FontAwesomeIcons.camera, "Photography"],
     [FontAwesomeIcons.palette, "Design"],
     [FontAwesomeIcons.planeArrival, "UFO"],
-    [FontAwesomeIcons.music, "Music"],
   ];
 
   final RxInt _selectedIndex = (-1).obs;
@@ -57,7 +73,7 @@ class InterestScreen extends StatelessWidget {
                   _choosenValue.value,
                 ],
               );
-            }else{
+            } else {
               CustomSnackbar.show("Error", "Pick one interest");
             }
           },

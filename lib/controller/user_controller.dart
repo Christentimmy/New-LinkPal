@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 
 class UserController extends GetxController {
   RxBool isloading = false.obs;
@@ -214,4 +216,71 @@ class UserController extends GetxController {
       isloading.value = false;
     }
   }
+
+  Future<void> updateUserDetails({
+    required String name,
+    required String bio,
+  }) async {
+    final String? token = await TokenStorage().getToken();
+    if (token == null) {
+      CustomSnackbar.show("Error", "Invalid token, login again");
+      return Get.toNamed(AppRoutes.dashboard);
+    }
+    try {
+      final response = await http.patch(
+        Uri.parse("$baseUrl/user"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          "Content-Type": "application/json"
+        },
+        body: json.encode({"name": name, "bio": bio}),
+      );
+      if (response.statusCode == 401) {
+        return CustomSnackbar.show("Error", "Unauthorized");
+      }
+      if (response.statusCode == 400) {
+        return CustomSnackbar.show("Error", "Bad Request");
+      }
+
+      // CustomSnackbar.show("Success", "Details changed successfully");
+    } catch (e) {
+      print(e.toString());
+      return CustomSnackbar.show("Error", e.toString());
+    }
+  }
+
+  int calculateAge({required String dateString}) {
+    DateTime birthDate = DateTime.parse(dateString);
+    DateTime currentDate = DateTime.now();
+
+    int age = currentDate.year - birthDate.year;
+    int month1 = currentDate.month;
+    int month2 = birthDate.month;
+
+    // Adjust age if the birth date has not occurred yet this year
+    if (month2 > month1 ||
+        (month2 == month1 && currentDate.day < birthDate.day)) {
+      age--;
+    }
+
+    return age;
+  }
+
+  Future<String?> getCityNameFromCoordiantion({
+    required String latitude,
+    required String longitude,
+  }) async {
+     List<Placemark> placemarks = await placemarkFromCoordinates(
+      double.parse(latitude),
+      double.parse(longitude),
+    );
+    String? city = placemarks[0].subAdministrativeArea;
+    return city ?? "";
+  }
+
+   
+  
+
 }
+
+  

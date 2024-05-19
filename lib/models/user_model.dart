@@ -14,6 +14,8 @@ class UserModel {
   final List mood;
   final int mobileNumber;
   final String image;
+  final String latitude;
+  final String longitude;
 
   const UserModel({
     required this.email,
@@ -31,6 +33,8 @@ class UserModel {
     required this.mood,
     required this.mobileNumber,
     required this.image,
+    required this.latitude,
+    required this.longitude,
   });
 
   factory UserModel.fromJson(var json) {
@@ -50,7 +54,9 @@ class UserModel {
       mood: json["mood"] ?? [],
       mobileNumber: json["mobile_number"] ?? 0,
       image: json["avatar"] ?? "",
-    );
+      latitude: json["latitude"] ?? "",
+      longitude: json["latitude"] ?? "",
+     );
   }
 }
 

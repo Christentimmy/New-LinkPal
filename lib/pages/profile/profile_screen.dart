@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/pages/profile/all_post_screen.dart';
 import 'package:linkingpal/pages/profile/edit_profile.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
@@ -13,7 +15,10 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final PageController _pageController = PageController();
+  // final PageController _pageController = PageController();
+  final _retrieveController = Get.put(RetrieveController());
+  final _userController = Get.put(UserController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Text(
                     "Profile",
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -44,163 +50,212 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      PageView.builder(
-                        itemCount: 5,
-                        controller: _pageController,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          return ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: CachedNetworkImage(
-                                imageUrl:
-                                    "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
-                                height: double.infinity,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.grey.shade50,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(Icons.error),
-                                ),
-                              ));
-                        },
-                      ),
-                      Container(
-                        height: 55,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
+                  child: Obx(
+                    () => ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: CachedNetworkImage(
+                          imageUrl:
+                              _retrieveController.userModel.value?.image ?? "",
+                          height: double.infinity,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.grey.shade50,
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _pageController.previousPage(
-                                    duration: const Duration(milliseconds: 600),
-                                    curve: Curves.easeInOut);
-                              },
-                              child: Container(
-                                height: 30,
-                                width: 30,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: const Icon(Icons.arrow_back_ios_new),
-                              ),
-                            ),
-                            const Spacer(),
-                            GestureDetector(
-                              onTap: () {
-                                _pageController.nextPage(
-                                    duration: const Duration(milliseconds: 600),
-                                    curve: Curves.easeInOut);
-                              },
-                              child: Container(
-                                height: 30,
-                                width: 30,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                                child: const Icon(Icons.arrow_forward_ios),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          errorWidget: (context, url, error) => const Center(
+                            child: Icon(Icons.error),
+                          ),
+                        )),
                   ),
+                  // child: Stack(
+                  //   alignment: Alignment.bottomCenter,
+                  //   children: [
+                  //     PageView.builder(
+                  //       itemCount: 5,
+                  //       controller: _pageController,
+                  //       scrollDirection: Axis.horizontal,
+                  //       itemBuilder: (context, index) {
+                  //         return Obx(
+                  //           () => ClipRRect(
+                  //               borderRadius: BorderRadius.circular(15),
+                  //               child: CachedNetworkImage(
+                  //                 imageUrl: _retrieveController
+                  //                         .userModel.value?.image ??
+                  //                     "",
+                  //                 height: double.infinity,
+                  //                 width: double.infinity,
+                  //                 fit: BoxFit.cover,
+                  //                 placeholder: (context, url) => Center(
+                  //                   child: CircularProgressIndicator(
+                  //                     color: Colors.grey.shade50,
+                  //                   ),
+                  //                 ),
+                  //                 errorWidget: (context, url, error) =>
+                  //                     const Center(
+                  //                   child: Icon(Icons.error),
+                  //                 ),
+                  //               )),
+                  //         );
+                  //       },
+                  //     ),
+                  //     Container(
+                  //       height: 55,
+                  //       padding: const EdgeInsets.symmetric(horizontal: 20),
+                  //       decoration: BoxDecoration(
+                  //         color: Colors.black.withOpacity(0.5),
+                  //         borderRadius: const BorderRadius.only(
+                  //           bottomLeft: Radius.circular(10),
+                  //           bottomRight: Radius.circular(10),
+                  //         ),
+                  //       ),
+                  //       child: Row(
+                  //         children: [
+                  //           GestureDetector(
+                  //             onTap: () {
+                  //               _pageController.previousPage(
+                  //                   duration: const Duration(milliseconds: 600),
+                  //                   curve: Curves.easeInOut);
+                  //             },
+                  //             child: Container(
+                  //               height: 30,
+                  //               width: 30,
+                  //               alignment: Alignment.center,
+                  //               decoration: const BoxDecoration(
+                  //                 shape: BoxShape.circle,
+                  //                 color: Colors.white,
+                  //               ),
+                  //               child: const Icon(Icons.arrow_back_ios_new),
+                  //             ),
+                  //           ),
+                  //           const Spacer(),
+                  //           GestureDetector(
+                  //             onTap: () {
+                  //               _pageController.nextPage(
+                  //                   duration: const Duration(milliseconds: 600),
+                  //                   curve: Curves.easeInOut);
+                  //             },
+                  //             child: Container(
+                  //               height: 30,
+                  //               width: 30,
+                  //               alignment: Alignment.center,
+                  //               decoration: const BoxDecoration(
+                  //                 shape: BoxShape.circle,
+                  //                 color: Colors.white,
+                  //               ),
+                  //               child: const Icon(Icons.arrow_forward_ios),
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ),
                 const SizedBox(height: 10),
-                const Row(
+                Row(
                   children: [
-                    Text(
-                      "Timothy Charlie, 35",
-                      style: TextStyle(
-                        fontSize: 18,
+                    Obx(
+                      () => Text(
+                        "${_retrieveController.userModel.value?.name ?? ""}, ${_userController.calculateAge(
+                          dateString: _retrieveController.userModel.value?.dob
+                                  .toString() ??
+                              "",
+                        )}",
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.check_circle,
                       color: Colors.blue,
                     )
                   ],
                 ),
                 const SizedBox(height: 5),
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.location_on,
                       color: Colors.blue,
+                      size: 20,
                     ),
-                    Text(
-                      "New York, USA",
-                      style: TextStyle(
-                        fontSize: 18,
+                    Obx(
+                      () => Text(
+                        _userController
+                            .getCityNameFromCoordiantion(
+                              latitude:
+                                  _retrieveController.userModel.value!.latitude,
+                              longitude: _retrieveController
+                                  .userModel.value!.longitude,
+                            )
+                            .toString(),
+                        style: const TextStyle(
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 const Text(
                   "Bio",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Text(
-                  "Loving and caring guy",
-                  style: TextStyle(
-                    fontSize: 17,
+                Obx(
+                  () => Text(
+                    _retrieveController.userModel.value?.bio ?? "",
+                    style: const TextStyle(
+                      fontSize: 13,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 const Text(
                   "Contacts",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.phone,
                       color: Colors.blue,
+                      size: 20,
                     ),
-                    SizedBox(width: 10),
-                    Text(
-                      "+1-432-767-4543",
-                      style: TextStyle(
-                        fontSize: 17,
+                    const SizedBox(width: 10),
+                    Obx(
+                      () => Text(
+                        "+${_retrieveController.userModel.value?.mobileNumber.toString() ?? ""}",
+                        style: const TextStyle(
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const Row(
+                Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.email,
                       color: Colors.blue,
+                      size: 20,
                     ),
-                    SizedBox(width: 10),
-                    Text(
-                      "samalfred34@gmail.com",
-                      style: TextStyle(
-                        fontSize: 17,
+                    const SizedBox(width: 10),
+                    Obx(
+                      () => Text(
+                        _retrieveController.userModel.value?.email ?? "",
+                        style: const TextStyle(
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -209,54 +264,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const Text(
                   "Interested In",
                   style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 Container(
-                  height: 35,
-                  width: 80,
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: const Text(
-                    "Women",
-                    style: TextStyle(
-                      color: Colors.deepPurple,
+                    height: 35,
+                    constraints: const BoxConstraints(
+                      minWidth: 30,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Activity/Mood",
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
-                ),
-                Container(
-                  height: 35,
-                  width: 80,
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: const Text(
-                    "Sport",
-                    style: TextStyle(
-                      color: Colors.deepPurple,
+                    margin: const EdgeInsets.only(top: 8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(40),
                     ),
-                  ),
-                ),
+                    child: Obx(
+                      () => Text(
+                        _retrieveController.userModel.value?.mood.toString() ??
+                            "",
+                        style: const TextStyle(
+                          color: Colors.deepPurple,
+                          fontSize: 12,
+                        ),
+                      ),
+                    )),
+                // const SizedBox(height: 10),
+                // const Text(
+                //   "Activity/Mood",
+                //   style: TextStyle(
+                //     fontSize: 20,
+                //     color: Colors.black,
+                //   ),
+                // ),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Get.to(() =>  EditProfileScreen());
+                    Get.to(() => const EditProfileScreen());
                   },
                   child: Container(
                     height: 40,
@@ -272,7 +316,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: const Text(
                       "Edit Profile",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         color: Colors.blue,
                       ),
                     ),
@@ -282,7 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const Text(
                   "Subscription Type",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Text(
@@ -298,7 +344,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Text(
                       "My Posts",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                       ),
                     ),
                     const Spacer(),
@@ -360,7 +406,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: const Text(
                       "My Matches",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                   ),

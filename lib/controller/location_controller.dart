@@ -14,7 +14,6 @@ class LocationController extends GetxController {
 
   Future<void> checkLocationPermission() async {
     isloading.value = true;
-
     try {
       _serviceEnabled.value = await location.serviceEnabled();
       if (!_serviceEnabled.value) {
