@@ -1,50 +1,50 @@
+import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
-import 'package:location/location.dart';
 
 class LocationController extends GetxController {
-  Location location = Location();
   RxBool isloading = false.obs;
-  final RxBool _serviceEnabled = false.obs;
-  final Rx<PermissionStatus> _permissionGranted = PermissionStatus.denied.obs;
-  Rx<LocationData?> locationData = Rx<LocationData?>(null);
   final _userController = Get.put(UserController());
 
-  Future<void> checkLocationPermission() async {
+  Future<void> getCurrentCityandUpload({
+    required VoidCallback onCalledWhatNext,
+  }) async {
     isloading.value = true;
+    final stopWatch = Stopwatch()..start();
     try {
-      _serviceEnabled.value = await location.serviceEnabled();
-      if (!_serviceEnabled.value) {
-        _serviceEnabled.value = await location.requestService();
-        if (!_serviceEnabled.value) {
-          return;
-        }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
       }
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.low,
+      );
 
-      _permissionGranted.value = await location.hasPermission();
-      if (_permissionGranted.value == PermissionStatus.denied) {
-        _permissionGranted.value = await location.requestPermission();
-        if (_permissionGranted.value != PermissionStatus.granted) {
-          return;
-        }
-      }
-
-      locationData.value = await location.getLocation();
+      // List<Placemark> placemarks = await placemarkFromCoordinates(
+      //   position.latitude,
+      //   position.longitude,
+      // );
       _userController.uploadLocation(
-        lang: locationData.value!.latitude!,
-        long: locationData.value!.longitude!,
+        lang: position.latitude,
+        long: position.longitude,
       );
       CustomSnackbar.show(
         "Success",
-        "Latitude: ${locationData.value!.latitude}, Longitude: ${locationData.value!.longitude}",
+        "Location Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.introductionVideo);
+      onCalledWhatNext();
+
+      // String? city = placemarks[0].subAdministrativeArea;
+      // return city ?? "";
     } catch (e) {
+      debugPrint(e.toString());
       CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
+      stopWatch.stop();
+      debugPrint("Execution Time: ${stopWatch.elapsed}");
     }
   }
 }

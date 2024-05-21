@@ -40,10 +40,6 @@ class UserController extends GetxController {
       var responseBody = await response.stream.bytesToString();
       var decodedResponse = json.decode(responseBody);
       String message = decodedResponse["message"];
-
-      print('suppose responce: $responseBody');
-      print('decoded Responce: $decodedResponse');
-      print('normal responce: ${decodedResponse["message"]}');
       if (response.statusCode == 403) {
         CustomSnackbar.show(
           "Error",
@@ -55,13 +51,7 @@ class UserController extends GetxController {
           }
         });
       }
-      if (message == "Please upload a mp4 or mkv video") {
-        return CustomSnackbar.show("Error", message);
-      }
-      if (message == "File too large") {
-        return CustomSnackbar.show("Error", message);
-      }
-      if (message == "Please upload video not more than 90 secs") {
+      if (response.statusCode != 200) {
         return CustomSnackbar.show("Error", message);
       }
 
@@ -159,28 +149,12 @@ class UserController extends GetxController {
         }),
       );
       final decodedBody = json.decode(response.body);
-      print(decodedBody);
-      if (response.statusCode == 403) {
-        return CustomSnackbar.show(
-          "Error",
-          "Please verify your email address and mobile number",
-        );
-      }
-      if (response.statusCode == 400) {
-        return CustomSnackbar.show(
-          "Error",
-          "Bad request",
-        );
-      }
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
-          "An error occured, try again",
+          decodedBody["message"],
         );
       }
-
-      CustomSnackbar.show("Success", "Location Uploaded Successfully");
-      Get.offAllNamed(AppRoutes.introductionVideo);
     } catch (e) {
       debugPrint(e.toString());
       CustomSnackbar.show("Error", e.toString());
@@ -215,12 +189,12 @@ class UserController extends GetxController {
       var decodedResponse = json.decode(response.body);
       if (response.statusCode == 400) {
         CustomSnackbar.show('Error', decodedResponse["message"]);
-        return onClickWhatNext();
+        return;
       }
 
       if (response.statusCode != 200) {
         CustomSnackbar.show("Error", decodedResponse["message"]);
-        return onClickWhatNext();
+        return;
       }
 
       _retrieveController.getUserDetails();

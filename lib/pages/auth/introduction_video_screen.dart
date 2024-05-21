@@ -32,7 +32,6 @@ class IntroductionVideoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(_videoPlayeController.value?.value.duration);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Introduction Video"),

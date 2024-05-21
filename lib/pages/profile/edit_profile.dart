@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
@@ -27,11 +28,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _fullNameController = TextEditingController();
   TextEditingController _bioController = TextEditingController();
   final _retrieveController = Get.put(RetrieveController());
-
-  final RxBool _serviceEnabled = false.obs;
-  final Rx<PermissionStatus> _permissionGranted = PermissionStatus.denied.obs;
+  final _locationController = Get.put(LocationController());
   Rx<LocationData?> locationData = Rx<LocationData?>(null);
-  Location location = Location();
   final Rx<XFile?> _image = Rx<XFile?>(null);
 
   @override
@@ -40,7 +38,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _fullNameController = TextEditingController(
       text: _retrieveController.userModel.value!.name,
     );
-
     _bioController = TextEditingController(
       text: _retrieveController.userModel.value!.bio,
     );
@@ -48,8 +45,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   final RxBool _isloading = false.obs;
-  final RxBool _isloadingLocation = false.obs;
-
   final _userController = Get.put(UserController());
 
   void _pickImageForUser() async {
@@ -146,9 +141,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   icon: Icons.person,
                 ),
                 const SizedBox(height: 20),
+                CustomBioTextField(
+                  hintText: "Bio",
+                  controller: _bioController,
+                  isObscureText: false,
+                  icon: Icons.person_2,
+                ),
+                const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    updateUserLocation();
+                    // updateUserLocation();
+                    _locationController.getCurrentCityandUpload(
+                        onCalledWhatNext: () {
+                      Get.offAllNamed(AppRoutes.dashboard);
+                    });
                   },
                   child: Obx(
                     () => Container(
@@ -159,11 +165,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
                           width: 1,
-                          color: Colors.grey,
+                          color: Colors.deepPurpleAccent,
                         ),
                       ),
-                      child: _isloadingLocation.value
-                          ? const Center(
+                      child:_locationController.isloading.value ?
+                          const Center(
                               child: CircularProgressIndicator(
                               color: Colors.deepOrangeAccent,
                             ))
@@ -176,13 +182,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                CustomBioTextField(
-                  hintText: "Bio",
-                  controller: _bioController,
-                  isObscureText: false,
-                  icon: Icons.person_2,
                 ),
                 const SizedBox(height: 25),
                 Obx(
@@ -303,77 +302,4 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  Future<void> updateUserLocation() async {
-    _isloadingLocation.value = true;
-    final tokenStorage = Get.put(TokenStorage());
-    String? token = await tokenStorage.getToken();
-    if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.signin);
-    }
-
-    try {
-      _serviceEnabled.value = await location.serviceEnabled();
-      if (!_serviceEnabled.value) {
-        _serviceEnabled.value = await location.requestService();
-        if (!_serviceEnabled.value) {
-          return;
-        }
-      }
-
-      _permissionGranted.value = await location.hasPermission();
-      if (_permissionGranted.value == PermissionStatus.denied) {
-        _permissionGranted.value = await location.requestPermission();
-        if (_permissionGranted.value != PermissionStatus.granted) {
-          return;
-        }
-      }
-
-      locationData.value = await location.getLocation();
-      final response = await http.post(
-        Uri.parse("https://linkingpal.dasimems.com/v1/user/location"),
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({
-          "latitude": locationData.value!.latitude!,
-          "longitude": locationData.value!.longitude!,
-        }),
-      );
-      final decodedBody = json.decode(response.body);
-      print(decodedBody);
-      if (response.statusCode == 403) {
-        return CustomSnackbar.show(
-          "Error",
-          "Please verify your email address and mobile number",
-        );
-      }
-      if (response.statusCode == 400) {
-        return CustomSnackbar.show(
-          "Error",
-          "Bad request",
-        );
-      }
-      if (response.statusCode != 200) {
-        return CustomSnackbar.show(
-          "Error",
-          "An error occured, try again",
-        );
-      }
-      CustomSnackbar.show(
-        "Success",
-        "Details update successfully",
-      );
-      _retrieveController.getUserDetails();
-      Get.offAllNamed(AppRoutes.dashboard);
-      print(_retrieveController.userModel.value!.latitude);
-      print(_retrieveController.userModel.value!.longitude);
-    } catch (e) {
-      print(e);
-      CustomSnackbar.show("Error", e.toString());
-    } finally {
-      _isloadingLocation.value = false;
-    }
-  }
 }

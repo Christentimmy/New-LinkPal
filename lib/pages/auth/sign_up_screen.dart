@@ -20,10 +20,9 @@ class SignUp extends StatelessWidget {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final _authController = Get.put(AuthController());
-
+  final RxBool _isShowPassword = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
   final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
-
 
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
@@ -154,7 +153,7 @@ class SignUp extends StatelessWidget {
                             controller: _phoneNumberController,
                             isObscureText: false,
                             icon: Icons.email,
-                            action: TextInputAction.next,
+                            type: TextInputType.number,
                           ),
                           const SizedBox(
                             height: 20,
@@ -210,25 +209,34 @@ class SignUp extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-                          CustomTextField(
-                            hintText: "Enter Password",
-                            controller: _passwordController,
-                            isObscureText: true,
-                            icon: Icons.lock,
-                            action: TextInputAction.done,
-                            passwordValidator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Password is required';
-                              }
-                              if (value.length < 8) {
-                                return 'Password must be at least 8 characters long';
-                              }
-                              if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
-                                  .hasMatch(value)) {
-                                return 'Password must contain at least one special character';
-                              }
-                              return null;
-                            },
+                          Obx(
+                            () => CustomTextField(
+                              hintText: "Enter Password",
+                              controller: _passwordController,
+                              isObscureText:
+                                  _isShowPassword.value ? false : true,
+                              icon: Icons.lock,
+                              action: TextInputAction.done,
+                              suffixICon: _isShowPassword.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              suffixTap: () {
+                                _isShowPassword.value = !_isShowPassword.value;
+                              },
+                              passwordValidator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Password is required';
+                                }
+                                if (value.length < 8) {
+                                  return 'Password must be at least 8 characters long';
+                                }
+                                if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]')
+                                    .hasMatch(value)) {
+                                  return 'Password must contain at least one special character';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
                           const SizedBox(
                             height: 30,

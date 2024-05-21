@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
-// import 'package:linkingpal/pages/auth/introduction_video_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
@@ -73,7 +73,10 @@ class LocationAccessScreen extends StatelessWidget {
                 () => CustomButton(
                   ontap: () {
                     // Get.to(() => IntroductionVideoScreen());
-                    _locationController.checkLocationPermission();
+                    _locationController.getCurrentCityandUpload(
+                        onCalledWhatNext: () {
+                      Get.toNamed(AppRoutes.introductionVideo);
+                    });
                   },
                   child: _locationController.isloading.value
                       ? const Loader()
@@ -89,7 +92,6 @@ class LocationAccessScreen extends StatelessWidget {
               const SizedBox(
                 height: 50,
               ),
-             
             ],
           ),
         ),

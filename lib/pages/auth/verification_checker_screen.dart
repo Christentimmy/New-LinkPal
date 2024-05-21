@@ -61,7 +61,7 @@ class VerificationCheckerScreen extends StatelessWidget {
               child: Obx(
                 () => ListTile(
                   title: const Text("Email Verification"),
-                  trailing: _retrieveController.userModel.value!.isEmailVerified
+                  trailing: _retrieveController.userModel.value?.isEmailVerified ?? false
                       ? const Icon(
                           Icons.check,
                           color: Colors.green,
@@ -95,7 +95,7 @@ class VerificationCheckerScreen extends StatelessWidget {
               child: Obx(
                 () => ListTile(
                   title: const Text("Phone Verification"),
-                  trailing: _retrieveController.userModel.value!.isPhoneVerified
+                  trailing: _retrieveController.userModel.value?.isPhoneVerified ?? false
                       ? const Icon(
                           Icons.check,
                           color: Colors.green,
