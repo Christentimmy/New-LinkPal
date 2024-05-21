@@ -1,4 +1,5 @@
 
+
 class PostModel {
   final String id;
   final String text;
@@ -32,20 +33,6 @@ class PostModel {
       comments: List<dynamic>.from(json['comments']),
       likes: List<dynamic>.from(json['likes']),
     );
-  }
-
-  // Method to convert an instance to a JSON map
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'text': text,
-      'tags': tags,
-      'files': files,
-      'created_at': createdAt.toIso8601String(),
-      'created_by': createdBy.toJson(),
-      'comments': comments,
-      'likes': likes,
-    };
   }
 }
 

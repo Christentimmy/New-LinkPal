@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
+  final int? maxline;
   final TextEditingController controller;
   final bool isObscureText;
   final IconData icon;
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
     this.action,
     this.type,
     this.passwordValidator,
+    this.maxline,
   });
 
   @override
@@ -37,7 +39,7 @@ class CustomTextField extends StatelessWidget {
             return null;
           },
       obscureText: isObscureText,
-      maxLines: 1,
+      maxLines: maxline ?? 1,
       textAlign: TextAlign.start,
       textInputAction: action ?? TextInputAction.done,
       keyboardType: type,

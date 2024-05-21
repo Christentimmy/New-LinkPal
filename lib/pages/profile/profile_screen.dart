@@ -170,8 +170,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             GestureDetector(
                               onTap: () {
                                 _pageController.previousPage(
-                                    duration: const Duration(milliseconds: 600),
-                                    curve: Curves.easeInOut);
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.easeInOut,
+                                );
+                                _controller.value!.pause();
                               },
                               child: Container(
                                 height: 30,

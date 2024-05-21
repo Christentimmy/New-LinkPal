@@ -73,7 +73,7 @@ class RouteHandler {
   static final List<GetPage> routes = [
     GetPage(
       name: AppRoutes.createPost,
-      page: () => const CreatePostScreen(),
+      page: () => CreatePostScreen(),
     ),
     GetPage(
       name: AppRoutes.swipe,

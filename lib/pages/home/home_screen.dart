@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _retrieveController = Get.put(RetrieveController());
+  final _postController = Get.put(PostController());
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,23 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 4),
               UserNameWidget(controller: _retrieveController),
               const SizedBox(height: 10),
+              // Expanded(
+              //   child: Obx(() {
+              //     if (_postController.allUserPost.isEmpty) {
+              //       return const Center(
+              //         child: Text("No posts available"),
+              //       );
+              //     } else {
+              //       return ListView.builder(
+              //         itemCount: _postController.allUserPost.length,
+              //         itemBuilder: (context, index) {
+              //           final post = _postController.allUserPost[index];
+              //           return const AltPageView();
+              //         },
+              //       );
+              //     }
+              //   }),
+              // ),
               Expanded(
                 child: ListView.builder(
                   itemCount: 10,
