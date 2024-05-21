@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,30 +36,26 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 4),
               UserNameWidget(controller: _retrieveController),
               const SizedBox(height: 10),
-              // Expanded(
-              //   child: Obx(() {
-              //     if (_postController.allUserPost.isEmpty) {
-              //       return const Center(
-              //         child: Text("No posts available"),
-              //       );
-              //     } else {
-              //       return ListView.builder(
-              //         itemCount: _postController.allUserPost.length,
-              //         itemBuilder: (context, index) {
-              //           final post = _postController.allUserPost[index];
-              //           return const AltPageView();
-              //         },
-              //       );
-              //     }
-              //   }),
-              // ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return const AltPageView();
-                  },
-                ),
+                child: Obx(() {
+                  if (_postController.allUserPost.isEmpty) {
+                    return Center(
+                      child: Lottie.network(
+                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                      ),
+                    );
+                  } else {
+                    return ListView.builder(
+                      itemCount: _postController.allUserPost.length,
+                      itemBuilder: (context, index) {
+                        final post = _postController.allUserPost[index];
+                        return PostCardDisplay(
+                          postModel: post,
+                        );
+                      },
+                    );
+                  }
+                }),
               ),
             ],
           ),
@@ -65,8 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class AltPageView extends StatelessWidget {
-  const AltPageView({
+class PostCardDisplay extends StatelessWidget {
+  final PostModel postModel;
+  const PostCardDisplay({
+    required this.postModel,
     super.key,
   });
 
@@ -79,25 +81,32 @@ class AltPageView extends StatelessWidget {
       ),
       height: 360,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: CachedNetworkImage(
-              height: 270,
-              fit: BoxFit.cover,
-              errorWidget: (context, url, error) => const Center(
-                child: Icon(Icons.error),
-              ),
-              width: double.infinity,
-              placeholder: (context, url) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.grey.shade100,
+          SizedBox(
+            height: 270,
+            child: PageView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: postModel.files.length,
+              itemBuilder: (context, index) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: CachedNetworkImage(
+                    height: 270,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => const Center(
+                      child: Icon(Icons.error),
+                    ),
+                    width: double.infinity,
+                    placeholder: (context, url) {
+                      return const Center(
+                        child: Loader(color: Colors.deepOrangeAccent),
+                      );
+                    },
+                    imageUrl: postModel.files[index],
                   ),
                 );
               },
-              imageUrl:
-                  "https://images.unsplash.com/photo-1531256456869-ce942a665e80?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             ),
           ),
           const SizedBox(height: 10),
@@ -121,25 +130,24 @@ class AltPageView extends StatelessWidget {
                     errorWidget: (context, url, error) => const Center(
                       child: Icon(Icons.error),
                     ),
-                    imageUrl:
-                        "https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDV8fGZlbWFsZSUyMHBpY3R1cmUlMjBwb3J0cmFpdHxlbnwwfHwwfHx8MA%3D%3D",
+                    imageUrl: postModel.createdBy.avatar,
                   ),
                 ),
               ),
               const SizedBox(width: 8),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       Text(
-                        "Charlie Jolie",
-                        style: TextStyle(
+                        postModel.createdBy.name,
+                        style: const TextStyle(
                           fontSize: 12,
                         ),
                       ),
-                      SizedBox(width: 5),
-                      FaIcon(
+                      const SizedBox(width: 5),
+                      const FaIcon(
                         FontAwesomeIcons.certificate,
                         size: 14,
                         color: Colors.blue,
@@ -147,25 +155,25 @@ class AltPageView extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    "Jan 24, 12:45PM",
+                    DateFormat("MMM dd yyyy").format(postModel.createdAt),
                     style: TextStyle(
                       fontSize: 11,
-                      color: Colors.grey,
+                      color: Colors.grey.shade800,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],
               ),
               const Spacer(),
-              const Column(
+               Column(
                 children: [
-                  Icon(
+                  const Icon(
                     FontAwesomeIcons.heart,
                     size: 22,
                   ),
                   Text(
-                    "22k",
-                    style: TextStyle(
+                    "${postModel.likes}K",
+                    style: const TextStyle(
                       fontSize: 8,
                     ),
                   ),
@@ -189,9 +197,9 @@ class AltPageView extends StatelessWidget {
                       size: 22,
                     ),
                   ),
-                  const Text(
-                    "22k",
-                    style: TextStyle(
+                  Text(
+                    "${postModel.comments}K",
+                    style: const TextStyle(
                       fontSize: 8,
                     ),
                   ),
@@ -199,9 +207,9 @@ class AltPageView extends StatelessWidget {
               ),
             ],
           ),
-          const Text(
-            "Its really cool playing today, who is online to challenge me, drop a comment and i will add......",
-            style: TextStyle(
+          Text(
+            postModel.text,
+            style: const TextStyle(
               fontSize: 12,
             ),
           ),

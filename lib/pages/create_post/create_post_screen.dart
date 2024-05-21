@@ -125,17 +125,18 @@ class CreatePostScreen extends StatelessWidget {
               Obx(
                 () => CustomButton(
                   ontap: () {
-                    if (_textController.text.isNotEmpty &&
-                        _imagesList.isNotEmpty) {
-                      _postController.createPost(
-                        text: _textController.text,
-                        pickedFiles: _imagesList,
-                      );
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      _textController.text = "";
-                    } else {
-                      CustomSnackbar.show("Error", "Fill the text and fill");
-                    }
+                    _postController.getAllPost();
+                    // if (_textController.text.isNotEmpty &&
+                    //     _imagesList.isNotEmpty) {
+                    //   _postController.createPost(
+                    //     text: _textController.text,
+                    //     pickedFiles: _imagesList,
+                    //   );
+                    //   FocusManager.instance.primaryFocus?.unfocus();
+                    //   _textController.text = "";
+                    // } else {
+                    //   CustomSnackbar.show("Error", "Fill the text and fill");
+                    // }
                   },
                   child: _postController.isloading.value
                       ? const Loader()

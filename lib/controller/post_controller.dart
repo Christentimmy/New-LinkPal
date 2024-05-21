@@ -13,6 +13,12 @@ class PostController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList<PostModel> allUserPost = RxList<PostModel>();
 
+  @override
+  void onInit() {
+    super.onInit();
+    getAllPost();
+  }
+
   Future<void> createPost({
     required String text,
     required List<XFile> pickedFiles,
@@ -62,10 +68,13 @@ class PostController extends GetxController {
       debugPrint(decodedResponse.toString());
       if (response.statusCode != 201) {
         return CustomSnackbar.show(
-            "Error", decodedResponse["message"].toString());
+          "Error",
+          decodedResponse["message"].toString(),
+        );
       }
-      CustomSnackbar.show("Error", "Post Done");
+      CustomSnackbar.show("Success", "Your post is now live!");
       PostModel.fromJson(decodedResponse["data"]);
+      await getAllPost();
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
@@ -86,26 +95,22 @@ class PostController extends GetxController {
     }
 
     try {
-      final response = await http.get(
-        Uri.parse("$baseUrl/post/all"),
-      );
+      final response = await http.get(Uri.parse("$baseUrl/post/all"), headers: {
+        "Authorization": "Bearer $token",
+      });
 
       final decodedResponce = await json.decode(response.body);
-      print(decodedResponce);
+
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
           decodedResponce["message"].toString(),
         );
       }
-
-      List<PostModel> posts = List<PostModel>.from(
-        decodedResponce["data"].map(
-          (post) => PostModel.fromJson(post),
-        ),
-      );
-      allUserPost.value = posts;
-      print(allUserPost);
+      debugPrint(decodedResponce["total"].toString());
+      List<dynamic> postsFromData = decodedResponce["data"];
+      List<PostModel> postModels = postsFromData.map((e) => PostModel.fromJson(e)).toList();
+      allUserPost.addAll(postModels);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

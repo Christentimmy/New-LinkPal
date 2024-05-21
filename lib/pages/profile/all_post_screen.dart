@@ -67,14 +67,14 @@ class AllPostScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return const AltPageView();
-                  },
-                ),
-              ),
+              // Expanded(
+              //   child: ListView.builder(
+              //     itemCount: 10,
+              //     itemBuilder: (context, index) {
+              //       return const AltPageView();
+              //     },
+              //   ),
+              // ),
               Container(),
             ],
           ),
