@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
               Expanded(
                 child: Obx(() {
-                  if (_postController.allUserPost.isEmpty) {
+                  if (_postController.allPost.isEmpty) {
                     return Center(
                       child: Lottie.network(
                         "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
@@ -46,9 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   } else {
                     return ListView.builder(
-                      itemCount: _postController.allUserPost.length,
+                      itemCount: _postController.allPost.length,
                       itemBuilder: (context, index) {
-                        final post = _postController.allUserPost[index];
+                        final post = _postController.allPost[index];
                         return PostCardDisplay(
                           postModel: post,
                         );
@@ -67,33 +67,42 @@ class _HomeScreenState extends State<HomeScreen> {
 
 class PostCardDisplay extends StatelessWidget {
   final PostModel postModel;
-  const PostCardDisplay({
+  PostCardDisplay({
     required this.postModel,
     super.key,
   });
+
+  final RxInt _currentViewPic = 1.obs;
+  final RxBool _isExpand = false.obs;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(
-        vertical: 15,
+        vertical: 5,
         horizontal: 5,
       ),
-      height: 360,
+      constraints: const BoxConstraints(
+        minHeight: 372,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 270,
+            height: 280,
             child: PageView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: postModel.files.length,
+              onPageChanged: (value) {
+                _currentViewPic.value = value + 1;
+              },
               itemBuilder: (context, index) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: CachedNetworkImage(
-                    height: 270,
+                    height: 280,
                     fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
                     errorWidget: (context, url, error) => const Center(
                       child: Icon(Icons.error),
                     ),
@@ -109,7 +118,22 @@ class PostCardDisplay extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
+          postModel.files.length != 1
+              ? Obx(
+                  () => Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "${_currentViewPic.value.toString()}/${postModel.files.length}",
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                )
+              : const SizedBox(),
+          const SizedBox(height: 2),
           Row(
             children: [
               GestureDetector(
@@ -165,7 +189,7 @@ class PostCardDisplay extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-               Column(
+              Column(
                 children: [
                   const Icon(
                     FontAwesomeIcons.heart,
@@ -207,12 +231,32 @@ class PostCardDisplay extends StatelessWidget {
               ),
             ],
           ),
-          Text(
-            postModel.text,
-            style: const TextStyle(
-              fontSize: 12,
+          Obx(
+            () => GestureDetector(
+              onTap: () {
+                _isExpand.value = !_isExpand.value;
+              },
+              child: _isExpand.value
+                  ? Text(postModel.text)
+                  : postModel.text.length > 80
+                      ? Text.rich(
+                          TextSpan(
+                            text: postModel.text.substring(0, 79),
+                            children: const [
+                              TextSpan(
+                                text: "...See more",
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : Text(postModel.text),
             ),
           ),
+          const Divider(),
         ],
       ),
     );

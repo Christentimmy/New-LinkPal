@@ -113,7 +113,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.allpost,
-      page: () => const AllPostScreen(),
+      page: () =>  AllPostScreen(),
     ),
     GetPage(
       name: AppRoutes.editProfile,

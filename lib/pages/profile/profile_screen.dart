@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/pages/profile/all_post_screen.dart';
 import 'package:linkingpal/pages/profile/edit_profile.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:lottie/lottie.dart';
 import 'package:video_player/video_player.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final PageController _pageController = PageController();
+  final _postController = Get.put(PostController());
 
   final _retrieveController = Get.put(RetrieveController());
   final _userController = Get.put(UserController());
@@ -407,13 +409,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Text(
                       "My Posts",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const Spacer(),
                     GestureDetector(
                       onTap: () {
-                        Get.to(() => const AllPostScreen());
+                        // Get.to(() => const AllPostScreen());
+                        Get.toNamed(AppRoutes.allpost);
                       },
                       child: const Text(
                         "View all",
@@ -425,36 +429,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      height: 200,
-                      width: MediaQuery.of(context).size.width / 2.3,
-                      decoration: BoxDecoration(
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                              "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"),
-                          fit: BoxFit.cover,
+                Obx(
+                  () {
+                    if (_postController.allUserPost.isEmpty) {
+                      return Center(
+                        child: Lottie.network(
+                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
                         ),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    Container(
-                      height: 200,
-                      width: MediaQuery.of(context).size.width / 2.3,
-                      decoration: BoxDecoration(
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                              "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"),
-                          fit: BoxFit.cover,
+                      );
+                    } else {
+                      return SizedBox(
+                        height: 200,
+                        child: ListView.builder(
+                          physics:const  NeverScrollableScrollPhysics(),
+                          itemCount: _postController.allUserPost.length > 2
+                              ? 2
+                              : _postController.allUserPost.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            final postData = _postController.allUserPost[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: postData.files[index],
+                                  height: 200,
+                                  width: MediaQuery.of(context).size.width / 2.3,
+                                  fit: BoxFit.cover,
+                                  alignment: Alignment.topCenter,
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(Icons.error),
+                                  ),
+                                  placeholder: (context, url) {
+                                    return const Center(
+                                      child: Loader(
+                                        color: Colors.deepOrangeAccent,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    )
-                  ],
+                      );
+                    }
+                  },
                 ),
-                const SizedBox(height: 10),
+               const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
                     Get.to(() => const MatchesScreen());

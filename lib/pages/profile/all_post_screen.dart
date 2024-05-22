@@ -1,80 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
+import 'package:lottie/lottie.dart';
 
 class AllPostScreen extends StatelessWidget {
-  const AllPostScreen({super.key});
+  AllPostScreen({super.key});
+
+  final _postController = Get.put(PostController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "AllPosts",
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.black,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Container(
-                    height: 30,
-                    width: 30,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(1, 1),
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 5,
-                        )
-                      ],
-                      color: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    "AllPosts",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    height: 30,
-                    width: 30,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(1, 1),
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 5,
-                        )
-                      ],
-                      color: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.more_vert_outlined,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
+              Expanded(
+                child: Obx(() {
+                  if (_postController.allPost.isEmpty) {
+                    return Center(
+                      child: Lottie.network(
+                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                      ),
+                    );
+                  } else {
+                    return ListView.builder(
+                      itemCount: _postController.allUserPost.length,
+                      itemBuilder: (context, index) {
+                        final post = _postController.allUserPost[index];
+                        return PostCardDisplay(
+                          postModel: post,
+                        );
+                      },
+                    );
+                  }
+                }),
               ),
-              // Expanded(
-              //   child: ListView.builder(
-              //     itemCount: 10,
-              //     itemBuilder: (context, index) {
-              //       return const AltPageView();
-              //     },
-              //   ),
-              // ),
               Container(),
             ],
           ),

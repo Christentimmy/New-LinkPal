@@ -342,7 +342,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                       const Spacer(),
                       GestureDetector(
                         onTap: () {
-                          Get.to(() => const AllPostScreen());
+                          Get.to(() => AllPostScreen());
                         },
                         child: const Text(
                           "View all",

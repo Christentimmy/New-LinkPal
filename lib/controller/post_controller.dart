@@ -11,11 +11,13 @@ import 'package:http/http.dart' as http;
 class PostController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
+  RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
 
   @override
   void onInit() {
     super.onInit();
+    getAllUserPost();
     getAllPost();
   }
 
@@ -73,8 +75,8 @@ class PostController extends GetxController {
         );
       }
       CustomSnackbar.show("Success", "Your post is now live!");
-      PostModel.fromJson(decodedResponse["data"]);
       await getAllPost();
+      await getAllUserPost();
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
@@ -95,9 +97,12 @@ class PostController extends GetxController {
     }
 
     try {
-      final response = await http.get(Uri.parse("$baseUrl/post/all"), headers: {
-        "Authorization": "Bearer $token",
-      });
+      final response = await http.get(
+        Uri.parse("$baseUrl/post/all"),
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
 
       final decodedResponce = await json.decode(response.body);
 
@@ -107,12 +112,55 @@ class PostController extends GetxController {
           decodedResponce["message"].toString(),
         );
       }
-      debugPrint(decodedResponce["total"].toString());
       List<dynamic> postsFromData = decodedResponce["data"];
-      List<PostModel> postModels = postsFromData.map((e) => PostModel.fromJson(e)).toList();
-      allUserPost.addAll(postModels);
+      List<PostModel> postModels =
+          postsFromData.map((e) => PostModel.fromJson(e)).toList();
+      postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      allPost.addAll(postModels);
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> getAllUserPost() async {
+    isloading.value = true;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/post"),
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decodedResponce = json.decode(response.body);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show(
+          "Error",
+          decodedResponce["message"].toString(),
+        );
+      }
+
+      List<dynamic> dataListFromResponce = decodedResponce["data"];
+      List<PostModel> postModelUserData = dataListFromResponce
+          .map(
+            (e) => PostModel.fromJson(e),
+          )
+          .toList();
+      postModelUserData.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      allUserPost.addAll(postModelUserData);
+      print(allUserPost);
+    } catch (e) {
+      print(e);
+      CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
     }
