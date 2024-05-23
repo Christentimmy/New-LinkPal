@@ -22,9 +22,9 @@ class PostController extends GetxController {
   }
 
   Future<void> createPost({
-    required String text,
+    required TextEditingController textController,
     required List<XFile> pickedFiles,
-    List<String>? tags,
+    List<dynamic>? tags,
   }) async {
     isloading.value = true;
 
@@ -45,7 +45,7 @@ class PostController extends GetxController {
       request.headers['Authorization'] = token;
 
       // Add the text parameter
-      request.fields['text'] = text;
+      request.fields['text'] = textController.text;
 
       // Add the tags parameter if present
       if (tags != null && tags.isNotEmpty) {
@@ -84,6 +84,7 @@ class PostController extends GetxController {
     } finally {
       isloading.value = false;
       pickedFiles.clear();
+      textController.clear();
     }
   }
 
@@ -161,6 +162,159 @@ class PostController extends GetxController {
     } catch (e) {
       print(e);
       CustomSnackbar.show("Error", e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> likeAPost(String postId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri =
+          Uri.parse("$baseUrl/post/$postId/like").replace(queryParameters: {
+        'postId': postId,
+      });
+
+      final response = await http.patch(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        int index = allPost.indexWhere((element) => element.id == postId);
+        if (index != -1) {
+          List<PostModel> updatedAllPost = List.from(allPost);
+          updatedAllPost[index].likes = allPost[index].likes += 1;
+          updatedAllPost[index].isLikeByUser = true;
+          allPost.clear();
+          allPost.addAll(updatedAllPost);
+          print("success");
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> disLikeAPost(String postId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri =
+          Uri.parse("$baseUrl/post/$postId/like").replace(queryParameters: {
+        'postId': postId,
+      });
+
+      final response = await http.delete(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decodedResponce = json.decode(response.body);
+      debugPrint(decodedResponce.toString());
+      if (response.statusCode == 200) {
+        int index = allPost.indexWhere((element) => element.id == postId);
+        if (index != -1) {
+          List<PostModel> updatedAllPost = List.from(allPost);
+          updatedAllPost[index].likes = allPost[index].likes -= 1;
+          updatedAllPost[index].isLikeByUser = false;
+          allPost.clear();
+          allPost.addAll(updatedAllPost);
+          print("success");
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> deletePost(String postId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri = Uri.parse("$baseUrl/post/:$postId").replace(queryParameters: {
+        'postId': postId,
+      });
+      final response = await http.delete(uri, headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      });
+      final decodedResponce = json.decode(response.body);
+      if (response.statusCode != 200) {
+        print(decodedResponce);
+        return CustomSnackbar.show("Error", decodedResponce["message"]);
+      }
+      if (response.statusCode == 200) {
+        int index = allPost.indexWhere((element) => element.id == postId);
+        if (index != -1) {
+          allPost.removeAt(index);
+          refresh();
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> commentOnPost(
+    String postId,
+    TextEditingController comment,
+  ) async {
+    isloading.value = true;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri =
+          Uri.parse("$baseUrl/post/$postId/comment").replace(queryParameters: {
+        "postId": postId,
+      });
+      final response = await http.post(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: json.encode({
+          "comment": comment.text,
+        }),
+      );
+      final decodedResponce = json.decode(response.body);
+      print(decodedResponce);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show(
+            "Error", decodedResponce["message"].toString());
+      }
+      CustomSnackbar.show("Success", "Comment done");
+    } catch (e) {
+      debugPrint(e.toString());
     } finally {
       isloading.value = false;
     }

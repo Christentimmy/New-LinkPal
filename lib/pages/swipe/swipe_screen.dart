@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
+import 'package:linkingpal/res/common_button.dart';
 
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({super.key});
@@ -91,11 +92,7 @@ class SwipeScreenState extends State<SwipeScreen> {
                           ],
                         ),
                         alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.cancel,
-                          color: Colors.black,
-                          size: 40,
-                        ),
+                        child: const Icon(FontAwesomeIcons.x, size: 20)
                       ),
                     ),
                     const Spacer(),
@@ -121,7 +118,7 @@ class SwipeScreenState extends State<SwipeScreen> {
                         alignment: Alignment.center,
                         child: const Icon(
                           FontAwesomeIcons.solidHeart,
-                          size: 40,
+                          size: 30,
                           color: Colors.redAccent,
                         ),
                       ),
@@ -219,6 +216,7 @@ class SwipeScreenState extends State<SwipeScreen> {
               child: Container(
                 height: 40,
                 width: 40,
+                padding: const EdgeInsets.all(10),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -232,11 +230,15 @@ class SwipeScreenState extends State<SwipeScreen> {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.filter_list,
+                child: Image.asset(
+                  "assets/images/filter-icon.png",
                   color: Colors.blue,
-                  size: 15,
                 ),
+                // child: const Icon(
+                //   FontAwesomeIcons.filter,
+                //   color: Colors.blue,
+                //   size: 15,
+                // ),
               ),
             ),
           ],
@@ -286,15 +288,6 @@ class SwipeCard extends StatelessWidget {
                 },
               ),
             ),
-            // Container(
-            //   decoration: BoxDecoration(
-            //     borderRadius: BorderRadius.circular(20),
-            //     image: DecorationImage(
-            //       image: NetworkImage(cards[index]),
-            //       fit: BoxFit.cover,
-            //     ),
-            //   ),
-            // ),
             Container(
               height: 150,
               padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
@@ -317,8 +310,9 @@ class SwipeCard extends StatelessWidget {
                       Text(
                         "Michelle, 26",
                         style: TextStyle(
-                          fontSize: 25,
+                          fontSize: 20,
                           color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(width: 10),
@@ -336,10 +330,11 @@ class SwipeCard extends StatelessWidget {
                         color: Colors.grey,
                       ),
                       Text(
-                        "New York, USA",
+                        "29Km",
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           color: Colors.white,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -367,6 +362,29 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
 
   double ageRange = 0.0;
   double distance = 0.0;
+
+  final List _allIntetrest = [
+    [FontAwesomeIcons.music, "Clubbing"],
+    [FontAwesomeIcons.breadSlice, "Having breakfast"],
+    [FontAwesomeIcons.utensils, "Going out for lunch"],
+    [FontAwesomeIcons.wineGlassEmpty, "Having dinner together"],
+    [FontAwesomeIcons.martiniGlassCitrus, "Going for drinks"],
+    [FontAwesomeIcons.dumbbell, "Working out at the gym"],
+    [FontAwesomeIcons.handsPraying, "Attending church/mosque"],
+    [FontAwesomeIcons.planeDeparture, "Going on holiday trips"],
+    [FontAwesomeIcons.spa, "Getting spa treatments"],
+    [FontAwesomeIcons.bagShopping, "Shopping together"],
+    [FontAwesomeIcons.tv, "Watching Netflix and chilling"],
+    [FontAwesomeIcons.calendarDays, "Being event or party partners"],
+    [FontAwesomeIcons.utensils, "Cooking and chilling"],
+    [FontAwesomeIcons.smoking, "Smoking together"],
+    [FontAwesomeIcons.book, "Studying together"],
+    [FontAwesomeIcons.basketball, "Playing sports"],
+    [FontAwesomeIcons.music, "Going to concerts"],
+    [FontAwesomeIcons.personHiking, "Hiking or outdoor activities"],
+    [FontAwesomeIcons.gamepad, "Playing board games or video games"],
+    [FontAwesomeIcons.compass, "Traveling buddy"],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -457,21 +475,22 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
           SizedBox(
             height: 35,
             child: ListView.builder(
-              itemCount: 5,
+              itemCount: _allIntetrest.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return Container(
-                  height: 35,
-                  width: 80,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
                   margin: const EdgeInsets.only(left: 9, top: 8),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(40),
                   ),
-                  child: const Text(
-                    "Women",
-                    style: TextStyle(
+                  child: Text(
+                    _allIntetrest[index][1],
+                    style: const TextStyle(
+                      fontSize: 12,
                       color: Colors.deepPurple,
                     ),
                   ),
@@ -479,59 +498,17 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               },
             ),
           ),
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0),
-            child: Text(
-              "Activity/Mood",
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
-              ),
-            ),
-          ),
-          SizedBox(
-              height: 35,
-              child: ListView.builder(
-                itemCount: 5,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 35,
-                    width: 80,
-                    margin: const EdgeInsets.only(left: 9, top: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: const Text(
-                      "Sport",
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                      ),
-                    ),
-                  );
-                },
-              )),
-          const SizedBox(height: 30),
-          GestureDetector(
-            onTap: () {
+          const Spacer(),
+          CustomButton(
+            ontap: () {
               Get.back();
             },
-            child: Container(
-              height: 45,
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xffFF496C),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text(
-                "Apply Now",
-                style: TextStyle(
-                  fontSize: 22,
-                ),
+            child: const Text(
+              "Apply Now",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),

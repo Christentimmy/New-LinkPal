@@ -86,14 +86,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height / 3.2,
+                  height: MediaQuery.of(context).size.height / 2.4,
                   width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.black,
@@ -135,7 +134,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
-                                    child: VideoPlayer(_controller.value!),
+                                    child: AspectRatio(
+                                      aspectRatio:
+                                          _controller.value!.value.aspectRatio,
+                                      child: VideoPlayer(
+                                        _controller.value!,
+                                      ),
+                                    ),
                                   ),
                                   GestureDetector(
                                     onTap: playPause,
@@ -441,21 +446,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return SizedBox(
                         height: 200,
                         child: ListView.builder(
-                          physics:const  NeverScrollableScrollPhysics(),
-                          itemCount: _postController.allUserPost.length > 2
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _postController.allUserPost.length >= 2
                               ? 2
                               : _postController.allUserPost.length,
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (context, index) {
                             final postData = _postController.allUserPost[index];
                             return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                              ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: CachedNetworkImage(
-                                  imageUrl: postData.files[index],
+                                  imageUrl: postData.files[0],
                                   height: 200,
-                                  width: MediaQuery.of(context).size.width / 2.3,
+                                  width:
+                                      MediaQuery.of(context).size.width / 2.3,
                                   fit: BoxFit.cover,
                                   alignment: Alignment.topCenter,
                                   errorWidget: (context, url, error) =>
@@ -478,7 +486,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                   },
                 ),
-               const SizedBox(height: 10),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
                     Get.to(() => const MatchesScreen());

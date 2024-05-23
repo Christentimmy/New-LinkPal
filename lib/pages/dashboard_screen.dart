@@ -10,7 +10,7 @@ class DashBoardScreen extends StatelessWidget {
   DashBoardScreen({super.key});
 
   final RxList _pages = [
-    const HomeScreen(),
+     HomeScreen(),
     const SwipeScreen(),
     CreatePostScreen(),
     const ProfileScreen(),

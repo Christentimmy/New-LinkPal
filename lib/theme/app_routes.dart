@@ -133,7 +133,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.homescreen,
-      page: () => const HomeScreen(),
+      page: () =>  HomeScreen(),
     ),
     GetPage(
       name: AppRoutes.notification,

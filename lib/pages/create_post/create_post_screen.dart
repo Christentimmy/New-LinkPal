@@ -18,7 +18,7 @@ class CreatePostScreen extends StatelessWidget {
   final TextEditingController _textController = TextEditingController();
   final _postController = Get.put(PostController());
   final RxList<XFile> _imagesList = <XFile>[].obs;
-
+   final RxList _tagList = [].obs;
   final Rx<XFile?> _file = Rx<XFile?>(null);
 
   void _pickImageForUser() async {
@@ -27,6 +27,14 @@ class CreatePostScreen extends StatelessWidget {
       _file.value = imagePicked;
       _imagesList.add(imagePicked);
     }
+  }
+
+ 
+  void extractHashtags(String input) {
+    List<String> words = input.split(' ');
+    List<String> hashtags =
+        words.where((word) => word.startsWith('#')).toList();
+    _tagList.value = hashtags;
   }
 
   @override
@@ -124,18 +132,19 @@ class CreatePostScreen extends StatelessWidget {
               const SizedBox(height: 30),
               Obx(
                 () => CustomButton(
-                  ontap: () { 
+                  ontap: () {
+                    extractHashtags(_textController.text);
                     if (_textController.text.isNotEmpty &&
                         _imagesList.isNotEmpty) {
                       _postController.createPost(
-                        text: _textController.text,
+                        textController: _textController,
                         pickedFiles: _imagesList,
+                        tags: _tagList,
                       );
                       FocusManager.instance.primaryFocus?.unfocus();
                     } else {
                       CustomSnackbar.show("Error", "Fill the text and fill");
                     }
-                     _textController.text = "";
                   },
                   child: _postController.isloading.value
                       ? const Loader()

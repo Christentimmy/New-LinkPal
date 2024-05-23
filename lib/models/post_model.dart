@@ -1,4 +1,3 @@
-
 class PostModel {
   final String id;
   final String text;
@@ -7,8 +6,8 @@ class PostModel {
   final DateTime createdAt;
   final CreatedBy createdBy;
   final int comments;
-  final int likes;
-  final bool isLikeByUser;
+  int likes;
+  bool isLikeByUser;
 
   PostModel({
     required this.id,
@@ -24,20 +23,19 @@ class PostModel {
 
   // Factory method to create an instance from a JSON map
   factory PostModel.fromJson(Map<String, dynamic> json) {
-   return PostModel(
-        id: json['id']?? '',
-        text: json['text']?? '',
-        tags: List<String>.from(json['tags']?? []),
-        files: List<String>.from(json['files']?? []),
-        createdAt: DateTime.parse(json['created_at']?? ''),
-        createdBy: CreatedBy.fromJson(json['created_by']?? {}),
-        comments: json["comments"] ?? 0,
-        likes: json['likes'] ?? 0 ,
-        isLikeByUser: json["is_like_by_user"] ?? false,
-      );
+    return PostModel(
+      id: json['id'] ?? '',
+      text: json['text'] ?? '',
+      tags: List<String>.from(json['tags'] ?? []),
+      files: List<String>.from(json['files'] ?? []),
+      createdAt: DateTime.parse(json['created_at'] ?? ''),
+      createdBy: CreatedBy.fromJson(json['created_by'] ?? {}),
+      comments: json["comments"] ?? 0,
+      likes: json['likes'] ?? 0,
+      isLikeByUser: json["is_like_by_user"] ?? false,
+    );
   }
 }
-
 
 class CreatedBy {
   final String avatar;

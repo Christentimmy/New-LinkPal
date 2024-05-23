@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/models/post_model.dart';
+import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 import 'package:linkingpal/theme/app_theme.dart';
@@ -12,14 +13,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _postController = Get.put(PostController());
 
@@ -36,26 +32,23 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 4),
               UserNameWidget(controller: _retrieveController),
               const SizedBox(height: 10),
-              Expanded(
-                child: Obx(() {
-                  if (_postController.allPost.isEmpty) {
-                    return Center(
-                      child: Lottie.network(
-                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      itemCount: _postController.allPost.length,
-                      itemBuilder: (context, index) {
-                        final post = _postController.allPost[index];
-                        return PostCardDisplay(
-                          postModel: post,
+              Obx(
+                () {
+                  return _postController.allPost.isEmpty
+                      ? Center(
+                          child: Lottie.network(
+                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            itemBuilder: (context, index) {
+                              final post = _postController.allPost[index];
+                              return PostCardDisplay(postModel: post);
+                            },
+                          ),
                         );
-                      },
-                    );
-                  }
-                }),
+                },
               ),
             ],
           ),
@@ -73,7 +66,11 @@ class PostCardDisplay extends StatelessWidget {
   });
 
   final RxInt _currentViewPic = 1.obs;
+
   final RxBool _isExpand = false.obs;
+
+  final _postController = Get.put(PostController());
+  final _retrieveController = Get.put(RetrieveController());
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +85,16 @@ class PostCardDisplay extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: _retrieveController.userModel.value?.name ==
+                    postModel.createdBy.name
+                ? GestureDetector(
+                    onTap: () async {},
+                    child: const Icon(Icons.more_vert),
+                  )
+                : null,
+          ),
           SizedBox(
             height: 280,
             child: PageView.builder(
@@ -97,22 +104,29 @@ class PostCardDisplay extends StatelessWidget {
                 _currentViewPic.value = value + 1;
               },
               itemBuilder: (context, index) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: CachedNetworkImage(
-                    height: 280,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(Icons.error),
+                return GestureDetector(
+                  onTap: () {
+                    Get.to(
+                      () => FullDetailsOfPost(postModel: postModel),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: CachedNetworkImage(
+                      height: 280,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      errorWidget: (context, url, error) => const Center(
+                        child: Icon(Icons.error),
+                      ),
+                      width: double.infinity,
+                      placeholder: (context, url) {
+                        return const Center(
+                          child: Loader(color: Colors.deepOrangeAccent),
+                        );
+                      },
+                      imageUrl: postModel.files[index],
                     ),
-                    width: double.infinity,
-                    placeholder: (context, url) {
-                      return const Center(
-                        child: Loader(color: Colors.deepOrangeAccent),
-                      );
-                    },
-                    imageUrl: postModel.files[index],
                   ),
                 );
               },
@@ -191,16 +205,32 @@ class PostCardDisplay extends StatelessWidget {
               const Spacer(),
               Column(
                 children: [
-                  const Icon(
-                    FontAwesomeIcons.heart,
-                    size: 22,
+                  GestureDetector(
+                    onTap: () {
+                      // _postController.likeAPost(postModel.id);
+                      if (postModel.isLikeByUser) {
+                        _postController.disLikeAPost(postModel.id);
+                      } else {
+                        _postController.likeAPost(postModel.id);
+                      }
+                    },
+                    child: postModel.isLikeByUser
+                        ? const Icon(
+                            FontAwesomeIcons.solidHeart,
+                            size: 22,
+                            color: Colors.redAccent,
+                          )
+                        : const Icon(
+                            FontAwesomeIcons.heart,
+                            size: 22,
+                          ),
                   ),
                   Text(
-                    "${postModel.likes}K",
+                    "${postModel.likes}",
                     style: const TextStyle(
                       fontSize: 8,
                     ),
-                  ),
+                  )
                 ],
               ),
               const SizedBox(width: 20),
@@ -213,7 +243,10 @@ class PostCardDisplay extends StatelessWidget {
                         enableDrag: true,
                         context: Get.context!,
                         backgroundColor: Colors.transparent,
-                        builder: (context) => altcommentSheet(context),
+                        builder: (context) => CommentScreen(
+                          postController: _postController,
+                          postModel: postModel,
+                        ),
                       );
                     },
                     child: const Icon(
@@ -222,7 +255,7 @@ class PostCardDisplay extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "${postModel.comments}K",
+                    "${postModel.comments}",
                     style: const TextStyle(
                       fontSize: 8,
                     ),
@@ -261,26 +294,20 @@ class PostCardDisplay extends StatelessWidget {
       ),
     );
   }
+}
 
-  Future<dynamic> displayComment(BuildContext context) {
-    return showModalBottomSheet(
-      showDragHandle: true,
-      context: context,
-      enableDrag: true,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 1.0,
-          minChildSize: 1.0,
-          maxChildSize: 1.0,
-          builder: (context, scrollController) {
-            return const Extra();
-          },
-        );
-      },
-    );
-  }
+class CommentScreen extends StatelessWidget {
+  final PostController postController;
+  final PostModel postModel;
+  CommentScreen({
+    super.key,
+    required this.postController,
+    required this.postModel,
+  });
+  final _commentController = TextEditingController();
 
-  Widget altcommentSheet(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 50),
       padding: EdgeInsets.only(
@@ -354,65 +381,9 @@ class PostCardDisplay extends StatelessWidget {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 10,
+                      itemCount: 2,
                       itemBuilder: (context, index) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 5,
-                          ),
-                          constraints: const BoxConstraints(
-                            minHeight: 60,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const CircleAvatar(
-                                radius: 17,
-                                backgroundImage: NetworkImage(
-                                  "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Container(
-                                width: MediaQuery.of(context).size.width / 1.6,
-                                constraints: const BoxConstraints(
-                                  minHeight: 50,
-                                ),
-                                child: const Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Fatime Collins",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    Text(
-                                      "Wow you both look cute together. I love your kfiukbvifvubjjkfvjfkdjkndfjk;bnjsblndfkjnfdjkdbafbsf",
-                                    ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.share),
-                                        SizedBox(width: 6),
-                                        Text("reply (25)"),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                              const Spacer(),
-                              const Column(
-                                children: [
-                                  Icon(Icons.favorite),
-                                  Text("22k"),
-                                ],
-                              )
-                            ],
-                          ),
-                        );
+                        return const CommentCard();
                       },
                     ),
                   ],
@@ -425,12 +396,12 @@ class PostCardDisplay extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 15),
             child: TextFormField(
+              controller: _commentController,
               style: const TextStyle(
                 color: AppColor.black,
                 fontWeight: FontWeight.w400,
                 fontSize: 14.0,
               ),
-              // controller: controller.commentController,
               maxLines: 5,
               minLines: 1,
               obscureText: false,
@@ -445,7 +416,11 @@ class PostCardDisplay extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        // controller.postCommentApi(postId: "${model?.id}");
+                        postController.commentOnPost(
+                          postModel.id,
+                          _commentController,
+                        );
+                        FocusManager.instance.primaryFocus?.unfocus();
                       },
                       child: Container(
                         padding: const EdgeInsets.all(10),
@@ -453,16 +428,24 @@ class PostCardDisplay extends StatelessWidget {
                           color: AppColor.themeColor,
                           shape: BoxShape.circle,
                         ),
-                        child: const Center(
-                          child: Icon(Icons.send),
+                        child: Obx(
+                          () => Center(
+                            child: postController.isloading.value
+                                ? const Loader(color: Colors.deepOrangeAccent)
+                                : const Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                  ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
                 border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(50)),
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(50),
+                ),
                 hintStyle: TextStyle(
                   color: AppColor.textfieldText.withOpacity(0.5),
                   fontWeight: FontWeight.w400,
@@ -482,116 +465,88 @@ class PostCardDisplay extends StatelessWidget {
   }
 }
 
-class Extra extends StatelessWidget {
-  const Extra({
+class CommentCard extends StatelessWidget {
+  const CommentCard({
     super.key,
   });
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.symmetric(
+        vertical: 5,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            const Text(
-              "Comments",
-              style: TextStyle(
-                fontSize: 25,
-              ),
+      constraints: const BoxConstraints(
+        minHeight: 60,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const CircleAvatar(
+            radius: 17,
+            backgroundImage: NetworkImage(
+              "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
             ),
-            const SizedBox(height: 20),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 5,
-                  ),
-                  constraints: const BoxConstraints(
-                    minHeight: 60,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const CircleAvatar(
-                        radius: 17,
-                        backgroundImage: AssetImage(
-                          "assets/fatima.jpg",
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        width: MediaQuery.of(context).size.width / 1.6,
-                        constraints: const BoxConstraints(
-                          minHeight: 50,
-                        ),
-                        child: const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Fatime Collins",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                            Text(
-                              "Wow you both look cute together. I love your kfiukbvifvubjjkfvjfkdjkndfjk;bnjsblndfkjnfdjkdbafbsf",
-                            ),
-                            Row(
-                              children: [
-                                Icon(Icons.share),
-                                SizedBox(width: 6),
-                                Text("reply (25)"),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-                      const Column(
-                        children: [
-                          Icon(Icons.favorite),
-                          Text("22k"),
-                        ],
-                      )
-                    ],
-                  ),
-                );
-              },
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: MediaQuery.of(context).size.width / 1.6,
+            constraints: const BoxConstraints(
+              minHeight: 50,
             ),
-            const SizedBox(height: 5),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  width: 2,
-                  color: Colors.grey,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              height: 45,
-              child: TextFormField(
-                decoration: const InputDecoration(
-                  suffixIcon: Icon(Icons.send),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide.none,
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Fatime Collins",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
+                Text(
+                  "Wow you both look cute together. I love your kfiukbvifvubjjkfvjfkdjkndfjk;bnjsblndfkjnfdjkdbafbsf",
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.share,
+                      size: 18,
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      "reply (25)",
+                      style: TextStyle(
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
-          ],
-        ),
+          ),
+          const Spacer(),
+          const Column(
+            children: [
+              Icon(
+                Icons.favorite,
+                size: 18,
+              ),
+              Text(
+                "22k",
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }
