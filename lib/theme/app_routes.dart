@@ -7,6 +7,7 @@ import 'package:linkingpal/pages/auth/forgot_password_screen.dart';
 import 'package:linkingpal/pages/auth/interest_screen.dart';
 import 'package:linkingpal/pages/auth/introduction_video_screen.dart';
 import 'package:linkingpal/pages/auth/location_access_screen.dart';
+import 'package:linkingpal/pages/auth/personal_data_from_user.dart';
 import 'package:linkingpal/pages/auth/sign_in_screen.dart';
 import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
@@ -26,6 +27,7 @@ import 'package:linkingpal/pages/profile/profile_screen.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
+import 'package:linkingpal/pages/setting/premium_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
 import 'package:linkingpal/pages/setting/setting_screen.dart';
 import 'package:linkingpal/pages/setting/subcription_screen.dart';
@@ -67,6 +69,8 @@ class AppRoutes {
   static const String swipe = '/swipe';
   static const String swipedCardProfile = '/swipedCardProfile';
   static const String verificationChecker = '/verificationChecker';
+  static const String premium = '/premium';
+  static const String personalDataFromUser = '/personalDataFromUser';
 }
 
 class RouteHandler {
@@ -74,6 +78,14 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.createPost,
       page: () => CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.personalDataFromUser,
+      page: () => PersonalDataFromUser(),
+    ),
+    GetPage(
+      name: AppRoutes.premium,
+      page: () => const PremiumScreen(),
     ),
     GetPage(
       name: AppRoutes.swipe,

@@ -5,7 +5,6 @@ import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
-import 'package:linkingpal/pages/setting/subcription_screen.dart';
 import 'package:linkingpal/pages/setting/terms_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
@@ -89,7 +88,7 @@ class _SettingScreenState extends State<SettingScreen> {
               const Divider(),
               ListTile(
                 onTap: () {
-                  Get.to(() => const SubscriptionScreen());
+                  Get.toNamed(AppRoutes.premium);
                 },
                 contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                 leading: const Text(

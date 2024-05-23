@@ -110,11 +110,8 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.interest, arguments: {
-        "action": () {
-          Get.toNamed(AppRoutes.locationAccess);
-        }
-      });
+      Get.toNamed(AppRoutes.personalDataFromUser);
+     
     } catch (e) {
       debugPrint(e.toString());
     } finally {

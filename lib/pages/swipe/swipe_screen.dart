@@ -1,8 +1,10 @@
+import 'package:another_xlider/another_xlider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
@@ -77,23 +79,22 @@ class SwipeScreenState extends State<SwipeScreen> {
                         controller.swipe(CardSwiperDirection.left);
                       },
                       child: Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(2, 2),
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 5,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: const Icon(FontAwesomeIcons.x, size: 20)
-                      ),
+                          height: 60,
+                          width: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                offset: const Offset(2, 2),
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 5,
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(FontAwesomeIcons.x, size: 20)),
                     ),
                     const Spacer(),
                     GestureDetector(
@@ -357,12 +358,6 @@ class CustomBottomSheet extends StatefulWidget {
 }
 
 class _CustomBottomSheetState extends State<CustomBottomSheet> {
-  RangeValues values = const RangeValues(0.1, 100.0);
-  RangeValues values1 = const RangeValues(0.1, 100.0);
-
-  double ageRange = 0.0;
-  double distance = 0.0;
-
   final List _allIntetrest = [
     [FontAwesomeIcons.music, "Clubbing"],
     [FontAwesomeIcons.breadSlice, "Having breakfast"],
@@ -386,16 +381,19 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     [FontAwesomeIcons.compass, "Traveling buddy"],
   ];
 
+  final List<String> _genders = [
+    "Man",
+    "Woman",
+    "Trans",
+    "Gay",
+  ];
+
+  final RxDouble _distanceValue = 0.0.obs;
+  RxDouble _minAge = 18.0.obs;
+  RxDouble _maxAge = 20.0.obs;
+
   @override
   Widget build(BuildContext context) {
-    RangeLabels labels = RangeLabels(
-      values.start.toString(),
-      values.end.toString(),
-    );
-    RangeLabels labels1 = RangeLabels(
-      values.start.toString(),
-      values.end.toString(),
-    );
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 15,
@@ -409,7 +407,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               const Text(
                 "Filter",
                 style: TextStyle(
-                  fontSize: 25,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -422,52 +420,89 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               )
             ],
           ),
-          Text(
-            "Distance $distance",
-            style: const TextStyle(fontSize: 18),
+          Obx(
+            () => Text(
+              "Distance: $_distanceValue Km",
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          RangeSlider(
-            values: values,
-            labels: labels,
-            divisions: 10,
-            min: 0.0,
-            max: 100.0,
-            onChanged: (newValue) {
-              if (newValue.end >= newValue.start) {
-                setState(() {
-                  values = newValue;
-                  distance = newValue.end - newValue.start;
-                });
-              }
+          FlutterSlider(
+            values: const [0, 0],
+            rangeSlider: true,
+            max: 500,
+            min: 0,
+            onDragging: (handlerIndex, lowerValue, upperValue) {
+              _distanceValue.value = upperValue - lowerValue;
             },
           ),
-          const SizedBox(height: 10),
-          Text(
-            "Age: $ageRange",
-            style: const TextStyle(fontSize: 18),
+          Obx(
+            () => Text(
+              "Age: $_minAge - $_maxAge",
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          RangeSlider(
-            values: values1,
-            labels: labels1,
-            divisions: 10,
-            min: 0.0,
-            max: 100.0,
-            onChanged: (newValue) {
-              if (newValue.end >= newValue.start) {
-                setState(() {
-                  values1 = newValue;
-                  ageRange = newValue.end - newValue.start;
-                });
-              }
+          FlutterSlider(
+            values: const [18, 20],
+            rangeSlider: true,
+            max: 500,
+            min: 0,
+            onDragging: (handlerIndex, lowerValue, upperValue) {
+              _minAge.value = lowerValue;
+              _maxAge.value = upperValue;
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           const Padding(
             padding: EdgeInsets.only(left: 8.0),
             child: Text(
               "Interested In",
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 15,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 35,
+            child: ListView.builder(
+              itemCount: _genders.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
+                  ),
+                  margin: const EdgeInsets.only(left: 9, top: 8),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  child: Text(
+                    _genders[index],
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Padding(
+            padding: EdgeInsets.only(left: 8.0),
+            child: Text(
+              "Activity/Mood",
+              style: TextStyle(
+                fontSize: 15,
                 color: Colors.black,
               ),
             ),
@@ -479,9 +514,11 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  margin: const EdgeInsets.only(left: 9, top: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
+                  ),
+                  margin: const EdgeInsets.only(left: 9, top: 5),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
@@ -512,6 +549,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               ),
             ),
           ),
+          const SizedBox(height: 10),
         ],
       ),
     );
