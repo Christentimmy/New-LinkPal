@@ -16,6 +16,7 @@ class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   final _retrieveController = Get.put(RetrieveController());
+  RxList userNotifications = [].obs;
 
   Future<void> uploadVideo({required File video}) async {
     final tokenStorage = Get.put(TokenStorage());
@@ -111,7 +112,6 @@ class UserController extends GetxController {
         "Profile Image Uploaded Successfully",
       );
       Get.toNamed(AppRoutes.personalDataFromUser);
-     
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -264,5 +264,100 @@ class UserController extends GetxController {
     );
     String? city = placemarks[0].subAdministrativeArea;
     return city ?? "";
+  }
+
+  Future<void> getAllNotification() async {
+    isloading.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/notification"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decoded = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"].toString());
+      }
+
+      userNotifications.value = decoded["data"];
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> getSingleNotification(String notId) async {
+    isloading.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri =
+          Uri.parse("$baseUrl/notification/$notId").replace(queryParameters: {
+        "postId": notId,
+      });
+      final response = await http.get(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decoded = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"].toString());
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> markNotication(String notId) async {
+    isloading.value = true;
+    isloading.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri = Uri.parse("$baseUrl/notification/$notId/read")
+          .replace(queryParameters: {
+        "postId": notId,
+      });
+      final response = await http.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decoded = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"].toString());
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
   }
 }

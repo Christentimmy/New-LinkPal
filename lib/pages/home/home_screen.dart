@@ -328,7 +328,6 @@ class PostCardDisplay extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                 )),
           ),
-
           const Divider(),
         ],
       ),
@@ -705,7 +704,7 @@ class UserNameWidget extends StatelessWidget {
           const Spacer(),
           GestureDetector(
             onTap: () {
-              Get.to(() => const NotificationScreen());
+              Get.to(() => NotificationScreen());
             },
             child: Container(
               height: 40,

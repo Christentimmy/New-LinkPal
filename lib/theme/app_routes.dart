@@ -143,7 +143,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.profile,
-      page: () => ProfileScreen(),
+      page: () =>const  ProfileScreen(),
     ),
     GetPage(
       name: AppRoutes.chat,
@@ -159,7 +159,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.notification,
-      page: () => const NotificationScreen(),
+      page: () => NotificationScreen(),
     ),
     GetPage(
       name: AppRoutes.initial,

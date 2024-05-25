@@ -1,136 +1,105 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:linkingpal/controller/user_controller.dart';
+import 'package:lottie/lottie.dart';
 
 class NotificationScreen extends StatelessWidget {
-  const NotificationScreen({super.key});
+   NotificationScreen({super.key});
+
+  final _userController = Get.put(UserController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Notifications",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 1),
           child: Column(
             children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Get.back();
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            offset: const Offset(1, 1),
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 5,
-                          )
-                        ],
-                        color: Colors.white,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    "Notifications",
-                    style: TextStyle(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    height: 50,
-                    width: 50,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(1, 1),
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          spreadRadius: 5,
-                        )
-                      ],
-                      color: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.more_vert_outlined,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
               const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return Column(
-                      children: [
-                        ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 0),
-                          leading: const CircleAvatar(
-                            radius: 23,
-                            backgroundImage: AssetImage("assets/alima.jpg"),
-                          ),
-                          title: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                text: const TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: "Mary Daniel ",
-                                      style: TextStyle(
-                                        color: Colors.deepPurpleAccent,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: "Liked you",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Text(
-                                "23 minutes ago",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
+             Obx(() => _userController.userNotifications.isEmpty ? 
+             Center(
+                        child: Lottie.network(
+                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
                         ),
-                        const Divider(),
-                      ],
-                    );
+                      )
+             :  Expanded(
+                child: ListView.builder(
+                  itemCount: _userController.userNotifications.length,
+                  itemBuilder: (context, index) {
+                    return const NotificationCard();
                   },
                 ),
-              ),
-              Container(),
+              ),),
+            
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class NotificationCard extends StatelessWidget {
+  const NotificationCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 0),
+          // leading: const CircleAvatar(
+          //   radius: 23,
+          //   backgroundImage: AssetImage("assets/alima.jpg"),
+          // ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Mary Daniel ",
+                      style: TextStyle(
+                        color: Colors.deepPurpleAccent,
+                        fontSize: 18,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "Liked you",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Text(
+                "23 minutes ago",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Divider(),
+      ],
     );
   }
 }
