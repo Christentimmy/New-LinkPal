@@ -15,7 +15,6 @@ import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
-import 'package:location/location.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -29,7 +28,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _bioController = TextEditingController();
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
-  Rx<LocationData?> locationData = Rx<LocationData?>(null);
   final Rx<XFile?> _image = Rx<XFile?>(null);
 
   @override

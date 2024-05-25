@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
@@ -46,7 +45,7 @@ class SwipeScreenState extends State<SwipeScreen> {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
-                      return const CustomBottomSheet();
+                      return CustomBottomSheet();
                     },
                   );
                 },
@@ -327,13 +326,32 @@ class SwipeCard extends StatelessWidget {
                   Row(
                     children: [
                       Icon(
-                        Icons.location_on,
-                        color: Colors.grey,
+                        Icons.house,
+                        size: 16,
+                        color: Colors.white,
                       ),
                       Text(
-                        "29Km",
+                        "Lives In Playa Del Carmen",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 13,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        "29Km away",
+                        style: TextStyle(
+                          fontSize: 13,
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                         ),
@@ -350,14 +368,9 @@ class SwipeCard extends StatelessWidget {
   }
 }
 
-class CustomBottomSheet extends StatefulWidget {
-  const CustomBottomSheet({super.key});
+class CustomBottomSheet extends StatelessWidget {
+  CustomBottomSheet({super.key});
 
-  @override
-  State<CustomBottomSheet> createState() => _CustomBottomSheetState();
-}
-
-class _CustomBottomSheetState extends State<CustomBottomSheet> {
   final List _allIntetrest = [
     [FontAwesomeIcons.music, "Clubbing"],
     [FontAwesomeIcons.breadSlice, "Having breakfast"],
@@ -389,8 +402,10 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
   ];
 
   final RxDouble _distanceValue = 0.0.obs;
-  RxDouble _minAge = 18.0.obs;
-  RxDouble _maxAge = 20.0.obs;
+  final RxDouble _minAge = 18.0.obs;
+  final RxDouble _maxAge = 20.0.obs;
+  final RxInt _ageIndex = (-1).obs;
+  final RxInt _currentlyTapped2 = (-1).obs;
 
   @override
   Widget build(BuildContext context) {
@@ -448,10 +463,10 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
             ),
           ),
           FlutterSlider(
-            values: const [18, 20],
+            values: [_minAge.value, _maxAge.value],
             rangeSlider: true,
-            max: 500,
-            min: 0,
+            max: 80,
+            min: _minAge.value,
             onDragging: (handlerIndex, lowerValue, upperValue) {
               _minAge.value = lowerValue;
               _maxAge.value = upperValue;
@@ -474,22 +489,33 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               itemCount: _genders.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2,
-                  ),
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Text(
-                    _genders[index],
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.deepPurple,
+                return GestureDetector(
+                  onTap: () {
+                    _ageIndex.value = index;
+                  },
+                  child: Obx(
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 5,
+                      ),
+                      margin: const EdgeInsets.only(left: 9, top: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _ageIndex.value == index
+                            ? Colors.black
+                            : Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Text(
+                        _genders[index],
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _ageIndex.value == index
+                              ? Colors.white
+                              : Colors.deepPurple,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -513,22 +539,33 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               itemCount: _allIntetrest.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2,
-                  ),
-                  margin: const EdgeInsets.only(left: 9, top: 5),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Text(
-                    _allIntetrest[index][1],
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.deepPurple,
+                return GestureDetector(
+                  onTap: () {
+                    _currentlyTapped2.value = index;
+                  },
+                  child: Obx(
+                    () => Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 2,
+                      ),
+                      margin: const EdgeInsets.only(left: 9, top: 5),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: _currentlyTapped2.value == index
+                            ? Colors.black
+                            : Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Text(
+                        _allIntetrest[index][1],
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _currentlyTapped2.value == index
+                              ? Colors.white
+                              : Colors.deepPurpleAccent,
+                        ),
+                      ),
                     ),
                   ),
                 );

@@ -1,6 +1,7 @@
 // app_routes.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/auth/error_face_screen.dart';
 import 'package:linkingpal/pages/auth/faceid_req_screen.dart';
 import 'package:linkingpal/pages/auth/forgot_password_screen.dart';
@@ -15,6 +16,7 @@ import 'package:linkingpal/pages/auth/upload_profile_picture.dart';
 import 'package:linkingpal/pages/auth/verification_checker_screen.dart';
 import 'package:linkingpal/pages/auth/verification_screen.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
+import 'package:linkingpal/pages/create_post/edit_post_screen.dart';
 import 'package:linkingpal/pages/dashboard_screen.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:linkingpal/pages/home/notification.dart';
@@ -71,6 +73,7 @@ class AppRoutes {
   static const String verificationChecker = '/verificationChecker';
   static const String premium = '/premium';
   static const String personalDataFromUser = '/personalDataFromUser';
+  static const String editPost = '/editPost';
 }
 
 class RouteHandler {
@@ -78,6 +81,13 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.createPost,
       page: () => CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.editPost,
+      page: () {
+        final PostModel model =  Get.arguments["model"];
+        return EditPostScreen(postModel: model);
+      },
     ),
     GetPage(
       name: AppRoutes.personalDataFromUser,

@@ -8,6 +8,7 @@ import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -25,33 +26,33 @@ class HomeScreen extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color.fromARGB(50, 158, 158, 158),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 4),
-              UserNameWidget(controller: _retrieveController),
-              const SizedBox(height: 10),
-              Obx(
-                () {
-                  return _postController.allPost.isEmpty
-                      ? Center(
-                          child: Lottie.network(
-                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                          ),
-                        )
-                      : Expanded(
-                          child: ListView.builder(
-                            itemBuilder: (context, index) {
-                              final post = _postController.allPost[index];
-                              return PostCardDisplay(postModel: post);
-                            },
-                          ),
-                        );
-                },
-              ),
-            ],
-          ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: UserNameWidget(controller: _retrieveController),
+            ),
+            const SizedBox(height: 5),
+            Obx(
+              () {
+                return _postController.allPost.isEmpty
+                    ? Center(
+                        child: Lottie.network(
+                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            final post = _postController.allPost[index];
+                            return PostCardDisplay(postModel: post);
+                          },
+                        ),
+                      );
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -66,232 +67,313 @@ class PostCardDisplay extends StatelessWidget {
   });
 
   final RxInt _currentViewPic = 1.obs;
-
   final RxBool _isExpand = false.obs;
-
   final _postController = Get.put(PostController());
   final _retrieveController = Get.put(RetrieveController());
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(
-        vertical: 5,
-        horizontal: 5,
-      ),
       constraints: const BoxConstraints(
         minHeight: 372,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment: Alignment.centerRight,
-            child: _retrieveController.userModel.value?.name ==
-                    postModel.createdBy.name
-                ? GestureDetector(
-                    onTap: () async {},
-                    child: const Icon(Icons.more_vert),
-                  )
-                : null,
-          ),
+          //image
           SizedBox(
-            height: 280,
-            child: PageView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: postModel.files.length,
-              onPageChanged: (value) {
-                _currentViewPic.value = value + 1;
-              },
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Get.to(
-                      () => FullDetailsOfPost(postModel: postModel),
-                    );
-                  },
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: Stack(
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: PageView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: postModel.files.length,
+                    onPageChanged: (value) {
+                      _currentViewPic.value = value + 1;
+                    },
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Get.to(
+                            () => FullDetailsOfPost(
+                              postModel: postModel,
+                              initalPage: index,
+                            ),
+                          );
+                        },
+                        child: CachedNetworkImage(
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => const Center(
+                            child: Icon(Icons.error),
+                          ),
+                          width: double.infinity,
+                          placeholder: (context, url) {
+                            return const Center(
+                              child: Loader(color: Colors.deepOrangeAccent),
+                            );
+                          },
+                          imageUrl: postModel.files[index],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: postModel.files.length != 1
+                      ? Obx(
+                          () => Container(
+                            height: 20,
+                            width: 30,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.grey.shade500,
+                            ),
+                            child: Text(
+                              "${_currentViewPic.value.toString()}/${postModel.files.length}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: _retrieveController.userModel.value?.name ==
+                            postModel.createdBy.name
+                        ? GestureDetector(
+                            onTap: () async {
+                              displayDialogBoX(context);
+                            },
+                            child: Container(
+                              height: 30,
+                              width: 30,
+                              decoration:  BoxDecoration(
+                                color: Colors.white.withOpacity(0.8),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.more_vert,
+                                size: 17,
+                                color: Colors.black,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Get.to(() => const UsersProfileScreen()),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(40),
                     child: CachedNetworkImage(
-                      height: 280,
+                      height: 38,
+                      width: 38,
                       fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
+                      placeholder: (context, url) {
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.grey.shade100,
+                          ),
+                        );
+                      },
                       errorWidget: (context, url, error) => const Center(
                         child: Icon(Icons.error),
                       ),
-                      width: double.infinity,
-                      placeholder: (context, url) {
-                        return const Center(
-                          child: Loader(color: Colors.deepOrangeAccent),
-                        );
-                      },
-                      imageUrl: postModel.files[index],
+                      imageUrl: postModel.createdBy.avatar,
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 4),
-          postModel.files.length != 1
-              ? Obx(
-                  () => Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "${_currentViewPic.value.toString()}/${postModel.files.length}",
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox(),
-          const SizedBox(height: 2),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Get.to(() => const UsersProfileScreen()),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(40),
-                  child: CachedNetworkImage(
-                    height: 38,
-                    width: 38,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: Colors.grey.shade100,
-                        ),
-                      );
-                    },
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(Icons.error),
-                    ),
-                    imageUrl: postModel.createdBy.avatar,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        postModel.createdBy.name,
-                        style: const TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      const FaIcon(
-                        FontAwesomeIcons.certificate,
-                        size: 14,
-                        color: Colors.blue,
-                      ),
-                    ],
-                  ),
-                  Text(
-                    DateFormat("MMM dd yyyy").format(postModel.createdAt),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade800,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      // _postController.likeAPost(postModel.id);
-                      if (postModel.isLikeByUser) {
-                        _postController.disLikeAPost(postModel.id);
-                      } else {
-                        _postController.likeAPost(postModel.id);
-                      }
-                    },
-                    child: postModel.isLikeByUser
-                        ? const Icon(
-                            FontAwesomeIcons.solidHeart,
-                            size: 22,
-                            color: Colors.redAccent,
-                          )
-                        : const Icon(
-                            FontAwesomeIcons.heart,
-                            size: 22,
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          postModel.createdBy.name,
+                          style: const TextStyle(
+                            fontSize: 12,
                           ),
-                  ),
-                  Text(
-                    "${postModel.likes}",
-                    style: const TextStyle(
-                      fontSize: 8,
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(width: 20),
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        isScrollControlled: true,
-                        enableDrag: true,
-                        context: Get.context!,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => CommentScreen(
-                          postController: _postController,
-                          postModel: postModel,
                         ),
-                      );
-                    },
-                    child: const Icon(
-                      FontAwesomeIcons.comment,
-                      size: 22,
+                        const SizedBox(width: 5),
+                        const FaIcon(
+                          FontAwesomeIcons.certificate,
+                          size: 14,
+                          color: Colors.blue,
+                        ),
+                      ],
                     ),
-                  ),
-                  Text(
-                    "${postModel.comments}",
-                    style: const TextStyle(
-                      fontSize: 8,
+                    Text(
+                      DateFormat("MMM dd yyyy").format(postModel.createdAt),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade800,
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Obx(
-            () => GestureDetector(
-              onTap: () {
-                _isExpand.value = !_isExpand.value;
-              },
-              child: _isExpand.value
-                  ? Text(postModel.text)
-                  : postModel.text.length > 80
-                      ? Text.rich(
-                          TextSpan(
-                            text: postModel.text.substring(0, 79),
-                            children: const [
-                              TextSpan(
-                                text: "...See more",
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
+                  ],
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () async {
+                    print("hi");
+                    if (postModel.isLikeByUser) {
+                      _postController.disLikeAPost(postModel.id);
+                    } else {
+                      _postController.likeAPost(postModel.id);
+                    }
+                  },
+                  child: postModel.isLikeByUser
+                      ? const Icon(
+                          FontAwesomeIcons.solidHeart,
+                          color: Colors.redAccent,
                         )
-                      : Text(postModel.text),
+                      : const Icon(
+                          FontAwesomeIcons.heart,
+                        ),
+                ),
+                const SizedBox(width: 5),
+                Text(postModel.likes.toString()),
+                const SizedBox(width: 15),
+                GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      isScrollControlled: true,
+                      enableDrag: true,
+                      context: Get.context!,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => CommentScreen(
+                        postController: _postController,
+                        postModel: postModel,
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    FontAwesomeIcons.comment,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  "${postModel.comments}",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Obx(
+              () => GestureDetector(
+                onTap: () {
+                  _isExpand.value = !_isExpand.value;
+                },
+                child: _isExpand.value
+                    ? Text(postModel.text)
+                    : postModel.text.length > 80
+                        ? Text.rich(
+                            TextSpan(
+                              text: postModel.text.substring(0, 79),
+                              children: const [
+                                TextSpan(
+                                  text: "...See more",
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Text(postModel.text),
+              ),
             ),
           ),
           const Divider(),
         ],
       ),
+    );
+  }
+
+  Future<dynamic> displayDialogBoX(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Get.toNamed(AppRoutes.editPost, arguments: {
+                  "model": postModel,
+                });
+              },
+              style: ElevatedButton.styleFrom(),
+              child: const Text(
+                "Edit",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                _postController.deletePost(postModel.id, context);
+              },
+              child: const Text(
+                "Delete",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          title: const Text(
+            "Confirmation",
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 5),
+              Text(
+                "Do you want to edit or delete this post?",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -5,10 +5,16 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 
 class FullDetailsOfPost extends StatelessWidget {
   final PostModel postModel;
-  const FullDetailsOfPost({super.key, required this.postModel});
+  final int initalPage;
+  const FullDetailsOfPost({
+    super.key,
+    required this.postModel,
+    required this.initalPage,
+  });
 
   @override
   Widget build(BuildContext context) {
+    PageController _pageController = PageController(initialPage: initalPage);
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Center(
@@ -16,13 +22,13 @@ class FullDetailsOfPost extends StatelessWidget {
           height: 580,
           child: PageView.builder(
             scrollDirection: Axis.horizontal,
+            controller: _pageController,
             itemCount: postModel.files.length,
             onPageChanged: (value) {
               // _currentViewPic.value = value + 1;
             },
             itemBuilder: (context, index) {
               return CachedNetworkImage(
-               
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter,
                 errorWidget: (context, url, error) => const Center(

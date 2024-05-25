@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -177,29 +178,32 @@ class PostController extends GetxController {
     }
 
     try {
+      int index = allPost.indexWhere((element) => element.id == postId);
+      int indexUserPost = allUserPost.indexWhere((element) => element.id == postId);
+      if (index != -1) {
+        //allpost
+        List<PostModel> updatedAllPost = List.from(allPost);
+        updatedAllPost[index].likes = allPost[index].likes += 1;
+        updatedAllPost[index].isLikeByUser = true;
+        allPost.addAll(updatedAllPost);
+
+        //userpost list
+        List<PostModel> updatedAllUSerPost = List.from(allPost);
+        updatedAllUSerPost[indexUserPost].likes = allPost[indexUserPost].likes += 1;
+        updatedAllUSerPost[indexUserPost].isLikeByUser = true;
+        allUserPost.addAll(updatedAllPost);
+      }
       final uri =
           Uri.parse("$baseUrl/post/$postId/like").replace(queryParameters: {
         'postId': postId,
       });
 
-      final response = await http.patch(
+      await http.patch(
         uri,
         headers: {
           "Authorization": "Bearer $token",
         },
       );
-
-      if (response.statusCode == 200) {
-        int index = allPost.indexWhere((element) => element.id == postId);
-        if (index != -1) {
-          List<PostModel> updatedAllPost = List.from(allPost);
-          updatedAllPost[index].likes = allPost[index].likes += 1;
-          updatedAllPost[index].isLikeByUser = true;
-          allPost.clear();
-          allPost.addAll(updatedAllPost);
-          print("success");
-        }
-      }
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -215,36 +219,52 @@ class PostController extends GetxController {
     }
 
     try {
+      int index = allPost.indexWhere((element) => element.id == postId);
+      int indexUserPost = allUserPost.indexWhere((element) => element.id == postId);
+      if (index != -1 && indexUserPost != -1) {
+        //allpost
+        List<PostModel> updatedAllPost = List.from(allPost);
+        updatedAllPost[index].likes = allPost[index].likes -= 1;
+        updatedAllPost[index].isLikeByUser = false;
+        allPost.clear();
+        allPost.addAll(updatedAllPost);
+
+        //userpost
+        List<PostModel> updatedAllUserPost = List.from(allUserPost);
+        updatedAllUserPost[indexUserPost].likes = allUserPost[indexUserPost].likes -= 1;
+        updatedAllUserPost[indexUserPost].isLikeByUser = false;
+        allUserPost.clear();
+        allUserPost.addAll(updatedAllUserPost);
+      }
+
       final uri =
           Uri.parse("$baseUrl/post/$postId/like").replace(queryParameters: {
         'postId': postId,
       });
 
-      final response = await http.delete(
+      await http.delete(
         uri,
         headers: {
           "Authorization": "Bearer $token",
         },
       );
-      final decodedResponce = json.decode(response.body);
-      debugPrint(decodedResponce.toString());
-      if (response.statusCode == 200) {
-        int index = allPost.indexWhere((element) => element.id == postId);
-        if (index != -1) {
-          List<PostModel> updatedAllPost = List.from(allPost);
-          updatedAllPost[index].likes = allPost[index].likes -= 1;
-          updatedAllPost[index].isLikeByUser = false;
-          allPost.clear();
-          allPost.addAll(updatedAllPost);
-          print("success");
-        }
-      }
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  Future<void> deletePost(String postId) async {
+  Future<void> deletePost(String postId, BuildContext context) async {
+    List<PostModel> shadowCopy = List.from(allPost);
+    shadowCopy.removeWhere((element) => element.id == postId);
+    allPost.clear();
+    allPost.addAll(shadowCopy);
+    Navigator.pop(context);
+
+    List<PostModel> shadowCopyUserPost = List.from(allUserPost);
+    shadowCopyUserPost.removeWhere((element) => element.id == postId);
+    allUserPost.clear();
+    allUserPost.addAll(shadowCopy);
+
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
@@ -254,7 +274,7 @@ class PostController extends GetxController {
     }
 
     try {
-      final uri = Uri.parse("$baseUrl/post/:$postId").replace(queryParameters: {
+      final uri = Uri.parse("$baseUrl/post/$postId").replace(queryParameters: {
         'postId': postId,
       });
       final response = await http.delete(uri, headers: {
@@ -263,15 +283,7 @@ class PostController extends GetxController {
       });
       final decodedResponce = json.decode(response.body);
       if (response.statusCode != 200) {
-        print(decodedResponce);
         return CustomSnackbar.show("Error", decodedResponce["message"]);
-      }
-      if (response.statusCode == 200) {
-        int index = allPost.indexWhere((element) => element.id == postId);
-        if (index != -1) {
-          allPost.removeAt(index);
-          refresh();
-        }
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -313,6 +325,50 @@ class PostController extends GetxController {
             "Error", decodedResponce["message"].toString());
       }
       CustomSnackbar.show("Success", "Comment done");
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> editPost({
+    required String postId,
+    required String textEdited,
+  }) async {
+    isloading.value = true;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri = Uri.parse("$baseUrl/post/$postId");
+      final responce = await http.patch(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: json.encode({
+          "text": textEdited,
+        }),
+      );
+      final decoded = json.decode(responce.body);
+      if (responce.statusCode != 200) {
+        return CustomSnackbar.show("Error", decoded["message"].toString());
+      }
+      int index = allPost.indexWhere((element) => element.id == postId);
+
+      if (index != -1) {
+        List<PostModel> updatedAllPost = List.from(allPost);
+        updatedAllPost[index].text = decoded["data"]["text"];
+        allPost.addAll(updatedAllPost);
+      }
+      Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

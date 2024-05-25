@@ -1,6 +1,6 @@
 class PostModel {
   final String id;
-  final String text;
+  String text;
   final List<String> tags;
   final List<String> files;
   final DateTime createdAt;
