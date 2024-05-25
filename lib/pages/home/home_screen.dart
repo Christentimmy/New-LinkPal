@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:like_button/like_button.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/models/post_model.dart';
@@ -44,6 +45,7 @@ class HomeScreen extends StatelessWidget {
                       )
                     : Expanded(
                         child: ListView.builder(
+                          itemCount: _postController.allPost.length,
                           itemBuilder: (context, index) {
                             final post = _postController.allPost[index];
                             return PostCardDisplay(postModel: post);
@@ -158,7 +160,7 @@ class PostCardDisplay extends StatelessWidget {
                             child: Container(
                               height: 30,
                               width: 30,
-                              decoration:  BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(0.8),
                                 shape: BoxShape.circle,
                               ),
@@ -172,6 +174,59 @@ class PostCardDisplay extends StatelessWidget {
                         : null,
                   ),
                 ),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Get.to(() => const UsersProfileScreen()),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              width: 1,
+                              color: Colors.deepOrangeAccent,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(40),
+                            child: CachedNetworkImage(
+                              height: 30,
+                              width: 30,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) {
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.grey.shade100,
+                                  ),
+                                );
+                              },
+                              errorWidget: (context, url, error) =>
+                                  const Center(
+                                child: Icon(Icons.error),
+                              ),
+                              imageUrl: postModel.createdBy.avatar,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Row(
+                        children: [
+                          Text(
+                            postModel.createdBy.name,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -180,79 +235,20 @@ class PostCardDisplay extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => Get.to(() => const UsersProfileScreen()),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(40),
-                    child: CachedNetworkImage(
-                      height: 38,
-                      width: 38,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.grey.shade100,
-                          ),
-                        );
-                      },
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Icons.error),
-                      ),
-                      imageUrl: postModel.createdBy.avatar,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          postModel.createdBy.name,
-                          style: const TextStyle(
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        const FaIcon(
-                          FontAwesomeIcons.certificate,
-                          size: 14,
-                          color: Colors.blue,
-                        ),
-                      ],
-                    ),
-                    Text(
-                      DateFormat("MMM dd yyyy").format(postModel.createdAt),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade800,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () async {
-                    print("hi");
+                LikeButton(
+                  size: 26,
+                  isLiked: postModel.isLikeByUser,
+                  likeCount: postModel.likes,
+                  onTap: (isLiked) async {
                     if (postModel.isLikeByUser) {
                       _postController.disLikeAPost(postModel.id);
+                      return !isLiked;
                     } else {
                       _postController.likeAPost(postModel.id);
+                      return isLiked;
                     }
                   },
-                  child: postModel.isLikeByUser
-                      ? const Icon(
-                          FontAwesomeIcons.solidHeart,
-                          color: Colors.redAccent,
-                        )
-                      : const Icon(
-                          FontAwesomeIcons.heart,
-                        ),
                 ),
-                const SizedBox(width: 5),
-                Text(postModel.likes.toString()),
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
@@ -291,11 +287,19 @@ class PostCardDisplay extends StatelessWidget {
                   _isExpand.value = !_isExpand.value;
                 },
                 child: _isExpand.value
-                    ? Text(postModel.text)
+                    ? Text(
+                        postModel.text,
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
+                      )
                     : postModel.text.length > 80
                         ? Text.rich(
                             TextSpan(
                               text: postModel.text.substring(0, 79),
+                              style: const TextStyle(
+                                fontSize: 12,
+                              ),
                               children: const [
                                 TextSpan(
                                   text: "...See more",
@@ -307,10 +311,24 @@ class PostCardDisplay extends StatelessWidget {
                               ],
                             ),
                           )
-                        : Text(postModel.text),
+                        : Text(
+                            postModel.text,
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(DateFormat("MMM dd yyyy").format(postModel.createdAt),
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                )),
+          ),
+
           const Divider(),
         ],
       ),

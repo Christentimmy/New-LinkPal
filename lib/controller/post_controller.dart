@@ -221,7 +221,7 @@ class PostController extends GetxController {
     try {
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUserPost = allUserPost.indexWhere((element) => element.id == postId);
-      if (index != -1 && indexUserPost != -1) {
+      if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
         updatedAllPost[index].likes = allPost[index].likes -= 1;

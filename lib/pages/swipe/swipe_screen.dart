@@ -1,4 +1,5 @@
 import 'package:another_xlider/another_xlider.dart';
+import 'package:another_xlider/models/handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -403,7 +404,7 @@ class CustomBottomSheet extends StatelessWidget {
 
   final RxDouble _distanceValue = 0.0.obs;
   final RxDouble _minAge = 18.0.obs;
-  final RxDouble _maxAge = 20.0.obs;
+  final RxDouble _maxAge = 30.0.obs;
   final RxInt _ageIndex = (-1).obs;
   final RxInt _currentlyTapped2 = (-1).obs;
 
@@ -446,16 +447,16 @@ class CustomBottomSheet extends StatelessWidget {
           ),
           FlutterSlider(
             values: const [0, 0],
-            rangeSlider: true,
+            rangeSlider: false,
             max: 500,
             min: 0,
             onDragging: (handlerIndex, lowerValue, upperValue) {
-              _distanceValue.value = upperValue - lowerValue;
+              _distanceValue.value = lowerValue - upperValue;
             },
           ),
           Obx(
             () => Text(
-              "Age: $_minAge - $_maxAge",
+              "Age: ${_minAge.round()} - ${_maxAge.round()}",
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -466,6 +467,22 @@ class CustomBottomSheet extends StatelessWidget {
             values: [_minAge.value, _maxAge.value],
             rangeSlider: true,
             max: 80,
+            rightHandler: FlutterSliderHandler(
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
+            handler: FlutterSliderHandler(
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
             min: _minAge.value,
             onDragging: (handlerIndex, lowerValue, upperValue) {
               _minAge.value = lowerValue;
