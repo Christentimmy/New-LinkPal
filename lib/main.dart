@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.montserratTextTheme(),
       ),
       getPages: RouteHandler.routes,
-      initialRoute: AppRoutes.initial,
+      initialRoute: AppRoutes.personalDataFromUser,
     );
   }
 }

@@ -8,6 +8,7 @@ class PersonalDataFromUser extends StatelessWidget {
 
   final RxString _selectedGender = "".obs;
   final RxString _finanClass = "".obs;
+  final RxString _carOwn = "".obs;
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +187,9 @@ class PersonalDataFromUser extends StatelessWidget {
                     title: const Text('Yes'),
                     leading: Radio<String>(
                       value: 'Yes',
-                      groupValue: _selectedGender.value,
+                      groupValue: _carOwn.value,
                       onChanged: (String? value) {
-                        _selectedGender.value = value!;
+                        _carOwn.value = value!;
                       },
                     ),
                   ),
@@ -200,9 +201,9 @@ class PersonalDataFromUser extends StatelessWidget {
                     horizontalTitleGap: 0,
                     leading: Radio<String>(
                       value: 'No',
-                      groupValue: _selectedGender.value,
+                      groupValue: _carOwn.value,
                       onChanged: (String? value) {
-                        _selectedGender.value = value!;
+                        _carOwn.value = value!;
                       },
                     ),
                   ),

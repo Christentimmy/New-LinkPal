@@ -81,7 +81,6 @@ class PostController extends GetxController {
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
       pickedFiles.clear();
@@ -159,10 +158,8 @@ class PostController extends GetxController {
           .toList();
       postModelUserData.sort((a, b) => a.createdAt.compareTo(b.createdAt));
       allUserPost.addAll(postModelUserData);
-      print(allUserPost);
     } catch (e) {
-      print(e);
-      CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
     } finally {
       isloading.value = false;
     }

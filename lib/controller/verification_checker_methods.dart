@@ -83,7 +83,6 @@ class VerificationMethods extends GetxController {
       return token;
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", e.toString());
       return "";
     }
   }
@@ -131,7 +130,7 @@ class VerificationMethods extends GetxController {
       isloading.value = false;
       return true;
     } catch (e) {
-      CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
       isloading.value = false;
       return false;
     }

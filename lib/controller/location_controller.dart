@@ -40,7 +40,7 @@ class LocationController extends GetxController {
       // return city ?? "";
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", e.toString());
+      CustomSnackbar.show("Error", "An unexpected error occurred");
     } finally {
       isloading.value = false;
       stopWatch.stop();

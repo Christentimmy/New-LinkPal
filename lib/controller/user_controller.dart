@@ -155,7 +155,6 @@ class UserController extends GetxController {
       }
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
     }
@@ -200,7 +199,6 @@ class UserController extends GetxController {
       onClickWhatNext();
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", e.toString());
     } finally {
       isloading.value = false;
     }
@@ -232,10 +230,9 @@ class UserController extends GetxController {
       }
 
       _retrieveController.getUserDetails();
-      // CustomSnackbar.show("Success", "Details changed successfully");
     } catch (e) {
-      print(e.toString());
-      return CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
+      
     }
   }
 

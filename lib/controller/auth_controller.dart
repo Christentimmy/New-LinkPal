@@ -42,7 +42,6 @@ class AuthController extends GetxController {
       final userModel = UserModel.fromJson(responseData["data"]);
       String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
-      print(responseData);
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -67,7 +66,6 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoutes.dashboard);
       
     } catch (e) {
-      CustomSnackbar.show("Error", "An unexpected error occurred");
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
@@ -118,7 +116,6 @@ class AuthController extends GetxController {
       _tokenStorage.storeToken(decodedResponseBody["token"]);
       _retrieveController.getUserDetails();
     } catch (e) {
-      CustomSnackbar.show("Error", e.toString());
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
@@ -147,8 +144,7 @@ class AuthController extends GetxController {
       CustomSnackbar.show("Success", "Password changed successfully");
       Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
-      print(e);
-      CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
     } finally {
       isloading.value = false;
     }
@@ -197,7 +193,7 @@ class AuthController extends GetxController {
         },
       );
     } catch (e) {
-      CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
     } finally {
       isloading.value = false;
     }
@@ -221,7 +217,7 @@ class AuthController extends GetxController {
       CustomSnackbar.show("Success", " account deleted successfully");
       Get.toNamed(AppRoutes.signin);
     } catch (e) {
-      return CustomSnackbar.show("Error", e.toString());
+      debugPrint(e.toString());
     }
   }
 }

@@ -45,7 +45,6 @@ class RetrieveController extends GetxController {
       final instance = UserModel.fromJson(responseData["data"]);
       userModel.value = instance;
     } catch (e) {
-      CustomSnackbar.show("Error", e.toString());
       debugPrint(e.toString());
     }
   }
