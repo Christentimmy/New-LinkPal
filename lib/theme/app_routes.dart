@@ -74,13 +74,18 @@ class AppRoutes {
   static const String premium = '/premium';
   static const String personalDataFromUser = '/personalDataFromUser';
   static const String editPost = '/editPost';
+  static const String viewVideoPosted = '/viewVideoPosted';
 }
 
 class RouteHandler {
   static final List<GetPage> routes = [
     GetPage(
       name: AppRoutes.createPost,
-      page: () => CreatePostScreen(),
+      page: () => const CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.viewVideoPosted,
+      page: () => const CreatePostScreen(),
     ),
     GetPage(
       name: AppRoutes.editPost,

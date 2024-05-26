@@ -12,6 +12,7 @@ import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -46,8 +47,11 @@ class HomeScreen extends StatelessWidget {
                         child: ListView.builder(
                           itemCount: _postController.allPost.length,
                           itemBuilder: (context, index) {
-                            final post = _postController.allPost[index];
-                            return PostCardDisplay(postModel: post);
+                            print("rebuilding");
+                            final post = _postController.allPost[index].obs;
+                            return PostCardDisplay(
+                              postModel: post,
+                            );
                           },
                         ),
                       );
@@ -61,22 +65,89 @@ class HomeScreen extends StatelessWidget {
 }
 
 class PostCardDisplay extends StatelessWidget {
-  final PostModel postModel;
+  final Rx<PostModel> postModel;
   PostCardDisplay({
-    required this.postModel,
     super.key,
+    required this.postModel,
   });
 
   final RxInt _currentViewPic = 1.obs;
   final RxBool _isExpand = false.obs;
-  final _postController = Get.put(PostController());
-  final _retrieveController = Get.put(RetrieveController());
+  final _postController = Get.find<PostController>();
+  final _retrieveController = Get.find<RetrieveController>();
+
+  bool _isImage(String file) {
+    final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    final extension = file.split('.').last.toLowerCase();
+    return imageExtensions.contains(extension);
+  }
+
+  Future<dynamic> displayDialogBoX(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Get.toNamed(AppRoutes.editPost, arguments: {
+                  "model": postModel,
+                });
+              },
+              style: ElevatedButton.styleFrom(),
+              child: const Text(
+                "Edit",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                _postController.deletePost(postModel.value.id, context);
+              },
+              child: const Text(
+                "Delete",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          title: const Text(
+            "Confirmation",
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 5),
+              Text(
+                "Do you want to edit or delete this post?",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    print("Rebuilding");
     return Container(
       constraints: const BoxConstraints(
-        minHeight: 372,
+        minHeight: 450,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,37 +157,47 @@ class PostCardDisplay extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.5,
             child: Stack(
               children: [
-                SizedBox(
+                Container(
+                  color: Colors.black,
                   height: MediaQuery.of(context).size.height * 0.5,
                   child: PageView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: postModel.files.length,
+                    itemCount: postModel.value.files.length,
                     onPageChanged: (value) {
                       _currentViewPic.value = value + 1;
                     },
                     itemBuilder: (context, index) {
+                      final files = postModel.value.files[index];
+                      final isImage = _isImage(files);
                       return GestureDetector(
-                        onTap: () {
-                          Get.to(
-                            () => FullDetailsOfPost(
-                              postModel: postModel,
-                              initalPage: index,
-                            ),
-                          );
-                        },
-                        child: CachedNetworkImage(
-                          fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => const Center(
-                            child: Icon(Icons.error),
-                          ),
-                          width: double.infinity,
-                          placeholder: (context, url) {
-                            return const Center(
-                              child: Loader(color: Colors.deepOrangeAccent),
-                            );
-                          },
-                          imageUrl: postModel.files[index],
-                        ),
+                        onTap: isImage
+                            ? () {
+                                Get.to(
+                                  () => FullDetailsOfPost(
+                                    postModel: postModel.value,
+                                    initalPage: index,
+                                  ),
+                                );
+                              }
+                            : null,
+                        child: isImage
+                            ? CachedNetworkImage(
+                                fit: BoxFit.cover,
+                                key: ValueKey(postModel.value.id),
+                                errorWidget: (context, url, error) =>
+                                    const Center(
+                                  child: Icon(Icons.error),
+                                ),
+                                width: double.infinity,
+                                height: 450,
+                                placeholder: (context, url) => const Center(
+                                  child: Loader(
+                                    color: Colors.deepOrangeAccent,
+                                  ),
+                                ),
+                                imageUrl: files,
+                              )
+                            : VideoPlayWidget(videoUrl: files),
                       );
                     },
                   ),
@@ -124,7 +205,7 @@ class PostCardDisplay extends StatelessWidget {
                 Positioned(
                   bottom: 10,
                   right: 10,
-                  child: postModel.files.length != 1
+                  child: postModel.value.files.length != 1
                       ? Obx(
                           () => Container(
                             height: 20,
@@ -135,7 +216,7 @@ class PostCardDisplay extends StatelessWidget {
                               color: Colors.grey.shade500,
                             ),
                             child: Text(
-                              "${_currentViewPic.value.toString()}/${postModel.files.length}",
+                              "${_currentViewPic.value.toString()}/${postModel.value.files.length}",
                               style: const TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w800,
@@ -151,7 +232,7 @@ class PostCardDisplay extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: _retrieveController.userModel.value?.name ==
-                            postModel.createdBy.name
+                            postModel.value.createdBy.name
                         ? GestureDetector(
                             onTap: () async {
                               displayDialogBoX(context);
@@ -210,7 +291,7 @@ class PostCardDisplay extends StatelessWidget {
                                   const Center(
                                 child: Icon(Icons.error),
                               ),
-                              imageUrl: postModel.createdBy.avatar,
+                              imageUrl: postModel.value.createdBy.avatar,
                             ),
                           ),
                         ),
@@ -218,7 +299,7 @@ class PostCardDisplay extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              postModel.createdBy.name,
+                              postModel.value.createdBy.name,
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.white,
@@ -241,14 +322,14 @@ class PostCardDisplay extends StatelessWidget {
               children: [
                 LikeButton(
                   size: 26,
-                  isLiked: postModel.isLikeByUser,
-                  likeCount: postModel.likes,
+                  isLiked: postModel.value.isLikeByUser,
+                  likeCount: postModel.value.likes,
                   onTap: (isLiked) async {
-                    if (postModel.isLikeByUser) {
-                      _postController.disLikeAPost(postModel.id);
+                    if (postModel.value.isLikeByUser) {
+                      _postController.disLikeAPost(postModel.value.id);
                       return !isLiked;
                     } else {
-                      _postController.likeAPost(postModel.id);
+                      _postController.likeAPost(postModel.value.id);
                       return isLiked;
                     }
                   },
@@ -263,7 +344,7 @@ class PostCardDisplay extends StatelessWidget {
                       backgroundColor: Colors.transparent,
                       builder: (context) => CommentScreen(
                         postController: _postController,
-                        postModel: postModel,
+                        postModel: postModel.value,
                       ),
                     );
                   },
@@ -274,7 +355,7 @@ class PostCardDisplay extends StatelessWidget {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  "${postModel.comments}",
+                  "${postModel.value.comments}",
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade700,
@@ -292,15 +373,15 @@ class PostCardDisplay extends StatelessWidget {
                 },
                 child: _isExpand.value
                     ? Text(
-                        postModel.text,
+                        postModel.value.text,
                         style: const TextStyle(
                           fontSize: 12,
                         ),
                       )
-                    : postModel.text.length > 80
+                    : postModel.value.text.length > 80
                         ? Text.rich(
                             TextSpan(
-                              text: postModel.text.substring(0, 79),
+                              text: postModel.value.text.substring(0, 79),
                               style: const TextStyle(
                                 fontSize: 12,
                               ),
@@ -316,7 +397,7 @@ class PostCardDisplay extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            postModel.text,
+                            postModel.value.text,
                             style: const TextStyle(
                               fontSize: 12,
                             ),
@@ -326,7 +407,8 @@ class PostCardDisplay extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(DateFormat("MMM dd yyyy").format(postModel.createdAt),
+            child: Text(
+                DateFormat("MMM dd yyyy").format(postModel.value.createdAt),
                 style: const TextStyle(
                   fontSize: 10,
                   fontStyle: FontStyle.italic,
@@ -335,66 +417,6 @@ class PostCardDisplay extends StatelessWidget {
           const Divider(),
         ],
       ),
-    );
-  }
-
-  Future<dynamic> displayDialogBoX(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Get.toNamed(AppRoutes.editPost, arguments: {
-                  "model": postModel,
-                });
-              },
-              style: ElevatedButton.styleFrom(),
-              child: const Text(
-                "Edit",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                _postController.deletePost(postModel.id, context);
-              },
-              child: const Text(
-                "Delete",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-          title: const Text(
-            "Confirmation",
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 5),
-              Text(
-                "Do you want to edit or delete this post?",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

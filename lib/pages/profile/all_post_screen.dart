@@ -38,7 +38,7 @@ class AllPostScreen extends StatelessWidget {
                     return ListView.builder(
                       itemCount: _postController.allUserPost.length,
                       itemBuilder: (context, index) {
-                        final post = _postController.allUserPost[index];
+                        final post = _postController.allUserPost[index].obs;
                         return PostCardDisplay(
                           postModel: post,
                         );
