@@ -148,7 +148,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    // updateUserLocation();
                     _locationController.getCurrentCityandUpload(
                         onCalledWhatNext: () {
                       Get.offAllNamed(AppRoutes.dashboard);
@@ -163,11 +162,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         borderRadius: BorderRadius.circular(15),
                         border: Border.all(
                           width: 1,
-                          color: Colors.deepPurpleAccent,
+                          color: Colors.deepOrangeAccent,
                         ),
                       ),
-                      child:_locationController.isloading.value ?
-                          const Center(
+                      child: _locationController.isloading.value
+                          ? const Center(
                               child: CircularProgressIndicator(
                               color: Colors.deepOrangeAccent,
                             ))
@@ -178,6 +177,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 fontSize: 14,
                               ),
                             ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.introductionVideo);
+                  },
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.only(left: 20),
+                    alignment: Alignment.centerLeft,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.deepOrangeAccent,
+                      ),
+                    ),
+                    child: const Text(
+                      "Update Video",
+                      style: TextStyle(
+                        color: AppColor.black,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
@@ -299,5 +323,4 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       debugPrint(e.toString());
     }
   }
-
 }

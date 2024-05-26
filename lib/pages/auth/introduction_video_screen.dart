@@ -63,7 +63,6 @@ class IntroductionVideoScreen extends StatelessWidget {
               () => CustomButton(
                 ontap: () {
                   pickUserVideo();
-                  // Get.to(() => DashBoardScreen());
                 },
                 child: _userController.isloading.value
                     ? const Loader()
@@ -81,7 +80,6 @@ class IntroductionVideoScreen extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                // Get.to(() => DashBoardScreen());
                 if (_videoFile.value != null) {
                   _userController.uploadVideo(video: _videoFile.value!);
                 } else {

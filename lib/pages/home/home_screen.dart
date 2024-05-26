@@ -8,7 +8,6 @@ import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
-import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -177,11 +176,16 @@ class PostCardDisplay extends StatelessWidget {
                 Positioned(
                   top: 10,
                   left: 10,
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Get.to(() => const UsersProfileScreen()),
-                        child: Container(
+                  child: GestureDetector(
+                    onTap: () {
+                      Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
+                        "model": postModel,
+                        "postController": _postController,
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
@@ -210,21 +214,21 @@ class PostCardDisplay extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 5),
-                      Row(
-                        children: [
-                          Text(
-                            postModel.createdBy.name,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                        const SizedBox(width: 5),
+                        Row(
+                          children: [
+                            Text(
+                              postModel.createdBy.name,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

@@ -61,6 +61,7 @@ class UserController extends GetxController {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
+      await _retrieveController.getUserDetails();
     }
   }
 

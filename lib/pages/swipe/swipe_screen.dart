@@ -7,8 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
-import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({super.key});
@@ -60,7 +60,12 @@ class SwipeScreenState extends State<SwipeScreen> {
                       verticalOffsetPercentage) {
                     return SwipeCard(
                       ontap: () {
-                        Get.to(() => const UsersProfileScreen());
+                        Get.toNamed(
+                          AppRoutes.swipedUserCardProfile,
+                          arguments: {
+                            "model": {},
+                          },
+                        );
                       },
                       cards: cards,
                       index: index,

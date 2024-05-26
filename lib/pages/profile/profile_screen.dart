@@ -21,7 +21,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final PageController _pageController = PageController();
   final _postController = Get.put(PostController());
-
   final _retrieveController = Get.put(RetrieveController());
   final _userController = Get.put(UserController());
   final _isInitialized = false.obs;

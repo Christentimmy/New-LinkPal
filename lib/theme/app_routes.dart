@@ -69,7 +69,7 @@ class AppRoutes {
   static const String subscription = '/subscription';
   static const String terms = '/terms';
   static const String swipe = '/swipe';
-  static const String swipedCardProfile = '/swipedCardProfile';
+  static const String swipedUserCardProfile = '/swipedCardProfile';
   static const String verificationChecker = '/verificationChecker';
   static const String premium = '/premium';
   static const String personalDataFromUser = '/personalDataFromUser';
@@ -85,7 +85,7 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.editPost,
       page: () {
-        final PostModel model =  Get.arguments["model"];
+        final PostModel model = Get.arguments["model"];
         return EditPostScreen(postModel: model);
       },
     ),
@@ -102,8 +102,15 @@ class RouteHandler {
       page: () => const SwipeScreen(),
     ),
     GetPage(
-      name: AppRoutes.swipedCardProfile,
-      page: () => const UsersProfileScreen(),
+      name: AppRoutes.swipedUserCardProfile,
+      page: () {
+        final model = Get.arguments["model"];
+        final controller = Get.arguments["postController"];
+        return UsersProfileScreen(
+          model: model ?? {},
+          controller: controller,
+        );
+      },
     ),
     GetPage(
       name: AppRoutes.terms,
@@ -135,7 +142,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.allpost,
-      page: () =>  AllPostScreen(),
+      page: () => AllPostScreen(),
     ),
     GetPage(
       name: AppRoutes.editProfile,
@@ -143,7 +150,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.profile,
-      page: () =>const  ProfileScreen(),
+      page: () => const ProfileScreen(),
     ),
     GetPage(
       name: AppRoutes.chat,
@@ -155,7 +162,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.homescreen,
-      page: () =>  HomeScreen(),
+      page: () => HomeScreen(),
     ),
     GetPage(
       name: AppRoutes.notification,
@@ -204,9 +211,9 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.interest,
-      page: (){
-         final VoidCallback action = Get.arguments["action"];
-         return InterestScreen(onClickWhatNext: action);
+      page: () {
+        final VoidCallback action = Get.arguments["action"];
+        return InterestScreen(onClickWhatNext: action);
       },
     ),
     GetPage(
@@ -231,9 +238,11 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.verificationChecker,
-      page: (){
-        final VoidCallback onClickedToProceed = Get.arguments["onClickToProceed"];
-        return VerificationCheckerScreen(onClickedToProceed: onClickedToProceed);
+      page: () {
+        final VoidCallback onClickedToProceed =
+            Get.arguments["onClickToProceed"];
+        return VerificationCheckerScreen(
+            onClickedToProceed: onClickedToProceed);
       },
     ),
   ];

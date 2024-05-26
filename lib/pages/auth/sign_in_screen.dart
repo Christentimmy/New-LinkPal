@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
-import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -19,8 +18,6 @@ class SignIn extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController = Get.put(AuthController());
   final RxBool _isShowPassword = false.obs;
-  // ignore: unused_field
-  final NetworkController _networkController = NetworkController();
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
 
   @override

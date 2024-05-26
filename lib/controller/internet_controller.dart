@@ -1,16 +1,35 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:get/get.dart';
-import 'package:linkingpal/widgets/snack_bar.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
-class NetworkController extends GetxController {
+class InternetandConectivityChecker extends GetxController {
+  var connectivityResult = ConnectivityResult.none.obs;
+  var isConnected = false.obs;
+
   @override
   void onInit() {
     super.onInit();
-    // Listen for changes in network connectivity
+    initConnectivity();
+    checkInternetConnection();
+
+    // Start listening to changes in connectivity
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
-      if (result == ConnectivityResult.none) {
-        CustomSnackbar.show("Network", "No Internet Connection");
-      }
+      connectivityResult.value = result;
     });
+
+    // Start listening to changes in internet connection
+    InternetConnectionChecker().onStatusChange.listen((status) {
+      isConnected.value = status == InternetConnectionStatus.connected;
+    });
+  }
+
+  Future<void> initConnectivity() async {
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    connectivityResult.value = result;
+  }
+
+  Future<void> checkInternetConnection() async {
+    final result = await InternetConnectionChecker().hasConnection;
+    isConnected.value = result;
   }
 }

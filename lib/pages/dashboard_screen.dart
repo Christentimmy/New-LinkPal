@@ -1,5 +1,7 @@
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
@@ -8,9 +10,11 @@ import 'package:linkingpal/pages/swipe/swipe_screen.dart';
 
 class DashBoardScreen extends StatelessWidget {
   DashBoardScreen({super.key});
+  final InternetandConectivityChecker _internetController =
+      Get.find<InternetandConectivityChecker>();
 
   final RxList _pages = [
-     HomeScreen(),
+    HomeScreen(),
     const SwipeScreen(),
     CreatePostScreen(),
     const ProfileScreen(),
@@ -22,6 +26,40 @@ class DashBoardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomSheet: Obx(() {
+        return  _internetController.connectivityResult.value == ConnectivityResult.none ?  Container(
+          padding: const EdgeInsets.all(10),
+          color: _internetController.connectivityResult.value ==
+                      ConnectivityResult.none ||
+                  !_internetController.isConnected.value
+              ? Colors.red
+              : Colors.green,
+          child: Row(
+            children: [
+              Icon(
+                _internetController.connectivityResult.value ==
+                            ConnectivityResult.none ||
+                        !_internetController.isConnected.value
+                    ? Icons.signal_wifi_off
+                    : Icons.check_circle,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                _internetController.connectivityResult.value ==
+                            ConnectivityResult.none ||
+                        !_internetController.isConnected.value
+                    ? 'No Internet Connection'
+                    : 'Ready....',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ) : const SizedBox();
+      }),
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
           unselectedItemColor: Colors.grey,
