@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
@@ -12,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 class PostController extends GetxController {
   RxBool isloading = false.obs;
+  RxBool isCommentLoading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
@@ -182,8 +184,7 @@ class PostController extends GetxController {
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUserPost =
           allUserPost.indexWhere((element) => element.id == postId);
-      print(indexUserPost);
-      print(index);
+
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
@@ -192,7 +193,7 @@ class PostController extends GetxController {
         allPost.addAll(updatedAllPost);
 
         //userpost list
-        List<PostModel> updatedAllUSerPost = List.from(allPost);
+        List<PostModel> updatedAllUSerPost = List.from(allUserPost);
         updatedAllUSerPost[indexUserPost].likes =
             allPost[indexUserPost].likes += 1;
         updatedAllUSerPost[indexUserPost].isLikeByUser = true;
@@ -227,8 +228,6 @@ class PostController extends GetxController {
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUserPost =
           allUserPost.indexWhere((element) => element.id == postId);
-      print(index);
-      print(indexUserPost);
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
@@ -331,12 +330,35 @@ class PostController extends GetxController {
       print(decodedResponce);
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
-            "Error", decodedResponce["message"].toString());
+          "Error",
+          decodedResponce["message"].toString(),
+        );
       }
+
+      int index = allPost.indexWhere((element) => element.id == postId);
+      int indexUserPost =
+          allUserPost.indexWhere((element) => element.id == postId);
+
+      if (index != -1) {
+        //allpost
+        List<PostModel> updatedAllPost = List.from(allPost);
+        updatedAllPost[index].likes = allPost[index].comments += 1;
+        allPost.addAll(updatedAllPost);
+
+        //userpost list
+        List<PostModel> updatedAllUSerPost = List.from(allUserPost);
+        updatedAllUSerPost[indexUserPost].likes =
+            allPost[indexUserPost].comments += 1;
+        allUserPost.addAll(updatedAllPost);
+      }
+
+      final commentData = CommentModel.fromJson(decodedResponce["data"]);
+      commentModelsList.add(commentData);
       CustomSnackbar.show("Success", "Comment done");
     } catch (e) {
       debugPrint(e.toString());
     } finally {
+      comment.clear();
       isloading.value = false;
     }
   }
@@ -386,7 +408,7 @@ class PostController extends GetxController {
   }
 
   Future<void> getComments(String postId) async {
-    isloading.value = true;
+    isCommentLoading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
@@ -401,7 +423,7 @@ class PostController extends GetxController {
           "postId": postId,
         },
       );
-      final response = await http.post(
+      final response = await http.get(
         uri,
         headers: {
           "Authorization": "Bearer $token",
@@ -410,18 +432,40 @@ class PostController extends GetxController {
       );
 
       final decoded = json.decode(response.body);
-      if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decoded["message"]);
+      if (response.statusCode == 200) {
+        List<dynamic> commentFromData = decoded["data"];
+        List<CommentModel> commentMod =
+            commentFromData.map((e) => CommentModel.fromJson(e)).toList();
+        commentModelsList.addAll(commentMod);
       }
-
-      List<dynamic> commentFromData = decoded["data"];
-      List<CommentModel> commentMod =
-          commentFromData.map((e) => CommentModel.fromJson(e)).toList();
-      commentModelsList.addAll(commentMod);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      isloading.value = false;
+      isCommentLoading.value = false;
+    }
+  }
+
+  Future<void> deleteComment(String commentId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+    try {
+      final uri = Uri.parse("$baseUrl//post/comment/$commentId").replace(
+        queryParameters: {
+          "commentId": commentId,
+        },
+      );
+      final response = await http.delete(uri, headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      });
+      print(response.body);
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 }

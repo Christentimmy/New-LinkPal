@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/post_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:lottie/lottie.dart';
 
 class AllPostScreen extends StatelessWidget {
   AllPostScreen({super.key});
 
-  final _postController = Get.put(PostController());
+  final _postController = Get.put(PostController()); 
+  final _retrieveController = Get.put(RetrieveController()); 
 
 
   @override
@@ -39,6 +41,7 @@ class AllPostScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final post = _postController.allUserPost[index].obs;
                       return PostCardDisplay(
+                        retrieveController: _retrieveController,
                         postModel: post,
                       );
                     },

@@ -50,6 +50,7 @@ class HomeScreen extends StatelessWidget {
                             final post = _postController.allPost[index].obs;
                             return PostCardDisplay(
                               postModel: post,
+                              retrieveController: _retrieveController,
                             );
                           },
                         ),
@@ -65,9 +66,11 @@ class HomeScreen extends StatelessWidget {
 
 class PostCardDisplay extends StatelessWidget {
   final Rx<PostModel> postModel;
+  final RetrieveController retrieveController;
   PostCardDisplay({
     super.key,
     required this.postModel,
+    required this.retrieveController,
   });
 
   final RxInt _currentViewPic = 1.obs;
@@ -339,14 +342,13 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   postModel.value.likes.toString(),
-                  style: const TextStyle(
-                    color: Colors.grey
-                  ),
+                  style: const TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
                     _postController.getComments(postModel.value.id);
+                    print(postModel.value.id);
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,
@@ -355,6 +357,7 @@ class PostCardDisplay extends StatelessWidget {
                       builder: (context) => CommentScreen(
                         postController: _postController,
                         postModel: postModel.value,
+                        retrieveController: retrieveController,
                       ),
                     );
                   },
@@ -431,15 +434,29 @@ class PostCardDisplay extends StatelessWidget {
   }
 }
 
-class CommentScreen extends StatelessWidget {
+class CommentScreen extends StatefulWidget {
   final PostController postController;
   final PostModel postModel;
-  CommentScreen({
+  final RetrieveController retrieveController;
+  const CommentScreen({
     super.key,
     required this.postController,
     required this.postModel,
+    required this.retrieveController,
   });
+
+  @override
+  State<CommentScreen> createState() => _CommentScreenState();
+}
+
+class _CommentScreenState extends State<CommentScreen> {
   final _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.postController.commentModelsList.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -506,25 +523,44 @@ class CommentScreen extends StatelessWidget {
                       height: 15,
                     ),
                     Obx(() {
-                      return postController.commentModelsList.isEmpty
-                          ? Center(
-                              child: Lottie.network(
-                                "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                      return widget.postController.isCommentLoading.value
+                          ? const Center(
+                              child: Loader(
+                                color: Colors.deepOrangeAccent,
                               ),
                             )
-                          : ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount:
-                                  postController.commentModelsList.length,
-                              itemBuilder: (context, index) {
-                                final commentsMod =
-                                    postController.commentModelsList[index];
-                                return CommentCard(
-                                  commentModel: commentsMod!,
+                          : widget.postController.commentModelsList.isEmpty
+                              ? Center(
+                                  child: Lottie.network(
+                                    "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: widget
+                                      .postController.commentModelsList.length,
+                                  itemBuilder: (context, index) {
+                                    final commentsMod = widget.postController
+                                        .commentModelsList[index];
+
+                                    return widget.retrieveController.userModel
+                                                .value!.id ==
+                                            commentsMod!.createdBy.id
+                                        ? Dismissible(
+                                            key: ValueKey(
+                                              commentsMod.commentId,
+                                            ),
+                                            onDismissed: (direction) {},
+                                            child: CommentCard(
+                                              commentModel: commentsMod,
+                                            ),
+                                          )
+                                        : CommentCard(
+                                            commentModel: commentsMod,
+                                          );
+                                  },
                                 );
-                              },
-                            );
                     }),
                   ],
                 ),
@@ -556,8 +592,8 @@ class CommentScreen extends StatelessWidget {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        postController.commentOnPost(
-                          postModel.id,
+                        widget.postController.commentOnPost(
+                          widget.postModel.id,
                           _commentController,
                         );
                         FocusManager.instance.primaryFocus?.unfocus();
@@ -570,7 +606,7 @@ class CommentScreen extends StatelessWidget {
                         ),
                         child: Obx(
                           () => Center(
-                            child: postController.isloading.value
+                            child: widget.postController.isloading.value
                                 ? const Loader(color: Colors.deepOrangeAccent)
                                 : const Icon(
                                     Icons.send,
@@ -638,33 +674,33 @@ class CommentCard extends StatelessWidget {
             constraints: const BoxConstraints(
               minHeight: 50,
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Fatime Collins",
-                  style: TextStyle(
+                  commentModel.createdBy.name,
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  "Wow you both look cute together. I love your kfiukbvifvubjjkfvjfkdjkndfjk;bnjsblndfkjnfdjkdbafbsf",
-                  style: TextStyle(
+                  commentModel.comment,
+                  style: const TextStyle(
                     fontSize: 12,
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.share,
                       size: 18,
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Text(
-                      "reply (25)",
-                      style: TextStyle(
+                      "replies (${commentModel.replies.length})",
+                      style: const TextStyle(
                         fontSize: 12,
                       ),
                     ),
@@ -674,15 +710,27 @@ class CommentCard extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Column(
+          Column(
             children: [
-              Icon(
-                Icons.favorite,
-                size: 18,
+              GestureDetector(
+                onTap: () {
+                  if (commentModel.isLikeByUser) {}
+                },
+                child: commentModel.isLikeByUser
+                    ? const Icon(
+                        Icons.favorite,
+                        color: Colors.redAccent,
+                        size: 18,
+                      )
+                    : const Icon(
+                        Icons.favorite,
+                        color: Colors.grey,
+                        size: 18,
+                      ),
               ),
               Text(
-                "22k",
-                style: TextStyle(
+                commentModel.likes.toString(),
+                style: const TextStyle(
                   fontSize: 12,
                 ),
               ),

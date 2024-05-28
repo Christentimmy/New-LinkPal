@@ -4,18 +4,16 @@ class CommentModel {
   final String id;  
   final DateTime createdAt;
   final CreatedBy createdBy;
-  final String postId;
+  final String commentId;
   final String comment;
   int likes;
   final List<String> replies;
-  String text;
   final List<String> tags;
   final List<String> files;
 
   bool isLikeByUser;
 
   CommentModel({
-    required this.text,
     required this.likes,
     required this.isLikeByUser,
     required this.id,
@@ -23,7 +21,7 @@ class CommentModel {
     required this.files,
     required this.createdAt,
     required this.createdBy,
-    required this.postId,
+    required this.commentId,
     required this.comment,
     required this.replies,
   });
@@ -33,8 +31,7 @@ class CommentModel {
   factory CommentModel.fromJson(Map<String, dynamic> json) {
     return CommentModel(
       id: json['id'] ?? '',
-      postId: json['post_id'] ?? '',
-      text: json['text'] ?? '',
+      commentId: json['post_id'] ?? '',
       tags: List<String>.from(json['tags'] ?? []),
       files: List<String>.from(json['files'] ?? []),
       createdAt: DateTime.parse(json['created_at'] ?? ''),

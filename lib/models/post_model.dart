@@ -6,7 +6,7 @@ class PostModel {
   final List<String> files;
   final DateTime createdAt;
   final CreatedBy createdBy;
-  final int comments;
+  int comments;
   int likes;
   bool isLikeByUser;
 
