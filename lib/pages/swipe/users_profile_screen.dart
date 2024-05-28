@@ -22,53 +22,6 @@ class UsersProfileScreen extends StatefulWidget {
 }
 
 class _UsersProfileScreenState extends State<UsersProfileScreen> {
-  // final PageController _pageController = PageController();
-  // final _isInitialized = false.obs;
-  // var isPlaying = false.obs;
-  // final Rx<VideoPlayerController?> _controller =
-  //     Rx<VideoPlayerController?>(null);
-
-  //    @override
-  // void initState() {
-  //   super.initState();
-  //   _controller.value = VideoPlayerController.networkUrl(
-  //     Uri.parse(
-  //       "Video Url"
-  //     ),
-  //   );
-  //   _controller.value!.initialize().then((_) {
-  //     _isInitialized.value = true;
-  //     isPlaying.value = true;
-  //     _controller.value!.addListener(_onVideoPlayerChanged);
-  //   });
-  // }
-
-  //    @override
-  // void dispose() {
-  //   _controller.value!.dispose();
-  //   _controller.value!.removeListener(_onVideoPlayerChanged);
-  //   super.dispose();
-  // }
-
-  // void _onVideoPlayerChanged() {
-  //   if (_controller.value!.value.position ==
-  //       _controller.value!.value.duration) {
-  //     isPlaying.value = false;
-  //   } else {
-  //     // Update play/pause state
-  //     isPlaying.value = _controller.value!.value.isPlaying;
-  //   }
-  // }
-
-  // void playPause() {
-  //   if (_controller.value!.value.isPlaying) {
-  //     _controller.value!.pause();
-  //   } else {
-  //     _controller.value!.play();
-  //   }
-  //   isPlaying.value = _controller.value!.value.isPlaying;
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,52 +129,47 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                         ),
                       ),
                       const Spacer(),
-                      Obx(
-                        () => GestureDetector(
-                          onTap: () {
-                            if (widget.model.value!.isLikeByUser) {
-                              widget.controller!.disLikeAPost(
-                                widget.model.value!.id,
-                              );
-
-                              setState(() {});
-                            } else {
-                              widget.controller!.likeAPost(
-                                widget.model.value!.id,
-                              );
-
-                              setState(() {});
-                            }
-                          },
-                          child: Container(
-                            height: 60,
-                            width: 60,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: const Offset(2, 2),
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 5,
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
-                            child: widget.model.value!.isLikeByUser
-                                ? const Icon(
-                                    FontAwesomeIcons.solidHeart,
-                                    color: Colors.redAccent,
-                                    size: 30,
-                                  )
-                                : const Icon(
-                                    FontAwesomeIcons.solidHeart,
-                                    color: Colors.grey,
-                                  ),
+                      GestureDetector(
+                        onTap: () {
+                          if (widget.model.value!.isLikeByUser) {
+                            widget.controller!
+                                .disLikeAPost(widget.model.value!.id);
+                            setState(() {});
+                          } else {
+                            widget.controller!
+                                .likeAPost(widget.model.value!.id);
+                            setState(() {});
+                          }
+                        },
+                        child: Container(
+                          height: 60,
+                          width: 60,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                offset: const Offset(2, 2),
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 5,
+                                blurRadius: 10,
+                              ),
+                            ],
                           ),
+                          child: widget.model.value!.isLikeByUser
+                              ? const Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  color: Colors.redAccent,
+                                  size: 30,
+                                )
+                              : const Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  color: Colors.grey,
+                                ),
                         ),
                       ),
+                     
                     ],
                   ),
                 ),
@@ -368,144 +316,3 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
     );
   }
 }
-
-// class displayuserProfileAndVideo extends StatelessWidget {
-//   const displayuserProfileAndVideo({
-//     super.key,
-//     required PageController pageController,
-//     required this.widget,
-//   }) : _pageController = pageController;
-
-//   final PageController _pageController;
-//   final UsersProfileScreen widget;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: MediaQuery.of(context).size.height / 3.2,
-//       width: double.infinity,
-//       margin: const EdgeInsets.symmetric(horizontal: 10),
-//       decoration: BoxDecoration(
-//         border: Border.all(
-//           color: Colors.black,
-//           width: 2,
-//         ),
-//         borderRadius: BorderRadius.circular(15),
-//       ),
-//       child: Stack(
-//         alignment: Alignment.bottomCenter,
-//         children: [
-//           PageView(
-//             controller: _pageController,
-//             scrollDirection: Axis.horizontal,
-//             children: [
-//               ClipRRect(
-//                 borderRadius: BorderRadius.circular(13),
-//                 child: CachedNetworkImage(
-//                   imageUrl: widget.model?.createdBy.avatar ?? "",
-//                   height: double.infinity,
-//                   width: double.infinity,
-//                   fit: BoxFit.cover,
-//                   placeholder: (context, url) {
-//                     return Center(
-//                       child: CircularProgressIndicator(
-//                         color: Colors.grey.shade100,
-//                       ),
-//                     );
-//                   },
-//                   errorWidget: (context, url, error) =>
-//                       const Center(
-//                     child: Icon(Icons.error),
-//                   ),
-//                 ),
-//               ),
-//               Obx(() {
-//                 if (_isInitialized.value) {
-//                   return Stack(
-//                     alignment: Alignment.center,
-//                     children: [
-//                       ClipRRect(
-//                         borderRadius: BorderRadius.circular(12),
-//                         child: AspectRatio(
-//                           aspectRatio:
-//                               _controller.value!.value.aspectRatio,
-//                           child: VideoPlayer(
-//                             _controller.value!,
-//                           ),
-//                         ),
-//                       ),
-//                       GestureDetector(
-//                         onTap: () {},
-//                         child: Icon(
-//                           isPlaying.value
-//                               ? Icons.pause_circle_filled
-//                               : Icons.play_circle_filled,
-//                           size: 50,
-//                           color: Colors.white70,
-//                         ),
-//                       ),
-//                     ],
-//                   );
-//                 } else {
-//                   return const Center(
-//                     child: CircularProgressIndicator(),
-//                   );
-//                 }
-//               }),
-//             ],
-//           ),
-//           Container(
-//             height: 55,
-//             padding: const EdgeInsets.symmetric(horizontal: 20),
-//             decoration: BoxDecoration(
-//               color: Colors.black.withOpacity(0.5),
-//               borderRadius: const BorderRadius.only(
-//                 bottomLeft: Radius.circular(10),
-//                 bottomRight: Radius.circular(10),
-//               ),
-//             ),
-//             child: Row(
-//               children: [
-//                 GestureDetector(
-//                   onTap: () {
-//                     _pageController.previousPage(
-//                         duration: const Duration(milliseconds: 600),
-//                         curve: Curves.easeInOut);
-//                   },
-//                   child: Container(
-//                     height: 30,
-//                     width: 30,
-//                     alignment: Alignment.center,
-//                     decoration: const BoxDecoration(
-//                       shape: BoxShape.circle,
-//                       color: Colors.white,
-//                     ),
-//                     child: const Icon(Icons.arrow_back_ios_new),
-//                   ),
-//                 ),
-//                 const Spacer(),
-//                 GestureDetector(
-//                   onTap: () {
-//                     _pageController.nextPage(
-//                         duration: const Duration(milliseconds: 600),
-//                         curve: Curves.easeInOut);
-//                   },
-//                   child: Container(
-//                     height: 30,
-//                     width: 30,
-//                     alignment: Alignment.center,
-//                     decoration: const BoxDecoration(
-//                       shape: BoxShape.circle,
-//                       color: Colors.white,
-//                     ),
-//                     child: const Icon(Icons.arrow_forward_ios),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

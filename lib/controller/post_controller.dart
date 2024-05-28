@@ -15,7 +15,7 @@ class PostController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
-  Rx<CommentModel?> commentModels = Rx<CommentModel?>(null);
+  RxList<CommentModel?> commentModelsList = RxList<CommentModel?>();
 
   @override
   void onInit() {
@@ -160,7 +160,7 @@ class PostController extends GetxController {
             (e) => PostModel.fromJson(e),
           )
           .toList();
-      postModelUserData.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      postModelUserData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       allUserPost.addAll(postModelUserData);
     } catch (e) {
       debugPrint(e.toString());
@@ -414,8 +414,10 @@ class PostController extends GetxController {
         CustomSnackbar.show("Error", decoded["message"]);
       }
 
-     final model = CommentModel.fromJson(decoded["data"]);
-     commentModels.value = model;
+      List<dynamic> commentFromData = decoded["data"];
+      List<CommentModel> commentMod =
+          commentFromData.map((e) => CommentModel.fromJson(e)).toList();
+      commentModelsList.addAll(commentMod);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

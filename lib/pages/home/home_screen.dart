@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:like_button/like_button.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
@@ -318,19 +318,30 @@ class PostCardDisplay extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               children: [
-                LikeButton(
-                  size: 26,
-                  isLiked: postModel.value.isLikeByUser,
-                  likeCount: postModel.value.likes,
-                  onTap: (isLiked) async {
+                GestureDetector(
+                  onTap: () {
                     if (postModel.value.isLikeByUser) {
                       _postController.disLikeAPost(postModel.value.id);
-                      return !isLiked;
                     } else {
                       _postController.likeAPost(postModel.value.id);
-                      return isLiked;
                     }
                   },
+                  child: postModel.value.isLikeByUser
+                      ? const Icon(
+                          FontAwesomeIcons.solidHeart,
+                          color: Colors.redAccent,
+                        )
+                      : const Icon(
+                          FontAwesomeIcons.solidHeart,
+                          color: Colors.grey,
+                        ),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  postModel.value.likes.toString(),
+                  style: const TextStyle(
+                    color: Colors.grey
+                  ),
                 ),
                 const SizedBox(width: 15),
                 GestureDetector(
@@ -452,12 +463,6 @@ class CommentScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // const AppText(
-                //   text: "Comments",
-                //   fontSize: 17,
-                //   color: AppColor.textfieldText,
-                //   fontWeight: FontWeight.w600,
-                // ),
                 const Text(
                   "Comments",
                   style: TextStyle(
@@ -500,16 +505,27 @@ class CommentScreen extends StatelessWidget {
                     const SizedBox(
                       height: 15,
                     ),
-
-                    /// ListView Builder
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 2,
-                      itemBuilder: (context, index) {
-                        return const CommentCard();
-                      },
-                    ),
+                    Obx(() {
+                      return postController.commentModelsList.isEmpty
+                          ? Center(
+                              child: Lottie.network(
+                                "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount:
+                                  postController.commentModelsList.length,
+                              itemBuilder: (context, index) {
+                                final commentsMod =
+                                    postController.commentModelsList[index];
+                                return CommentCard(
+                                  commentModel: commentsMod!,
+                                );
+                              },
+                            );
+                    }),
                   ],
                 ),
               ),
@@ -590,8 +606,10 @@ class CommentScreen extends StatelessWidget {
 }
 
 class CommentCard extends StatelessWidget {
+  final CommentModel commentModel;
   const CommentCard({
     super.key,
+    required this.commentModel,
   });
 
   @override
@@ -608,10 +626,10 @@ class CommentCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 17,
             backgroundImage: NetworkImage(
-              "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
+              commentModel.createdBy.avatar,
             ),
           ),
           const SizedBox(width: 10),

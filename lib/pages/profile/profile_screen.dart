@@ -38,6 +38,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  bool _isImage(String file) {
+    final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    final extension = file.split('.').last.toLowerCase();
+    return imageExtensions.contains(extension);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -446,42 +452,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return SizedBox(
                         height: 200,
                         child: ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _postController.allUserPost.length >= 2
-                              ? 2
-                              : _postController.allUserPost.length,
-                          scrollDirection: Axis.horizontal,
-                          itemBuilder: (context, index) {
-                            final postData = _postController.allUserPost[index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: CachedNetworkImage(
-                                  imageUrl: postData.files[0],
-                                  height: 200,
-                                  width:
-                                      MediaQuery.of(context).size.width / 2.3,
-                                  fit: BoxFit.cover,
-                                  alignment: Alignment.topCenter,
-                                  errorWidget: (context, url, error) =>
-                                      const Center(
-                                    child: Icon(Icons.error),
-                                  ),
-                                  placeholder: (context, url) {
-                                    return const Center(
-                                      child: Loader(
-                                        color: Colors.deepOrangeAccent,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _postController.allUserPost.length >= 2
+                                ? 2
+                                : _postController.allUserPost.length,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) {
+                              final postData =
+                                  _postController.allUserPost[index];
+                              final imageFiles =
+                                  postData.files.where(_isImage).toList();
+
+                              return Row(
+                                children: imageFiles.map((file) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 2,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: CachedNetworkImage(
+                                        imageUrl: file,
+                                        height: 200,
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                2.3,
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.center,
+                                        errorWidget: (context, url, error) =>
+                                            const Center(
+                                          child: Icon(Icons.error),
+                                        ),
+                                        placeholder: (context, url) =>
+                                            const Center(
+                                          child: Loader(
+                                            color: Colors.deepOrangeAccent,
+                                          ),
+                                        ),
                                       ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            }),
                       );
                     }
                   },

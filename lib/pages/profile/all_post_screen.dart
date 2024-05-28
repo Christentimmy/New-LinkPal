@@ -9,6 +9,7 @@ class AllPostScreen extends StatelessWidget {
 
   final _postController = Get.put(PostController());
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,34 +23,31 @@ class AllPostScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-          child: Column(
-            children: [
-              Expanded(
-                child: Obx(() {
-                  if (_postController.allPost.isEmpty) {
-                    return Center(
-                      child: Lottie.network(
-                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                      itemCount: _postController.allUserPost.length,
-                      itemBuilder: (context, index) {
-                        final post = _postController.allUserPost[index].obs;
-                        return PostCardDisplay(
-                          postModel: post,
-                        );
-                      },
-                    );
-                  }
-                }),
-              ),
-              Container(),
-            ],
-          ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (_postController.allPost.isEmpty) {
+                  return Center(
+                    child: Lottie.network(
+                      "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                    ),
+                  );
+                } else {
+                  return ListView.builder(
+                    itemCount: _postController.allUserPost.length,
+                    itemBuilder: (context, index) {
+                      final post = _postController.allUserPost[index].obs;
+                      return PostCardDisplay(
+                        postModel: post,
+                      );
+                    },
+                  );
+                }
+              }),
+            ),
+            Container(),
+          ],
         ),
       ),
     );
