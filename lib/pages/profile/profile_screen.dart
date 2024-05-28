@@ -93,6 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: MediaQuery.of(context).size.height / 2.4,
                   width: double.infinity,
                   decoration: BoxDecoration(
+                    color: Colors.black,
                     border: Border.all(
                       color: Colors.black,
                       width: 2,

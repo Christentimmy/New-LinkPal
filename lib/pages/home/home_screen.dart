@@ -47,7 +47,6 @@ class HomeScreen extends StatelessWidget {
                         child: ListView.builder(
                           itemCount: _postController.allPost.length,
                           itemBuilder: (context, index) {
-                            print("rebuilding");
                             final post = _postController.allPost[index].obs;
                             return PostCardDisplay(
                               postModel: post,
@@ -144,7 +143,6 @@ class PostCardDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Rebuilding");
     return Container(
       constraints: const BoxConstraints(
         minHeight: 450,
@@ -337,6 +335,7 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
+                    _postController.getComments(postModel.value.id);
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,

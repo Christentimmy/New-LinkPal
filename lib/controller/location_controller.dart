@@ -22,6 +22,9 @@ class LocationController extends GetxController {
         desiredAccuracy: LocationAccuracy.low,
       );
 
+      print("${position.latitude}");
+      print("${position.longitude}");
+
       // List<Placemark> placemarks = await placemarkFromCoordinates(
       //   position.latitude,
       //   position.longitude,

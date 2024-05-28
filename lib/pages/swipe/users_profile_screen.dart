@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:like_button/like_button.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/profile/all_post_screen.dart';
@@ -9,7 +9,7 @@ import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
 class UsersProfileScreen extends StatefulWidget {
-  final PostModel? model;
+  final Rx<PostModel?> model;
   final PostController? controller;
   const UsersProfileScreen({
     super.key,
@@ -92,7 +92,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(20),
                   child: CachedNetworkImage(
-                    imageUrl: widget.model?.createdBy.avatar ?? "",
+                    imageUrl: widget.model.value?.createdBy.avatar ?? "",
                     height: MediaQuery.of(context).size.height / 3.2,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -115,7 +115,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      widget.model?.createdBy.name ?? "",
+                      widget.model.value?.createdBy.name ?? "",
                       style: const TextStyle(
                         fontSize: 18,
                       ),
@@ -176,34 +176,50 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                         ),
                       ),
                       const Spacer(),
-                      Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(2, 2),
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 5,
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: LikeButton(
-                          size: 30,
-                          isLiked: widget.model!.isLikeByUser,
-                          onTap: (isLiked) async {
-                            if (widget.model!.isLikeByUser) {
-                              widget.controller!.disLikeAPost(widget.model!.id);
-                              return !isLiked;
+                      Obx(
+                        () => GestureDetector(
+                          onTap: () {
+                            if (widget.model.value!.isLikeByUser) {
+                              widget.controller!.disLikeAPost(
+                                widget.model.value!.id,
+                              );
+
+                              setState(() {});
                             } else {
-                              widget.controller!.likeAPost(widget.model!.id);
-                              return isLiked;
+                              widget.controller!.likeAPost(
+                                widget.model.value!.id,
+                              );
+
+                              setState(() {});
                             }
                           },
+                          child: Container(
+                            height: 60,
+                            width: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  offset: const Offset(2, 2),
+                                  color: Colors.black.withOpacity(0.2),
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: widget.model.value!.isLikeByUser
+                                ? const Icon(
+                                    FontAwesomeIcons.solidHeart,
+                                    color: Colors.redAccent,
+                                    size: 30,
+                                  )
+                                : const Icon(
+                                    FontAwesomeIcons.solidHeart,
+                                    color: Colors.grey,
+                                  ),
+                          ),
                         ),
                       ),
                     ],
@@ -280,7 +296,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Text(
-                    widget.model?.createdBy.mood[0] ?? "",
+                    widget.model.value?.createdBy.mood[0] ?? "",
                     style: const TextStyle(
                       color: Colors.deepPurple,
                     ),

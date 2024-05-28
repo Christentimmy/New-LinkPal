@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -284,7 +283,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                                           color: Colors.red,
                                           shape: BoxShape.circle,
                                         ),
-                                        child:const  Icon(
+                                        child: const Icon(
                                           FontAwesomeIcons.x,
                                           size: 10,
                                           color: Colors.white,
@@ -322,6 +321,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         textController: _textController,
                         pickedFiles: _filesList,
                         tags: _tagList,
+                        context: context,
                       );
                       FocusManager.instance.primaryFocus?.unfocus();
                     } else {
@@ -335,6 +335,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                           style: TextStyle(
                             color: AppColor.white,
                             fontSize: 14,
+
                             fontWeight: FontWeight.w600,
                           ),
                         ),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -14,6 +15,7 @@ class PostController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
+  Rx<CommentModel?> commentModels = Rx<CommentModel?>(null);
 
   @override
   void onInit() {
@@ -26,6 +28,7 @@ class PostController extends GetxController {
     required TextEditingController textController,
     required List<XFile> pickedFiles,
     List<dynamic>? tags,
+    required BuildContext context,
   }) async {
     isloading.value = true;
 
@@ -76,6 +79,7 @@ class PostController extends GetxController {
         );
       }
       CustomSnackbar.show("Success", "Your post is now live!");
+
       await getAllPost();
       await getAllUserPost();
       Get.offAllNamed(AppRoutes.dashboard);
@@ -176,7 +180,10 @@ class PostController extends GetxController {
 
     try {
       int index = allPost.indexWhere((element) => element.id == postId);
-      int indexUserPost = allUserPost.indexWhere((element) => element.id == postId);
+      int indexUserPost =
+          allUserPost.indexWhere((element) => element.id == postId);
+      print(indexUserPost);
+      print(index);
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
@@ -186,7 +193,8 @@ class PostController extends GetxController {
 
         //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allPost);
-        updatedAllUSerPost[indexUserPost].likes = allPost[indexUserPost].likes += 1;
+        updatedAllUSerPost[indexUserPost].likes =
+            allPost[indexUserPost].likes += 1;
         updatedAllUSerPost[indexUserPost].isLikeByUser = true;
         allUserPost.addAll(updatedAllPost);
       }
@@ -217,7 +225,10 @@ class PostController extends GetxController {
 
     try {
       int index = allPost.indexWhere((element) => element.id == postId);
-      int indexUserPost = allUserPost.indexWhere((element) => element.id == postId);
+      int indexUserPost =
+          allUserPost.indexWhere((element) => element.id == postId);
+      print(index);
+      print(indexUserPost);
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
@@ -228,7 +239,8 @@ class PostController extends GetxController {
 
         //userpost
         List<PostModel> updatedAllUserPost = List.from(allUserPost);
-        updatedAllUserPost[indexUserPost].likes = allUserPost[indexUserPost].likes -= 1;
+        updatedAllUserPost[indexUserPost].likes =
+            allUserPost[indexUserPost].likes -= 1;
         updatedAllUserPost[indexUserPost].isLikeByUser = false;
         allUserPost.clear();
         allUserPost.addAll(updatedAllUserPost);
@@ -366,6 +378,44 @@ class PostController extends GetxController {
         allPost.addAll(updatedAllPost);
       }
       Get.toNamed(AppRoutes.dashboard);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> getComments(String postId) async {
+    isloading.value = true;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri = Uri.parse("$baseUrl/post/$postId/comment").replace(
+        queryParameters: {
+          "postId": postId,
+        },
+      );
+      final response = await http.post(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      final decoded = json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"]);
+      }
+
+     final model = CommentModel.fromJson(decoded["data"]);
+     commentModels.value = model;
     } catch (e) {
       debugPrint(e.toString());
     } finally {

@@ -101,7 +101,7 @@ class AuthController extends GetxController {
       var decodedResponseBody = json.decode(responce.body);
       if (responce.statusCode == 400) {
         return CustomSnackbar.show(
-            "Error", decodedResponseBody["error"].toString());
+            "Error", decodedResponseBody["message"].toString());
       }
 
       if (responce.statusCode != 200) {

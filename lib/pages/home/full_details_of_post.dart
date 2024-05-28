@@ -14,7 +14,7 @@ class FullDetailsOfPost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PageController _pageController = PageController(initialPage: initalPage);
+    PageController pageController = PageController(initialPage: initalPage);
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Center(
@@ -22,11 +22,8 @@ class FullDetailsOfPost extends StatelessWidget {
           height: 580,
           child: PageView.builder(
             scrollDirection: Axis.horizontal,
-            controller: _pageController,
+            controller: pageController,
             itemCount: postModel.files.length,
-            onPageChanged: (value) {
-              // _currentViewPic.value = value + 1;
-            },
             itemBuilder: (context, index) {
               return CachedNetworkImage(
                 fit: BoxFit.cover,
