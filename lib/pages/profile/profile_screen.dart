@@ -426,8 +426,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () {
-                        // Get.to(() => const AllPostScreen());
+                      onTap: ()async {
+                        await _postController.getAllUserPost();
                         Get.toNamed(AppRoutes.allpost);
                       },
                       child: const Text(

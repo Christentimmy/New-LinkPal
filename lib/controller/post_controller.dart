@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
@@ -108,6 +107,7 @@ class PostController extends GetxController {
         Uri.parse("$baseUrl/post/all"),
         headers: {
           "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
         },
       );
 
@@ -120,6 +120,7 @@ class PostController extends GetxController {
         );
       }
       List<dynamic> postsFromData = decodedResponce["data"];
+      print(postsFromData);
       List<PostModel> postModels =
           postsFromData.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -184,20 +185,19 @@ class PostController extends GetxController {
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUserPost =
           allUserPost.indexWhere((element) => element.id == postId);
-
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
-        updatedAllPost[index].likes = allPost[index].likes += 1;
+        updatedAllPost[index].likes += 1;
         updatedAllPost[index].isLikeByUser = true;
         allPost.addAll(updatedAllPost);
-
+      }
+      if (indexUserPost != -1) {
         //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
-        updatedAllUSerPost[indexUserPost].likes =
-            allPost[indexUserPost].likes += 1;
+        updatedAllUSerPost[indexUserPost].likes += 1;
         updatedAllUSerPost[indexUserPost].isLikeByUser = true;
-        allUserPost.addAll(updatedAllPost);
+        allUserPost.addAll(updatedAllUSerPost);
       }
       final uri =
           Uri.parse("$baseUrl/post/$postId/like").replace(queryParameters: {
@@ -231,15 +231,15 @@ class PostController extends GetxController {
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
-        updatedAllPost[index].likes = allPost[index].likes -= 1;
+        updatedAllPost[index].likes -= 1;
         updatedAllPost[index].isLikeByUser = false;
         allPost.clear();
         allPost.addAll(updatedAllPost);
-
+      }
+      if (indexUserPost != -1) {
         //userpost
         List<PostModel> updatedAllUserPost = List.from(allUserPost);
-        updatedAllUserPost[indexUserPost].likes =
-            allUserPost[indexUserPost].likes -= 1;
+        updatedAllUserPost[indexUserPost].likes -= 1;
         updatedAllUserPost[indexUserPost].isLikeByUser = false;
         allUserPost.clear();
         allUserPost.addAll(updatedAllUserPost);
@@ -327,13 +327,19 @@ class PostController extends GetxController {
         }),
       );
       final decodedResponce = json.decode(response.body);
-      print(decodedResponce);
+
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
           decodedResponce["message"].toString(),
         );
       }
+
+      List<dynamic> allFreshComments = decodedResponce["data"]["comments"];
+      List<CommentModel> freshMap =
+          allFreshComments.map((e) => CommentModel.fromJson(e)).toList();
+      commentModelsList.clear();
+      commentModelsList.addAll(freshMap);
 
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUserPost =
@@ -342,19 +348,15 @@ class PostController extends GetxController {
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
-        updatedAllPost[index].likes = allPost[index].comments += 1;
+        updatedAllPost[index].likes += 1;
         allPost.addAll(updatedAllPost);
-
+      }
+      if (indexUserPost != -1) {
         //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
-        updatedAllUSerPost[indexUserPost].likes =
-            allPost[indexUserPost].comments += 1;
-        allUserPost.addAll(updatedAllPost);
+        updatedAllUSerPost[indexUserPost].likes += 1;
+        allUserPost.addAll(updatedAllUSerPost);
       }
-
-      final commentData = CommentModel.fromJson(decodedResponce["data"]);
-      commentModelsList.add(commentData);
-      CustomSnackbar.show("Success", "Comment done");
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -393,11 +395,17 @@ class PostController extends GetxController {
         return CustomSnackbar.show("Error", decoded["message"].toString());
       }
       int index = allPost.indexWhere((element) => element.id == postId);
+      int indexUser = allUserPost.indexWhere((element) => element.id == postId);
 
       if (index != -1) {
         List<PostModel> updatedAllPost = List.from(allPost);
         updatedAllPost[index].text = decoded["data"]["text"];
         allPost.addAll(updatedAllPost);
+      }
+      if (indexUser != -1) {
+        List<PostModel> updatedAllUserPost = List.from(allUserPost);
+        updatedAllUserPost[index].text = decoded["data"]["text"];
+        allUserPost.addAll(updatedAllUserPost);
       }
       Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
@@ -445,7 +453,10 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> deleteComment(String commentId) async {
+  Future<void> deleteComment({
+    required String commentId,
+    required String postId,
+  }) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
@@ -454,18 +465,38 @@ class PostController extends GetxController {
       return Get.toNamed(AppRoutes.signin);
     }
     try {
-      final uri = Uri.parse("$baseUrl//post/comment/$commentId").replace(
+      final uri = Uri.parse("$baseUrl/post/comment/$commentId").replace(
         queryParameters: {
           "commentId": commentId,
         },
       );
-      final response = await http.delete(uri, headers: {
+      await http.delete(uri, headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       });
-      print(response.body);
+      int index = allPost.indexWhere((element) => element.id == postId);
+      int indexUserPost =
+          allUserPost.indexWhere((element) => element.id == postId);
+
+      if (index != -1) {
+        //allpost
+        List<PostModel> updatedAllPost = List.from(allPost);
+        updatedAllPost[index].likes -= 1;
+        allPost.addAll(updatedAllPost);
+
+      
+      }
+      if (indexUserPost != -1) {
+          //userpost list
+        List<PostModel> updatedAllUSerPost = List.from(allUserPost);
+        updatedAllUSerPost[indexUserPost].likes  -= 1;
+        allUserPost.addAll(updatedAllUSerPost);
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
   }
+
+
+
 }

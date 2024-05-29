@@ -324,7 +324,9 @@ class PostCardDisplay extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     if (postModel.value.isLikeByUser) {
-                      _postController.disLikeAPost(postModel.value.id);
+                      _postController.disLikeAPost(
+                        postModel.value.id,
+                      );
                     } else {
                       _postController.likeAPost(postModel.value.id);
                     }
@@ -549,9 +551,18 @@ class _CommentScreenState extends State<CommentScreen> {
                                             commentsMod!.createdBy.id
                                         ? Dismissible(
                                             key: ValueKey(
-                                              commentsMod.commentId,
+                                              commentsMod.id,
                                             ),
-                                            onDismissed: (direction) {},
+                                            onDismissed: (direction) {
+                                              widget.postController
+                                                  .commentModelsList
+                                                  .removeAt(index);
+                                              widget.postController
+                                                  .deleteComment(
+                                                commentId: commentsMod.id,
+                                                postId: widget.postModel.id,
+                                              );
+                                            },
                                             child: CommentCard(
                                               commentModel: commentsMod,
                                             ),
@@ -699,7 +710,7 @@ class CommentCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "replies (${commentModel.replies.length})",
+                      "replies (${commentModel.replies})",
                       style: const TextStyle(
                         fontSize: 12,
                       ),
