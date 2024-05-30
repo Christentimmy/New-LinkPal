@@ -33,7 +33,6 @@ class AuthController extends GetxController {
         }),
       );
       print(response.body);
-
       if (response.statusCode == 401) {
         CustomSnackbar.show("Error", "Check your credentials again");
         return;

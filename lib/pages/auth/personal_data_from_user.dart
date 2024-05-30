@@ -109,6 +109,7 @@ class PersonalDataFromUser extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 30),
+
                 const Text(
                   "Gender: ",
                   style: TextStyle(
@@ -172,6 +173,10 @@ class PersonalDataFromUser extends StatelessWidget {
                     ),
                   ),
                 ),
+
+
+
+                
                 const SizedBox(height: 30),
                 const Text(
                   "Own a car: ",

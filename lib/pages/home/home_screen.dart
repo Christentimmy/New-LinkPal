@@ -8,6 +8,7 @@ import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
+import 'package:linkingpal/pages/home/people_who_reacted.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -322,6 +323,9 @@ class PostCardDisplay extends StatelessWidget {
             child: Row(
               children: [
                 GestureDetector(
+                  onLongPress: () {
+                    Get.to(() => ReactedScreen(postModel: postModel.value));
+                  },
                   onTap: () {
                     if (postModel.value.isLikeByUser) {
                       _postController.disLikeAPost(
@@ -349,8 +353,8 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
-                    _postController.getComments(postModel.value.id);
                     print(postModel.value.id);
+                    _postController.getComments(postModel.value.id);    
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,
@@ -524,55 +528,64 @@ class _CommentScreenState extends State<CommentScreen> {
                     const SizedBox(
                       height: 15,
                     ),
-                    Obx(() {
-                      return widget.postController.isCommentLoading.value
-                          ? const Center(
-                              child: Loader(
-                                color: Colors.deepOrangeAccent,
-                              ),
-                            )
-                          : widget.postController.commentModelsList.isEmpty
-                              ? Center(
-                                  child: Lottie.network(
-                                    "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                                  ),
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: widget
-                                      .postController.commentModelsList.length,
-                                  itemBuilder: (context, index) {
-                                    final commentsMod = widget.postController
-                                        .commentModelsList[index];
+                    Obx(
+                      () {
+                        return widget.postController.isCommentLoading.value
+                            ? const Center(
+                                child: Loader(
+                                  color: Colors.deepOrangeAccent,
+                                ),
+                              )
+                            : widget.postController.commentModelsList.isEmpty
+                                ? Center(
+                                    child: Lottie.network(
+                                      "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                    ),
+                                  )
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount: widget.postController
+                                        .commentModelsList.length,
+                                    itemBuilder: (context, index) {
+                                      final commentsMod = widget.postController
+                                          .commentModelsList[index];
 
-                                    return widget.retrieveController.userModel
-                                                .value!.id ==
-                                            commentsMod!.createdBy.id
-                                        ? Dismissible(
-                                            key: ValueKey(
-                                              commentsMod.id,
-                                            ),
-                                            onDismissed: (direction) {
-                                              widget.postController
-                                                  .commentModelsList
-                                                  .removeAt(index);
-                                              widget.postController
-                                                  .deleteComment(
-                                                commentId: commentsMod.id,
-                                                postId: widget.postModel.id,
-                                              );
-                                            },
-                                            child: CommentCard(
+                                      return widget.retrieveController.userModel
+                                                  .value!.id ==
+                                              commentsMod!.createdBy.id
+                                          ? Dismissible(
+                                              key: ValueKey(
+                                                commentsMod.id,
+                                              ),
+                                              onDismissed: (direction) {
+                                                widget.postController
+                                                    .commentModelsList
+                                                    .removeAt(index);
+                                                widget.postController
+                                                    .deleteComment(
+                                                  commentId: commentsMod.id,
+                                                  postId: widget.postModel.id,
+                                                );
+                                              },
+                                              child: CommentCard(
+                                                commentModel: commentsMod,
+                                                postController:
+                                                    widget.postController,
+                                                postModel: widget.postModel,
+                                              ),
+                                            )
+                                          : CommentCard(
                                               commentModel: commentsMod,
-                                            ),
-                                          )
-                                        : CommentCard(
-                                            commentModel: commentsMod,
-                                          );
-                                  },
-                                );
-                    }),
+                                              postController:
+                                                  widget.postController,
+                                              postModel: widget.postModel,
+                                            );
+                                    },
+                                  );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -581,7 +594,11 @@ class _CommentScreenState extends State<CommentScreen> {
 
           /// TextField View
           Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 15),
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              bottom: 15,
+            ),
             child: TextFormField(
               controller: _commentController,
               style: const TextStyle(
@@ -652,13 +669,22 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 }
 
-class CommentCard extends StatelessWidget {
+class CommentCard extends StatefulWidget {
   final CommentModel commentModel;
+  final PostModel postModel;
+  final PostController postController;
   const CommentCard({
     super.key,
     required this.commentModel,
+    required this.postController,
+    required this.postModel,
   });
 
+  @override
+  State<CommentCard> createState() => _CommentCardState();
+}
+
+class _CommentCardState extends State<CommentCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -676,7 +702,7 @@ class CommentCard extends StatelessWidget {
           CircleAvatar(
             radius: 17,
             backgroundImage: NetworkImage(
-              commentModel.createdBy.avatar,
+              widget.commentModel.createdBy.avatar,
             ),
           ),
           const SizedBox(width: 10),
@@ -689,34 +715,28 @@ class CommentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  commentModel.createdBy.name,
+                  widget.commentModel.createdBy.name,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  commentModel.comment,
+                  widget.commentModel.comment,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.share,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "replies (${commentModel.replies})",
-                      style: const TextStyle(
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                )
+                const SizedBox(height: 5),
+                const Text(
+                  "Reply",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
               ],
             ),
           ),
@@ -725,9 +745,16 @@ class CommentCard extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  if (commentModel.isLikeByUser) {}
+                  if (widget.commentModel.isLikeByUser) {
+                    widget.postController
+                        .dislikeComement(widget.commentModel.id);
+                    setState(() {});
+                  } else {
+                    widget.postController.likeComement(widget.commentModel.id);
+                    setState(() {});
+                  }
                 },
-                child: commentModel.isLikeByUser
+                child: widget.commentModel.isLikeByUser
                     ? const Icon(
                         Icons.favorite,
                         color: Colors.redAccent,
@@ -740,7 +767,7 @@ class CommentCard extends StatelessWidget {
                       ),
               ),
               Text(
-                commentModel.likes.toString(),
+                widget.commentModel.likes.toString(),
                 style: const TextStyle(
                   fontSize: 12,
                 ),

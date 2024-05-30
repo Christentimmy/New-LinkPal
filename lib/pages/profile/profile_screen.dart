@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
@@ -22,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final PageController _pageController = PageController();
   final _postController = Get.put(PostController());
   final _retrieveController = Get.put(RetrieveController());
+  final _locationController = Get.put(LocationController());
   final _userController = Get.put(UserController());
   final _isInitialized = false.obs;
   var isPlaying = false.obs;
@@ -244,6 +246,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 5),
+                FutureBuilder(
+                  future: _locationController.displayLocation(
+                    latitude: _retrieveController.userModel.value!.latitude,
+                    longitude: _retrieveController.userModel.value!.longitude,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Loader(color: Colors.deepPurpleAccent);
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text('Location not available');
+                    } else {
+                      return Text(snapshot.data!);
+                    }
+                  },
+                ),
+
+                const SizedBox(height: 5),
                 // Row(
                 //   children: [
                 //     const Icon(
@@ -426,7 +447,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: ()async {
+                      onTap: () async {
                         await _postController.getAllUserPost();
                         Get.toNamed(AppRoutes.allpost);
                       },

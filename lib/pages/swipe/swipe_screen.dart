@@ -6,6 +6,7 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -19,6 +20,7 @@ class SwipeScreen extends StatefulWidget {
 
 class SwipeScreenState extends State<SwipeScreen> {
   final _retrieveController = Get.put(RetrieveController());
+  final _userController = Get.put(UserController());
 
   List<String> cards = [
     "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
@@ -27,8 +29,6 @@ class SwipeScreenState extends State<SwipeScreen> {
   ];
 
   CardSwiperController controller = CardSwiperController();
-  RangeValues values = const RangeValues(10, 90);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,12 +60,18 @@ class SwipeScreenState extends State<SwipeScreen> {
                       verticalOffsetPercentage) {
                     return SwipeCard(
                       ontap: () {
-                        Get.toNamed(
-                          AppRoutes.swipedUserCardProfile,
-                          arguments: {
-                            "model": {},
-                          },
+                        _userController.getNearByUSer(
+                          age: "18",
+                          mood: "Sport",
+                          distance: "5",
+                          interest: "all",
                         );
+                        // Get.toNamed(
+                        //   AppRoutes.swipedUserCardProfile,
+                        //   arguments: {
+                        //     "model": {},
+                        //   },
+                        // );
                       },
                       cards: cards,
                       index: index,

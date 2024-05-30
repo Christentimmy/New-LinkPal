@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
+import 'package:linkingpal/models/likes_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -16,6 +17,7 @@ class PostController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
+  RxList<LikesModel> allLikes = RxList<LikesModel>();
   RxList<CommentModel?> commentModelsList = RxList<CommentModel?>();
 
   @override
@@ -327,7 +329,6 @@ class PostController extends GetxController {
         }),
       );
       final decodedResponce = json.decode(response.body);
-
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
@@ -348,13 +349,13 @@ class PostController extends GetxController {
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
-        updatedAllPost[index].likes += 1;
+        updatedAllPost[index].comments += 1;
         allPost.addAll(updatedAllPost);
       }
       if (indexUserPost != -1) {
         //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
-        updatedAllUSerPost[indexUserPost].likes += 1;
+        updatedAllUSerPost[indexUserPost].comments += 1;
         allUserPost.addAll(updatedAllUSerPost);
       }
     } catch (e) {
@@ -481,15 +482,13 @@ class PostController extends GetxController {
       if (index != -1) {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
-        updatedAllPost[index].likes -= 1;
+        updatedAllPost[index].comments -= 1;
         allPost.addAll(updatedAllPost);
-
-      
       }
       if (indexUserPost != -1) {
-          //userpost list
+        //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
-        updatedAllUSerPost[indexUserPost].likes  -= 1;
+        updatedAllUSerPost[indexUserPost].comments -= 1;
         allUserPost.addAll(updatedAllUSerPost);
       }
     } catch (e) {
@@ -497,6 +496,143 @@ class PostController extends GetxController {
     }
   }
 
+  Future<void> getSinglePost(String postId) async {
+    isloading.value = false;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
 
+    try {
+      final uri = Uri.parse("$baseUrl/post/$postId").replace(queryParameters: {
+        "postId": postId,
+      });
 
+      final response = await http.get(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+      final decoded = json.decode(response.body);
+      List<dynamic> allLikesFromResponse = decoded["data"]["likes"];
+      List<LikesModel> mapLikes =
+          allLikesFromResponse.map((e) => LikesModel.fromJson(e)).toList();
+      allLikes.value = mapLikes;
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+  Future<void> likeComement(String commentId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+    try {
+      int index =
+          commentModelsList.indexWhere((element) => element!.id == commentId);
+      if (index != -1) {
+        List<CommentModel> shadowCopy = List.from(commentModelsList);
+        shadowCopy[index].likes += 1;
+        shadowCopy[index].isLikeByUser = true;
+      }
+
+      final uri = Uri.parse("$baseUrl/post/comment/$commentId/like")
+          .replace(queryParameters: {
+        "commentId": commentId,
+      });
+
+      final responce = await http.patch(uri, headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      });
+      print(responce.body);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> dislikeComement(String commentId) async {
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+    try {
+      int index =
+          commentModelsList.indexWhere((element) => element!.id == commentId);
+      if (index != -1) {
+        List<CommentModel> shadowCopy = List.from(commentModelsList);
+        shadowCopy[index].likes -= 1;
+        shadowCopy[index].isLikeByUser = false;
+      }
+
+      final uri = Uri.parse("$baseUrl/post/comment/$commentId/like")
+          .replace(queryParameters: {
+        "commentId": commentId,
+      });
+
+      final responce = await http.delete(uri, headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      });
+      print(responce.body);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> editComment(String commentId, String textComment) async {
+    isloading.value = false;
+    //token validation
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final response = await http.patch(
+        Uri.parse("$baseUrl/post/comment/$commentId").replace(queryParameters: {
+          "commentId": commentId,
+        }),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: json.encode({
+          "comment": textComment,
+        }),
+      );
+      final decoded = json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"]);
+      }
+      int index =
+          commentModelsList.indexWhere((element) => element!.id == commentId);
+      CommentModel incomingComment = CommentModel.fromJson(decoded["data"]);
+      if (index != -1) {
+        List<CommentModel> freshEdit = List.from(commentModelsList);
+        commentModelsList[index]!.comment = incomingComment.comment;
+        commentModelsList.addAll(freshEdit);
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
+    }
+  }
 }

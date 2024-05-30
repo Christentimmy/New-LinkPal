@@ -12,10 +12,11 @@ class UserModel {
   final String bio;
   final String dob;
   final List mood;
+  final String gender;
   final int mobileNumber;
   final String image;
-  final String latitude;
-  final String longitude;
+  final double latitude;
+  final double longitude;
 
   const UserModel({
     required this.email,
@@ -35,6 +36,7 @@ class UserModel {
     required this.image,
     required this.latitude,
     required this.longitude,
+    required this.gender,
   });
 
   factory UserModel.fromJson(var json) {
@@ -56,6 +58,7 @@ class UserModel {
       image: json["avatar"] ?? "",
       latitude: json["latitude"] ?? "",
       longitude: json["longitude"] ?? "",
+      gender: json["gender"] ?? "",
      );
   }
 }

@@ -17,6 +17,18 @@ class UserController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   final _retrieveController = Get.put(RetrieveController());
   RxList userNotifications = [].obs;
+  RxList peopleNearBy = [].obs;
+
+  @override
+  void onInit() {
+    getNearByUSer(
+      age: calculateAge(_retrieveController.userModel.value!.dob).toString(),
+      mood: _retrieveController.userModel.value!.mood[0],
+      distance: "50",
+      interest: "all",
+    );
+    super.onInit();
+  }
 
   Future<void> uploadVideo({required File video}) async {
     final tokenStorage = Get.put(TokenStorage());
@@ -232,7 +244,6 @@ class UserController extends GetxController {
       _retrieveController.getUserDetails();
     } catch (e) {
       debugPrint(e.toString());
-      
     }
   }
 
@@ -328,7 +339,6 @@ class UserController extends GetxController {
 
   Future<void> markNotication(String notId) async {
     isloading.value = true;
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -356,6 +366,42 @@ class UserController extends GetxController {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
+    }
+  }
+
+  Future<void> getNearByUSer({
+    required String age,
+    required String mood,
+    required String distance,
+    required String interest,
+  }) async {
+    isloading.value = true;
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final uri = Uri.parse(
+        "$baseUrl/user/nearby?age=$age&mood=$mood&distance=$distance&interest=$interest",
+      ).replace(queryParameters: {
+        "age": age,
+        "mood": mood,
+        "interest": interest,
+        "distance": distance,
+      });
+      final response = await http.get(
+        uri,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+      print(response.body);
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 }
