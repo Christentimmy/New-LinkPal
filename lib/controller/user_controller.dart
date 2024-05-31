@@ -114,7 +114,7 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.personalDataFromUser);
+      Get.toNamed(AppRoutes.selectGender);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -210,6 +210,7 @@ class UserController extends GetxController {
     String? name,
     String? bio,
     String? gender,
+    required VoidCallback onClickToProceed,
   }) async {
     isloading.value = true;
     final String? token = await TokenStorage().getToken();
@@ -237,10 +238,10 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", "Bad Request");
       }
 
-      Get.offAllNamed(AppRoutes.dashboard);
       final RetrieveController retrieveController =
           Get.put(RetrieveController());
       retrieveController.getUserDetails();
+      onClickToProceed();
     } catch (e) {
       debugPrint(e.toString());
     } finally {

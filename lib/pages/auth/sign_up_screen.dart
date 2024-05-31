@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
@@ -25,7 +24,6 @@ class SignUp extends StatelessWidget {
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
   final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
 
-
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
       context: context,
@@ -37,6 +35,8 @@ class SignUp extends StatelessWidget {
       _timePickedByUser.value = picked;
     }
   }
+
+  final RxString _genderSelected = 'Male'.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +208,7 @@ class SignUp extends StatelessWidget {
                             action: TextInputAction.newline,
                             type: TextInputType.multiline,
                           ),
+                         
                           const SizedBox(
                             height: 20,
                           ),
@@ -255,6 +256,7 @@ class SignUp extends StatelessWidget {
                                     dob: _timePickedByUser.value!,
                                     password: _passwordController.text,
                                     bio: _bioController.text,
+                                    gender: _genderSelected.value,
                                   );
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();

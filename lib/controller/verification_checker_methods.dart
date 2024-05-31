@@ -12,8 +12,10 @@ class VerificationMethods extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxBool isloading = false.obs;
 
-  Future<void> verifyEmail(
-      {required String email, required BuildContext context}) async {
+  Future<void> verifyEmail({
+    required String email,
+    required BuildContext context,
+  }) async {
     String tempToken = await sendOTP(
       emailOrPhoneNumber: email,
       parameter: "email",

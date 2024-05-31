@@ -12,7 +12,6 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxBool isloading = false.obs;
-  final _retrieveController = Get.put(RetrieveController());
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
 
@@ -40,10 +39,8 @@ class AuthController extends GetxController {
 
       final responseData = await json.decode(response.body);
       final userModel = UserModel.fromJson(responseData["data"]);
-      // String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
 
-      
       if (response.statusCode == 404) {
         CustomSnackbar.show("Error", "Invalid Credentials");
         return;
@@ -57,19 +54,18 @@ class AuthController extends GetxController {
           }
         });
       }
-
       if (userModel.video.isEmpty) {
         Get.toNamed(AppRoutes.introductionVideo);
         CustomSnackbar.show("Error", "Video not uploaded");
         return;
       }
-      print(userModel.gender);
       if (userModel.gender.isEmpty) {
         Get.toNamed(AppRoutes.selectGender);
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
 
-      await _retrieveController.getUserDetails();
+      final controller = Get.put(RetrieveController());
+      await controller.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
@@ -85,6 +81,7 @@ class AuthController extends GetxController {
     required DateTime dob,
     required String password,
     required String bio,
+    required String gender,
   }) async {
     isloading.value = true;
     try {
@@ -95,6 +92,7 @@ class AuthController extends GetxController {
         "dob": dob.toUtc().toIso8601String(),
         "password": password,
         "bio": bio,
+        "gender": gender,
       };
 
       final responce = await http.post(
@@ -114,13 +112,16 @@ class AuthController extends GetxController {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
 
+      await _tokenStorage.deleteToken();
+      await _tokenStorage.storeToken(decodedResponseBody["token"]);
+      final controller = Get.put(RetrieveController());
+      await controller.getUserDetails();
+
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () {
           Get.toNamed(AppRoutes.uploadPicture);
         }
       });
-      _tokenStorage.storeToken(decodedResponseBody["token"]);
-      _retrieveController.getUserDetails();
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -206,6 +207,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> deleteAccount() async {
+    isloading.value = true;
     final String? token = await TokenStorage().getToken();
     if (token == null) {
       CustomSnackbar.show("Error", "Invalid token, login again");
@@ -213,17 +215,19 @@ class AuthController extends GetxController {
     }
     try {
       final response = await http.delete(
-        Uri.parse("uri"),
+        Uri.parse("$baseUrl/user"),
         headers: {'Authorization': 'Bearer $token'},
       );
-
       if (response.statusCode == 401) {
         return CustomSnackbar.show("Error", "Unauthorized");
       }
+
       CustomSnackbar.show("Success", " account deleted successfully");
-      Get.toNamed(AppRoutes.signin);
+      Get.offAllNamed(AppRoutes.signin);
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
     }
   }
 }

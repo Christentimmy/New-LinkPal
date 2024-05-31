@@ -92,7 +92,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                             return SwipeCard(
                               retrieveController: _retrieveController,
                               userController: _userController,
-                              ontap: ()  {
+                              ontap: () {
                                 //  _retrieveController
                                 //     .getSpecificUserId(userModel.id);
                                 Get.toNamed(
@@ -312,12 +312,13 @@ class SwipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String distanceApart = userController
         .calculateDistance(
-          retrieveController.userModel.value?.latitude ?? 0.00,
-          retrieveController.userModel.value?.longitude ?? 0.00,
+          retrieveController.userModel.value!.latitude,
+          retrieveController.userModel.value!.longitude,
           userModel.latitude,
           userModel.longitude,
         )
         .toStringAsFixed(2);
+
     return GestureDetector(
       onTap: ontap,
       child: Container(
@@ -454,7 +455,10 @@ class SwipeCard extends StatelessWidget {
 // ignore: must_be_immutable
 class CustomBottomSheet extends StatelessWidget {
   final UserController controller;
-  CustomBottomSheet({super.key, required this.controller});
+  CustomBottomSheet({
+    super.key,
+    required this.controller,
+  });
 
   final List _allIntetrest = [
     "Game",
@@ -683,6 +687,7 @@ class CustomBottomSheet extends StatelessWidget {
           Obx(
             () => CustomButton(
               ontap: () async {
+                controller.peopleNearBy.clear();
                 await controller.getNearByUSer(
                   age: _maxAge.value.toString(),
                   mood: selectedMood,
@@ -691,14 +696,16 @@ class CustomBottomSheet extends StatelessWidget {
                 );
                 Get.back();
               },
-              child: controller.isloading.value ?  const Loader() :  const Text(
-                "Apply Now",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
+              child: controller.isloading.value
+                  ? const Loader()
+                  : const Text(
+                      "Apply Now",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 10),

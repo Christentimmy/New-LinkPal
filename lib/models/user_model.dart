@@ -15,8 +15,8 @@ class UserModel {
   final String gender;
   final int mobileNumber;
   final String image;
-  final double latitude;
-  final double longitude;
+  final dynamic latitude;
+  final dynamic longitude;
 
   const UserModel({
     required this.email,

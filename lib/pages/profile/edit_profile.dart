@@ -254,20 +254,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         updateUserProfile(
           image: image,
         );
-        Get.offAllNamed(AppRoutes.dashboard);
+        final RetrieveController controller = Get.put(RetrieveController());
+        await controller.getUserDetails();
       }
 
       if (name.isNotEmpty && bio.isNotEmpty) {
         _userController.updateUserDetails(
           name: name,
           bio: bio,
+          onClickToProceed: () {},
         );
-        CustomSnackbar.show("Success", "Details update successfully");
+       
       }
 
-      final RetrieveController retrieveController =
-          Get.put(RetrieveController());
-      retrieveController.getUserDetails();
+      final RetrieveController controller = Get.put(RetrieveController());
+      await controller.getUserDetails();
+       CustomSnackbar.show("Success", "Details update successfully");
+      Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

@@ -121,10 +121,10 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                         future: _locationController.displayLocation(
                           latitude: _retrieveController
                                   .externalUserModel.value?.latitude ??
-                              0.0,
+                              0.00,
                           longitude: _retrieveController
                                   .externalUserModel.value?.longitude ??
-                              0.0,
+                              0.00,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -279,22 +279,24 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                     ),
                   ),
                 ),
-                Container(
-                  constraints: const BoxConstraints(
-                    minHeight: 35,
-                  ),
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Text(
-                    _retrieveController.externalUserModel.value?.mood[0]
-                            .toString() ??
-                        "null",
-                    style: const TextStyle(
-                      color: Colors.deepPurple,
+                Obx(
+                  () => Container(
+                    constraints: const BoxConstraints(
+                      minHeight: 35,
+                    ),
+                    margin: const EdgeInsets.only(left: 9, top: 8),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Text(
+                      _retrieveController.externalUserModel.value?.mood[0]
+                              .toString() ??
+                          "null",
+                      style: const TextStyle(
+                        color: Colors.deepPurple,
+                      ),
                     ),
                   ),
                 ),

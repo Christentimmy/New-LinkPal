@@ -11,4 +11,9 @@ class TokenStorage extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString("auth_token");
   }
+
+  Future<void> deleteToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('auth_token');
+  }
 }

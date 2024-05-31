@@ -89,7 +89,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.selectGender,
-      page: () =>  SelectGenderScreen(),
+      page: () => SelectGenderScreen(),
     ),
     GetPage(
       name: AppRoutes.viewAllPostedPics,
@@ -207,19 +207,19 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.verification,
       page: () {
-        final VoidCallback action = Get.arguments["action"];
-        final String tempToken = Get.arguments["token"];
-        final bool isEmailType = Get.arguments["isEmailType"];
+        final VoidCallback? action = Get.arguments["action"];
+        final String? tempToken = Get.arguments["token"];
+        final bool? isEmailType = Get.arguments["isEmailType"];
         return VerificationScreen(
-          onClickButtonNext: action,
-          token: tempToken,
-          isEmailType: isEmailType,
+          onClickButtonNext: action ?? () {},
+          token: tempToken ?? "",
+          isEmailType: isEmailType ?? false,
         );
       },
     ),
     GetPage(
       name: AppRoutes.signin,
-      page: () => SignIn(),
+      page: () => const SignIn(),
     ),
     GetPage(
       name: AppRoutes.signup,
@@ -262,7 +262,8 @@ class RouteHandler {
         final VoidCallback onClickedToProceed =
             Get.arguments["onClickToProceed"];
         return VerificationCheckerScreen(
-            onClickedToProceed: onClickedToProceed);
+          onClickedToProceed: onClickedToProceed,
+        );
       },
     ),
   ];

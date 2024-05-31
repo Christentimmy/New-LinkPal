@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/post_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -11,14 +13,30 @@ import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
-class SignIn extends StatelessWidget {
-  SignIn({super.key});
+class SignIn extends StatefulWidget {
+  const SignIn({super.key});
 
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
+
   final TextEditingController _passwordController = TextEditingController();
+
   final AuthController _authController = Get.put(AuthController());
+
   final RxBool _isShowPassword = false.obs;
+
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
+
+  @override
+  void initState() {
+    super.initState();
+    Get.put(RetrieveController());
+    Get.put(PostController());
+  }
 
   @override
   Widget build(BuildContext context) {

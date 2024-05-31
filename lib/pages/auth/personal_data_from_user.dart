@@ -6,7 +6,6 @@ import 'package:linkingpal/theme/app_routes.dart';
 class PersonalDataFromUser extends StatelessWidget {
   PersonalDataFromUser({super.key});
 
-  final RxString _selectedGender = "".obs;
   final RxString _finanClass = "".obs;
   final RxString _carOwn = "".obs;
 
@@ -108,75 +107,6 @@ class PersonalDataFromUser extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
-
-                const Text(
-                  "Gender: ",
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Obx(
-                  () => ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                    horizontalTitleGap: 0,
-                    title: const Text('Man'),
-                    leading: Radio<String>(
-                      value: 'Man',
-                      groupValue: _selectedGender.value,
-                      onChanged: (String? value) {
-                        _selectedGender.value = value!;
-                      },
-                    ),
-                  ),
-                ),
-                Obx(
-                  () => ListTile(
-                    title: const Text('Woman'),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                    horizontalTitleGap: 0,
-                    leading: Radio<String>(
-                      value: 'Woman',
-                      groupValue: _selectedGender.value,
-                      onChanged: (String? value) {
-                        _selectedGender.value = value!;
-                      },
-                    ),
-                  ),
-                ),
-                Obx(
-                  () => ListTile(
-                    title: const Text('Trans'),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                    horizontalTitleGap: 0,
-                    leading: Radio<String>(
-                      value: 'Trans',
-                      groupValue: _selectedGender.value,
-                      onChanged: (String? value) {
-                        _selectedGender.value = value!;
-                      },
-                    ),
-                  ),
-                ),
-                Obx(
-                  () => ListTile(
-                    title: const Text('Gay'),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                    horizontalTitleGap: 0,
-                    leading: Radio<String>(
-                      value: 'Gay',
-                      groupValue: _selectedGender.value,
-                      onChanged: (String? value) {
-                        _selectedGender.value = value!;
-                      },
-                    ),
-                  ),
-                ),
-
-
-
-                
                 const SizedBox(height: 30),
                 const Text(
                   "Own a car: ",

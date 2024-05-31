@@ -6,11 +6,22 @@ import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:lottie/lottie.dart';
 
-class VerificationCheckerScreen extends StatelessWidget {
+class VerificationCheckerScreen extends StatefulWidget {
   final VoidCallback onClickedToProceed;
-  VerificationCheckerScreen({super.key, required this.onClickedToProceed});
+  const VerificationCheckerScreen({super.key, required this.onClickedToProceed});
 
+  @override
+  State<VerificationCheckerScreen> createState() => _VerificationCheckerScreenState();
+}
+
+class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
   final _retrieveController = Get.put(RetrieveController());
+  @override
+  void initState() {
+    super.initState();
+    _retrieveController.getUserDetails();
+  
+  }
   final _verificationCheckerMethod = Get.put(VerificationMethods());
 
   @override
@@ -125,7 +136,7 @@ class VerificationCheckerScreen extends StatelessWidget {
                     "Kindly verify your necessary details",
                   );
                 } else {
-                  onClickedToProceed();
+                  widget.onClickedToProceed();
                 }
               },
               child: const Text(

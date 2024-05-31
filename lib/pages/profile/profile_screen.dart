@@ -244,22 +244,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                FutureBuilder(
-                  future: _locationController.displayLocation(
-                    latitude: _retrieveController.userModel.value!.latitude,
-                    longitude: _retrieveController.userModel.value!.longitude,
+                Obx(
+                  () => FutureBuilder(
+                    future: _locationController.displayLocation(
+                      latitude:  _retrieveController.userModel.value!.latitude,
+                      longitude: _retrieveController.userModel.value!.longitude,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const SizedBox();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('Location not available');
+                      } else {
+                        return Text(snapshot.data!);
+                      }
+                    },
                   ),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('Location not available');
-                    } else {
-                      return Text(snapshot.data!);
-                    }
-                  },
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -271,7 +273,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 Obx(
                   () => Text(
-                    _retrieveController.userModel.value?.gender.toUpperCase() ?? "",
+                    _retrieveController.userModel.value?.gender.toUpperCase() ??
+                        "",
                     style: const TextStyle(
                       fontSize: 13,
                     ),
@@ -339,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  "Interested In",
+                  "Acitivity/Mood",
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -375,14 +378,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                // const SizedBox(height: 10),
-                // const Text(
-                //   "Activity/Mood",
-                //   style: TextStyle(
-                //     fontSize: 20,
-                //     color: Colors.black,
-                //   ),
-                // ),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {

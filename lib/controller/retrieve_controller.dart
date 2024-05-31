@@ -32,10 +32,12 @@ class RetrieveController extends GetxController {
           'Authorization': 'Bearer $token',
         },
       );
+      final responseData = await json.decode(response.body);
       if (response.statusCode == 401) {
-        Get.toNamed(AppRoutes.verification, arguments: {
-          "action": () {
-            Get.offAllNamed(AppRoutes.signin);
+
+        Get.toNamed(AppRoutes.verificationChecker, arguments: {
+          "onClickToProceed": () {
+            Get.offAllNamed(AppRoutes.dashboard);
           }
         });
         return CustomSnackbar.show(
@@ -43,7 +45,9 @@ class RetrieveController extends GetxController {
           "Please verify your mobile number to continue",
         );
       }
-      final responseData = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show("Error", responseData["message"]);
+      }
       final instance = UserModel.fromJson(responseData["data"]);
       userModel.value = instance;
     } catch (e) {
