@@ -2,19 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:linkingpal/controller/post_controller.dart';
-import 'package:linkingpal/models/post_model.dart';
-import 'package:linkingpal/pages/profile/all_post_screen.dart';
+import 'package:linkingpal/controller/location_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:lottie/lottie.dart';
 
 class UsersProfileScreen extends StatefulWidget {
-  final Rx<PostModel?> model;
-  final PostController? controller;
+  final String userId;
   const UsersProfileScreen({
     super.key,
-    required this.model,
-    required this.controller,
+    required this.userId,
   });
 
   @override
@@ -22,6 +20,27 @@ class UsersProfileScreen extends StatefulWidget {
 }
 
 class _UsersProfileScreenState extends State<UsersProfileScreen> {
+  final _retrieveController = Get.put(RetrieveController());
+  final _locationController = Get.put(LocationController());
+  @override
+  void initState() {
+    super.initState();
+    _retrieveController.getSpecificUserId(widget.userId);
+  }
+
+  @override
+  void dispose() {
+    _retrieveController.externalUserModel.value = null;
+    _retrieveController.allPostFiles.value = [];
+    super.dispose();
+  }
+
+  bool _isImage(String file) {
+    final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    final extension = file.split('.').last.toLowerCase();
+    return imageExtensions.contains(extension);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,22 +61,26 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 15),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: CachedNetworkImage(
-                    imageUrl: widget.model.value?.createdBy.avatar ?? "",
-                    height: MediaQuery.of(context).size.height / 3.2,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) {
-                      return const Center(
-                        child: Loader(
-                          color: Colors.deepOrangeAccent,
-                        ),
-                      );
-                    },
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(Icons.error),
+                Obx(
+                  () => ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          _retrieveController.externalUserModel.value?.image ??
+                              "",
+                      height: MediaQuery.of(context).size.height / 3.2,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) {
+                        return const Center(
+                          child: Loader(
+                            color: Colors.deepOrangeAccent,
+                          ),
+                        );
+                      },
+                      errorWidget: (context, url, error) => const Center(
+                        child: Icon(Icons.error),
+                      ),
                     ),
                   ),
                 ),
@@ -67,10 +90,12 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      widget.model.value?.createdBy.name ?? "",
-                      style: const TextStyle(
-                        fontSize: 18,
+                    Obx(
+                      () => Text(
+                        _retrieveController.externalUserModel.value?.name ?? "",
+                        style: const TextStyle(
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                     const Icon(
@@ -82,21 +107,44 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                 ),
                 const SizedBox(height: 5),
                 //location not done yet
-                // const Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     Icon(
-                //       Icons.location_on,
-                //       color: Colors.blue,
-                //     ),
-                //     Text(
-                //       "New York, USA",
-                //       style: TextStyle(
-                //         fontSize: 18,
-                //       ),
-                //     ),
-                //   ],
-                // ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: Colors.blue,
+                      size: 16,
+                    ),
+                    FutureBuilder(
+                      future: _locationController.displayLocation(
+                        latitude: _retrieveController
+                            .externalUserModel.value!.latitude,
+                        longitude: _retrieveController
+                            .externalUserModel.value!.longitude,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Text('Location not available');
+                        } else {
+                          return Text(
+                            snapshot.data!,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -130,17 +178,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                       ),
                       const Spacer(),
                       GestureDetector(
-                        onTap: () {
-                          if (widget.model.value!.isLikeByUser) {
-                            widget.controller!
-                                .disLikeAPost(widget.model.value!.id);
-                            setState(() {});
-                          } else {
-                            widget.controller!
-                                .likeAPost(widget.model.value!.id);
-                            setState(() {});
-                          }
-                        },
+                        onTap: () {},
                         child: Container(
                           height: 60,
                           width: 60,
@@ -157,19 +195,22 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                               ),
                             ],
                           ),
-                          child: widget.model.value!.isLikeByUser
-                              ? const Icon(
-                                  FontAwesomeIcons.solidHeart,
-                                  color: Colors.redAccent,
-                                  size: 30,
-                                )
-                              : const Icon(
-                                  FontAwesomeIcons.solidHeart,
-                                  color: Colors.grey,
-                                ),
+                          child: const Icon(
+                            FontAwesomeIcons.solidHeart,
+                            color: Colors.grey,
+                          ),
+                          // child: widget.model.value!.isLikeByUser
+                          //     ? const Icon(
+                          //         FontAwesomeIcons.solidHeart,
+                          //         color: Colors.redAccent,
+                          //         size: 30,
+                          //       )
+                          //     : const Icon(
+                          //         FontAwesomeIcons.solidHeart,
+                          //         color: Colors.grey,
+                          //       ),
                         ),
                       ),
-                     
                     ],
                   ),
                 ),
@@ -244,7 +285,9 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Text(
-                    widget.model.value?.createdBy.mood[0] ?? "",
+                    _retrieveController.externalUserModel.value?.mood[0]
+                            .toString() ??
+                        "null",
                     style: const TextStyle(
                       color: Colors.deepPurple,
                     ),
@@ -258,54 +301,77 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                       const Text(
                         "Post",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: () {
-                          Get.to(() => AllPostScreen());
+                          Get.toNamed(AppRoutes.viewAllPostedPics, arguments: {
+                            "list": _retrieveController.allPostFiles
+                                .where((p) => _isImage(p))
+                                .toList()
+                                .obs,
+                          });
                         },
                         child: const Text(
                           "View all",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 14,
                             color: Colors.blue,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       )
                     ],
                   ),
                 ),
-                GridView.builder(
-                  shrinkWrap: true,
-                  itemCount: 6,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 5.0,
-                    mainAxisSpacing: 5.0,
-                    childAspectRatio: 0.5,
-                  ),
-                  itemBuilder: (context, index) {
-                    return ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: CachedNetworkImage(
-                          imageUrl:
-                              "https://images.unsplash.com/photo-1521676129211-b7a9e7592e65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTV8fGZlbWFsZSUyMHBpY3R1cmUlMjBwb3J0cmFpdHxlbnwwfHwwfHx8MA%3D%3D",
-                          height: double.infinity,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.grey.shade100,
-                            ),
+                Obx(
+                  () => _retrieveController.allPostFiles.isEmpty
+                      ? Center(
+                          child: Lottie.network(
+                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
                           ),
-                          errorWidget: (context, url, error) => const Center(
-                            child: Icon(Icons.error),
+                        )
+                      : GridView.builder(
+                          shrinkWrap: true,
+                          itemCount:
+                              _retrieveController.allPostFiles.length >= 3
+                                  ? 3
+                                  : _retrieveController.allPostFiles.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 5.0,
+                            mainAxisSpacing: 5.0,
+                            childAspectRatio: 0.5,
                           ),
-                        ));
-                  },
+                          itemBuilder: (context, index) {
+                            final imageFiles = _retrieveController.allPostFiles
+                                .where((file) => _isImage(file))
+                                .toList();
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: CachedNetworkImage(
+                                imageUrl: imageFiles[index],
+                                height: double.infinity,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.grey.shade100,
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Center(
+                                  child: Icon(Icons.error),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                 ),
                 const SizedBox(height: 20),
               ],

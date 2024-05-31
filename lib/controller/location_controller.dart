@@ -19,7 +19,6 @@ class LocationController extends GetxController {
         longitude,
       );
       String? city = placemarks[0].subAdministrativeArea;
-      print(city);
       return city ?? "";
     } catch (e) {
       debugPrint(e.toString());

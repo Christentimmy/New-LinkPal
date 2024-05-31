@@ -16,6 +16,8 @@ class RetrieveController extends GetxController {
   }
 
   Rx<UserModel?> userModel = Rx<UserModel?>(null);
+  Rx<UserModel?> externalUserModel = Rx<UserModel?>(null);
+  RxList<String> allPostFiles = <String>[].obs;
 
   Future<void> getUserDetails() async {
     final String? token = await TokenStorage().getToken();
@@ -48,5 +50,37 @@ class RetrieveController extends GetxController {
       debugPrint(e.toString());
     }
   }
- 
+
+  Future<void> getSpecificUserId(String userId) async {
+    final String? token = await TokenStorage().getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.show("Error", "Invalid token, login again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/user/$userId"),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer $token"
+          });
+      final decoded = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", decoded["message"].toString());
+      }
+      final instance = UserModel.fromJson(decoded["data"]);
+      externalUserModel.value = instance;
+      List<dynamic> fromRes = decoded["data"]["post"];
+
+      //mylogic
+      for (var i = 0; i < fromRes.length; i++) {
+        List files = fromRes[i]["files"];
+        for (var y = 0; y < files.length; y++) {
+          allPostFiles.add(files[y]);
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
 }

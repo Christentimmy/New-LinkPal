@@ -37,10 +37,12 @@ import 'package:linkingpal/pages/setting/terms_screen.dart';
 import 'package:linkingpal/pages/splash/splash_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
 import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
+import 'package:linkingpal/pages/swipe/view_posted_pics.dart';
 
 class AppRoutes {
   static const String initial = '/';
   static const String walkthrough = '/walkthrough';
+  static const String viewAllPostedPics = '/viewAllPostedPics';
   static const String introductionVideo = '/introductionVideo';
   static const String homescreen = '/homescreen';
   static const String dashboard = '/dashboard';
@@ -84,6 +86,15 @@ class RouteHandler {
       page: () => const CreatePostScreen(),
     ),
     GetPage(
+      name: AppRoutes.viewAllPostedPics,
+      page: () {
+        final RxList<String> allPostedPics = Get.arguments["list"];
+        return VieAllPostedPics(
+          allPostedPics: allPostedPics,
+        );
+      },
+    ),
+    GetPage(
       name: AppRoutes.viewVideoPosted,
       page: () => const CreatePostScreen(),
     ),
@@ -109,11 +120,9 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.swipedUserCardProfile,
       page: () {
-        final model = Get.arguments["model"];
-        final controller = Get.arguments["postController"];
+        final String userId = Get.arguments["userId"];
         return UsersProfileScreen(
-          model: model ?? {},
-          controller: controller,
+          userId: userId,
         );
       },
     ),
@@ -167,7 +176,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.homescreen,
-      page: () => HomeScreen(),
+      page: () => const HomeScreen(),
     ),
     GetPage(
       name: AppRoutes.notification,

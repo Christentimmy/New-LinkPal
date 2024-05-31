@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
@@ -18,6 +19,7 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   RxBool value = false.obs;
   final _tokenStorage = Get.put(TokenStorage());
+  final _retrieveController = Get.find<RetrieveController>();
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +139,7 @@ class _SettingScreenState extends State<SettingScreen> {
               GestureDetector(
                 onTap: () {
                   _tokenStorage.storeToken("");
+                  _retrieveController.userModel.value = null;
                   Get.offAllNamed(AppRoutes.signin);
                 },
                 child: Container(

@@ -5,7 +5,6 @@ import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/pages/profile/edit_profile.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -35,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _controller.value!.value.duration) {
       isPlaying.value = false;
     } else {
-      // Update play/pause state
       isPlaying.value = _controller.value!.value.isPlaying;
     }
   }
@@ -253,7 +251,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Loader(color: Colors.deepPurpleAccent);
+                      return const SizedBox();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -397,7 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Get.to(() => const EditProfileScreen());
+                    Get.toNamed(AppRoutes.editProfile);
                   },
                   child: Container(
                     height: 40,
@@ -448,8 +446,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Spacer(),
                     GestureDetector(
                       onTap: () async {
-                        await _postController.getAllUserPost();
                         Get.toNamed(AppRoutes.allpost);
+                        await _postController.getAllUserPost();
                       },
                       child: const Text(
                         "View all",

@@ -16,8 +16,18 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   final _retrieveController = Get.put(RetrieveController());
   final _postController = Get.put(PostController());
@@ -106,16 +116,22 @@ class PostCardDisplay extends StatelessWidget {
                 ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                _postController.deletePost(postModel.value.id, context);
-              },
-              child: const Text(
-                "Delete",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                ),
+            Obx(
+              () => ElevatedButton(
+                onPressed: () async {
+                  _postController.deletePost(postModel.value.id, context);
+                },
+                child: _postController.isloading.value
+                    ? const Loader(
+                        color: Colors.deepPurpleAccent,
+                      )
+                    : const Text(
+                        "Delete",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
               ),
             ),
           ],
@@ -260,10 +276,11 @@ class PostCardDisplay extends StatelessWidget {
                   top: 10,
                   left: 10,
                   child: GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      await _retrieveController
+                          .getSpecificUserId(postModel.value.createdBy.id);
                       Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
-                        "model": postModel,
-                        "postController": _postController,
+                        "userId": postModel.value.createdBy.id,
                       });
                     },
                     child: Row(
@@ -354,7 +371,7 @@ class PostCardDisplay extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     print(postModel.value.id);
-                    _postController.getComments(postModel.value.id);    
+                    _postController.getComments(postModel.value.id);
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,

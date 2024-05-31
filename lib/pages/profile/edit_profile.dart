@@ -26,7 +26,7 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   TextEditingController _fullNameController = TextEditingController();
   TextEditingController _bioController = TextEditingController();
-  final _retrieveController = Get.put(RetrieveController());
+  final _retrieveController = Get.find<RetrieveController>();
   final _locationController = Get.put(LocationController());
   final Rx<XFile?> _image = Rx<XFile?>(null);
 
@@ -220,7 +220,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           bio: _bioController.text,
                           context: context,
                         );
-                        _retrieveController.getUserDetails();
                       }
                     },
                     child: _isloading.value
@@ -265,8 +264,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         CustomSnackbar.show("Success", "Details update successfully");
       }
 
-      _retrieveController.getUserDetails();
-      await Future.delayed(const Duration(seconds: 2));
+      final RetrieveController retrieveController =
+          Get.put(RetrieveController());
+      retrieveController.getUserDetails();
+
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());

@@ -45,7 +45,6 @@ class PostController extends GetxController {
 
     try {
       var uri = Uri.parse('https://linkingpal.dasimems.com/v1/post');
-
       var request = http.MultipartRequest('POST', uri);
 
       //Authorization
@@ -122,7 +121,6 @@ class PostController extends GetxController {
         );
       }
       List<dynamic> postsFromData = decodedResponce["data"];
-      print(postsFromData);
       List<PostModel> postModels =
           postsFromData.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -166,6 +164,7 @@ class PostController extends GetxController {
           )
           .toList();
       postModelUserData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      allUserPost.clear();
       allUserPost.addAll(postModelUserData);
     } catch (e) {
       debugPrint(e.toString());
@@ -192,6 +191,7 @@ class PostController extends GetxController {
         List<PostModel> updatedAllPost = List.from(allPost);
         updatedAllPost[index].likes += 1;
         updatedAllPost[index].isLikeByUser = true;
+        allPost.clear();
         allPost.addAll(updatedAllPost);
       }
       if (indexUserPost != -1) {
@@ -199,6 +199,7 @@ class PostController extends GetxController {
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
         updatedAllUSerPost[indexUserPost].likes += 1;
         updatedAllUSerPost[indexUserPost].isLikeByUser = true;
+        allUserPost.clear();
         allUserPost.addAll(updatedAllUSerPost);
       }
       final uri =
@@ -264,11 +265,11 @@ class PostController extends GetxController {
   }
 
   Future<void> deletePost(String postId, BuildContext context) async {
+    isloading.value = true;
     List<PostModel> shadowCopy = List.from(allPost);
     shadowCopy.removeWhere((element) => element.id == postId);
     allPost.clear();
     allPost.addAll(shadowCopy);
-    Navigator.pop(context);
 
     List<PostModel> shadowCopyUserPost = List.from(allUserPost);
     shadowCopyUserPost.removeWhere((element) => element.id == postId);
@@ -295,8 +296,11 @@ class PostController extends GetxController {
       if (response.statusCode != 200) {
         return CustomSnackbar.show("Error", decodedResponce["message"]);
       }
+      Navigator.pop(context);
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
     }
   }
 
@@ -350,12 +354,14 @@ class PostController extends GetxController {
         //allpost
         List<PostModel> updatedAllPost = List.from(allPost);
         updatedAllPost[index].comments += 1;
+        allPost.clear();
         allPost.addAll(updatedAllPost);
       }
       if (indexUserPost != -1) {
         //userpost list
         List<PostModel> updatedAllUSerPost = List.from(allUserPost);
         updatedAllUSerPost[indexUserPost].comments += 1;
+        allUserPost.clear();
         allUserPost.addAll(updatedAllUSerPost);
       }
     } catch (e) {

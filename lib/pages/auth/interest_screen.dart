@@ -47,7 +47,6 @@ class InterestScreen extends StatelessWidget {
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-          
             if (_choosenValue.value.isNotEmpty) {
               _userController.uploadInterest(
                 interests: [
@@ -98,7 +97,7 @@ class InterestScreen extends StatelessWidget {
                                         _choosenValue.value =
                                             _allIntetrest[index][1];
 
-                                              print(_choosenValue.value);
+                                        print(_choosenValue.value);
                                       },
                                       child: Obx(
                                         () => Chip(

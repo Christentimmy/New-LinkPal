@@ -8,9 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
-import 'package:geocoding/geocoding.dart';
+import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
   RxBool isloading = false.obs;
@@ -18,17 +19,6 @@ class UserController extends GetxController {
   final _retrieveController = Get.put(RetrieveController());
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
-
-  @override
-  void onInit() {
-    getNearByUSer(
-      age: calculateAge(_retrieveController.userModel.value!.dob).toString(),
-      mood: _retrieveController.userModel.value!.mood[0],
-      distance: "50",
-      interest: "all",
-    );
-    super.onInit();
-  }
 
   Future<void> uploadVideo({required File video}) async {
     final tokenStorage = Get.put(TokenStorage());
@@ -263,18 +253,6 @@ class UserController extends GetxController {
     return age;
   }
 
-  Future<String?> getCityNameFromCoordiantion({
-    required String latitude,
-    required String longitude,
-  }) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      double.parse(latitude),
-      double.parse(longitude),
-    );
-    String? city = placemarks[0].subAdministrativeArea;
-    return city ?? "";
-  }
-
   Future<void> getAllNotification() async {
     isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
@@ -387,10 +365,10 @@ class UserController extends GetxController {
       final uri = Uri.parse(
         "$baseUrl/user/nearby?age=$age&mood=$mood&distance=$distance&interest=$interest",
       ).replace(queryParameters: {
-        "age": age,
-        "mood": mood,
-        "interest": interest,
-        "distance": distance,
+        "age": age.toLowerCase(),
+        "mood": mood.toLowerCase(),
+        "interest": interest.toLowerCase(),
+        "distance": distance.toLowerCase(),
       });
       final response = await http.get(
         uri,
@@ -399,9 +377,41 @@ class UserController extends GetxController {
           "Content-Type": "application/json",
         },
       );
-      print(response.body);
+      final responseData = json.decode(response.body);
+      if (response.statusCode != 200) {
+        CustomSnackbar.show("Error", responseData["message"].toString());
+      }
+
+      List<dynamic> dataFromResponse = responseData["data"];
+      List<UserModel> mapList = dataFromResponse
+          .map(
+            (e) => UserModel.fromJson(e),
+          )
+          .toList();
+      peopleNearBy.value = mapList;
+      print(peopleNearBy.length);
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
     }
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const R = 6371; // Radius of the Earth in kilometers
+    final dLat = _degToRad(lat2 - lat1);
+    final dLon = _degToRad(lon2 - lon1);
+    final a = sin(dLat / 2) * sin(dLat / 2) +
+        cos(_degToRad(lat1)) *
+            cos(_degToRad(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    final distance = R * c;
+    return distance;
+  }
+
+  double _degToRad(double degree) {
+    return degree * pi / 180;
   }
 }

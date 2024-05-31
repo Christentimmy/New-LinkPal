@@ -32,7 +32,7 @@ class AuthController extends GetxController {
           "password": password,
         }),
       );
-      print(response.body);
+
       if (response.statusCode == 401) {
         CustomSnackbar.show("Error", "Check your credentials again");
         return;
@@ -40,8 +40,14 @@ class AuthController extends GetxController {
 
       final responseData = await json.decode(response.body);
       final userModel = UserModel.fromJson(responseData["data"]);
-      String message = responseData["message"];
+      // String message = responseData["message"];
       _tokenStorage.storeToken(responseData["token"]);
+
+      
+      if (response.statusCode == 404) {
+        CustomSnackbar.show("Error", "Invalid Credentials");
+        return;
+      }
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -58,11 +64,7 @@ class AuthController extends GetxController {
         return;
       }
 
-      if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", message);
-        return;
-      }
-      _retrieveController.getUserDetails();
+      await _retrieveController.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard);
       
     } catch (e) {

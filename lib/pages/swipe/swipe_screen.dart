@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:lottie/lottie.dart';
 
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({super.key});
@@ -19,14 +22,19 @@ class SwipeScreen extends StatefulWidget {
 }
 
 class SwipeScreenState extends State<SwipeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _userController.getNearByUSer(
+      age: "80",
+      mood: _retrieveController.userModel.value!.mood[0],
+      distance: "80",
+      interest: "all",
+    );
+  }
+
   final _retrieveController = Get.put(RetrieveController());
   final _userController = Get.put(UserController());
-
-  List<String> cards = [
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
-    "https://images.unsplash.com/photo-1496440737103-cd596325d314?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8ZmVtYWxlJTIwcGljdHVyZXxlbnwwfHwwfHx8MA%3D%3D",
-    "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
-  ];
 
   CardSwiperController controller = CardSwiperController();
   @override
@@ -46,99 +54,118 @@ class SwipeScreenState extends State<SwipeScreen> {
                   showModalBottomSheet(
                     context: context,
                     builder: (context) {
-                      return CustomBottomSheet();
+                      return CustomBottomSheet(
+                        controller: _userController,
+                      );
                     },
                   );
                 },
               ),
-              Expanded(
-                child: CardSwiper(
-                  controller: controller,
-                  allowedSwipeDirection:
-                      const AllowedSwipeDirection.symmetric(horizontal: true),
-                  cardBuilder: (context, index, horizontalOffsetPercentage,
-                      verticalOffsetPercentage) {
-                    return SwipeCard(
-                      ontap: () {
-                        _userController.getNearByUSer(
-                          age: "18",
-                          mood: "Sport",
-                          distance: "5",
-                          interest: "all",
-                        );
-                        // Get.toNamed(
-                        //   AppRoutes.swipedUserCardProfile,
-                        //   arguments: {
-                        //     "model": {},
-                        //   },
-                        // );
-                      },
-                      cards: cards,
-                      index: index,
-                    );
-                  },
-                  cardsCount: cards.length,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 35.0),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        controller.swipe(CardSwiperDirection.left);
-                      },
-                      child: Container(
-                          height: 60,
-                          width: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                offset: const Offset(2, 2),
-                                color: Colors.black.withOpacity(0.2),
-                                spreadRadius: 5,
-                                blurRadius: 10,
-                              ),
-                            ],
+              Obx(() {
+                return _userController.peopleNearBy.isEmpty
+                    ? Expanded(
+                        child: Center(
+                          child: Lottie.network(
+                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
                           ),
-                          alignment: Alignment.center,
-                          child: const Icon(FontAwesomeIcons.x, size: 20)),
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        controller.swipe(CardSwiperDirection.right);
-                      },
-                      child: Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              offset: const Offset(2, 2),
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 5,
-                              blurRadius: 10,
+                        ),
+                      )
+                    : Expanded(
+                        child: CardSwiper(
+                          controller: controller,
+                          cardsCount: _userController.peopleNearBy.length,
+                          allowedSwipeDirection:
+                              const AllowedSwipeDirection.symmetric(
+                                  horizontal: true),
+                          cardBuilder: (context,
+                              index,
+                              horizontalOffsetPercentage,
+                              verticalOffsetPercentage) {
+                            final UserModel userModel =
+                                _userController.peopleNearBy[index];
+                            return SwipeCard(
+                              retrieveController: _retrieveController,
+                              userController: _userController,
+                              ontap: () async {
+                               await  _retrieveController
+                                    .getSpecificUserId(userModel.id);
+                                Get.toNamed(
+                                  AppRoutes.swipedUserCardProfile,
+                                  arguments: {
+                                    "userId": userModel.id,
+                                  },
+                                );
+                              },
+                              userModel: userModel,
+                            );
+                          },
+                        ),
+                      );
+              }),
+              const SizedBox(height: 20),
+              Obx(() {
+                return _userController.peopleNearBy.isEmpty
+                    ? const SizedBox()
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 35.0),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                controller.swipe(CardSwiperDirection.left);
+                              },
+                              child: Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: const Offset(2, 2),
+                                        color: Colors.black.withOpacity(0.2),
+                                        spreadRadius: 5,
+                                        blurRadius: 10,
+                                      ),
+                                    ],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child:
+                                      const Icon(FontAwesomeIcons.x, size: 20)),
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                controller.swipe(CardSwiperDirection.right);
+                              },
+                              child: Container(
+                                height: 60,
+                                width: 60,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      offset: const Offset(2, 2),
+                                      color: Colors.black.withOpacity(0.2),
+                                      spreadRadius: 5,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  size: 30,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          FontAwesomeIcons.solidHeart,
-                          size: 30,
-                          color: Colors.redAccent,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
+                      );
+              }),
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -261,19 +288,30 @@ class SwipeScreenState extends State<SwipeScreen> {
 }
 
 class SwipeCard extends StatelessWidget {
-  const SwipeCard({
+  SwipeCard({
     super.key,
-    required this.cards,
-    required this.index,
     required this.ontap,
+    required this.userModel,
+    required this.retrieveController,
+    required this.userController,
   });
 
-  final List<String> cards;
-  final int index;
+  final UserModel userModel;
   final VoidCallback ontap;
+  final RetrieveController retrieveController;
+  final UserController userController;
+  final _locationController = Get.put(LocationController());
 
   @override
   Widget build(BuildContext context) {
+    String distanceApart = userController
+        .calculateDistance(
+          retrieveController.userModel.value?.latitude ?? 0.00,
+          retrieveController.userModel.value?.longitude ?? 0.00,
+          userModel.latitude,
+          userModel.longitude,
+        )
+        .toStringAsFixed(2);
     return GestureDetector(
       onTap: ontap,
       child: Container(
@@ -287,10 +325,19 @@ class SwipeCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: CachedNetworkImage(
-                imageUrl: cards[index],
+                imageUrl: userModel.image,
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
+                errorWidget: (context, url, error) {
+                  return Container(
+                    color: Colors.black,
+                    child: const Icon(
+                      Icons.error,
+                      color: Colors.red,
+                    ),
+                  );
+                },
                 placeholder: (context, url) {
                   return const Center(
                     child: CircularProgressIndicator(
@@ -314,55 +361,73 @@ class SwipeCard extends StatelessWidget {
                   ],
                 ),
               ),
-              child: const Column(
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Row(
                     children: [
                       Text(
-                        "Michelle, 26",
-                        style: TextStyle(
+                        userModel.name,
+                        style: const TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(width: 10),
-                      Icon(
+                      const SizedBox(width: 10),
+                      const Icon(
                         Icons.verified,
                         color: Colors.blue,
                       ),
                     ],
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.house,
                         size: 16,
                         color: Colors.white,
                       ),
-                      Text(
-                        "Lives In Playa Del Carmen",
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                      FutureBuilder(
+                        future: _locationController.displayLocation(
+                          latitude: userModel.latitude,
+                          longitude: userModel.longitude,
                         ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text('Location not available');
+                          } else {
+                            return Text(
+                              snapshot.data!,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.location_on,
                         size: 16,
                         color: Colors.white,
                       ),
                       Text(
-                        "29Km away",
-                        style: TextStyle(
+                        "$distanceApart km",
+                        style: const TextStyle(
                           fontSize: 13,
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
@@ -380,44 +445,50 @@ class SwipeCard extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class CustomBottomSheet extends StatelessWidget {
-  CustomBottomSheet({super.key});
+  final UserController controller;
+  CustomBottomSheet({super.key, required this.controller});
 
   final List _allIntetrest = [
-    [FontAwesomeIcons.music, "Clubbing"],
-    [FontAwesomeIcons.breadSlice, "Having breakfast"],
-    [FontAwesomeIcons.utensils, "Going out for lunch"],
-    [FontAwesomeIcons.wineGlassEmpty, "Having dinner together"],
-    [FontAwesomeIcons.martiniGlassCitrus, "Going for drinks"],
-    [FontAwesomeIcons.dumbbell, "Working out at the gym"],
-    [FontAwesomeIcons.handsPraying, "Attending church/mosque"],
-    [FontAwesomeIcons.planeDeparture, "Going on holiday trips"],
-    [FontAwesomeIcons.spa, "Getting spa treatments"],
-    [FontAwesomeIcons.bagShopping, "Shopping together"],
-    [FontAwesomeIcons.tv, "Watching Netflix and chilling"],
-    [FontAwesomeIcons.calendarDays, "Being event or party partners"],
-    [FontAwesomeIcons.utensils, "Cooking and chilling"],
-    [FontAwesomeIcons.smoking, "Smoking together"],
-    [FontAwesomeIcons.book, "Studying together"],
-    [FontAwesomeIcons.basketball, "Playing sports"],
-    [FontAwesomeIcons.music, "Going to concerts"],
-    [FontAwesomeIcons.personHiking, "Hiking or outdoor activities"],
-    [FontAwesomeIcons.gamepad, "Playing board games or video games"],
-    [FontAwesomeIcons.compass, "Traveling buddy"],
+    "Game",
+    "Clubbing",
+    "Having breakfast",
+    "Going out for lunch",
+    "Having dinner together",
+    "Going for drinks",
+    "Working out at the gym",
+    "Attending church/mosque",
+    "Going on holiday trips",
+    "Getting spa treatments",
+    "Shopping together",
+    "Watching Netflix and chilling",
+    "Being event or party partners",
+    "Cooking and chilling",
+    "Smoking together",
+    "Studying together",
+    "Playing sports",
+    "Going to concerts",
+    "Hiking or outdoor activities",
+    "Playing board games or video games",
+    "Traveling buddy",
   ];
 
   final List<String> _genders = [
-    "Man",
-    "Woman",
-    "Trans",
-    "Gay",
+    "Men",
+    "Women",
+    "Others",
+    "All",
   ];
 
   final RxDouble _distanceValue = 0.0.obs;
   final RxDouble _minAge = 18.0.obs;
   final RxDouble _maxAge = 30.0.obs;
-  final RxInt _ageIndex = (-1).obs;
-  final RxInt _currentlyTapped2 = (-1).obs;
+  final RxInt _genderIndex = (-1).obs;
+  final RxInt _interest = (-1).obs;
+
+  String selectedInterest = "";
+  String selectedMood = "";
 
   @override
   Widget build(BuildContext context) {
@@ -519,7 +590,8 @@ class CustomBottomSheet extends StatelessWidget {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    _ageIndex.value = index;
+                    _genderIndex.value = index;
+                    selectedInterest = _genders[index];
                   },
                   child: Obx(
                     () => Container(
@@ -530,7 +602,7 @@ class CustomBottomSheet extends StatelessWidget {
                       margin: const EdgeInsets.only(left: 9, top: 8),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: _ageIndex.value == index
+                        color: _genderIndex.value == index
                             ? Colors.black
                             : Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(40),
@@ -539,7 +611,7 @@ class CustomBottomSheet extends StatelessWidget {
                         _genders[index],
                         style: TextStyle(
                           fontSize: 12,
-                          color: _ageIndex.value == index
+                          color: _genderIndex.value == index
                               ? Colors.white
                               : Colors.deepPurple,
                         ),
@@ -569,7 +641,8 @@ class CustomBottomSheet extends StatelessWidget {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    _currentlyTapped2.value = index;
+                    _interest.value = index;
+                    selectedMood = _allIntetrest[index];
                   },
                   child: Obx(
                     () => Container(
@@ -580,16 +653,16 @@ class CustomBottomSheet extends StatelessWidget {
                       margin: const EdgeInsets.only(left: 9, top: 5),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: _currentlyTapped2.value == index
+                        color: _interest.value == index
                             ? Colors.black
                             : Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Text(
-                        _allIntetrest[index][1],
+                        _allIntetrest[index],
                         style: TextStyle(
                           fontSize: 12,
-                          color: _currentlyTapped2.value == index
+                          color: _interest.value == index
                               ? Colors.white
                               : Colors.deepPurpleAccent,
                         ),
@@ -603,6 +676,12 @@ class CustomBottomSheet extends StatelessWidget {
           const Spacer(),
           CustomButton(
             ontap: () {
+              controller.getNearByUSer(
+                age: _maxAge.value.toString(),
+                mood: selectedMood,
+                distance: _distanceValue.value.toString(),
+                interest: selectedInterest,
+              );
               Get.back();
             },
             child: const Text(
