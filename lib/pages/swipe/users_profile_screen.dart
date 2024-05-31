@@ -22,6 +22,7 @@ class UsersProfileScreen extends StatefulWidget {
 class _UsersProfileScreenState extends State<UsersProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
+
   @override
   void initState() {
     super.initState();
@@ -115,33 +116,37 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                       color: Colors.blue,
                       size: 16,
                     ),
-                    FutureBuilder(
-                      future: _locationController.displayLocation(
-                        latitude: _retrieveController
-                            .externalUserModel.value!.latitude,
-                        longitude: _retrieveController
-                            .externalUserModel.value!.longitude,
+                    Obx(
+                      () => FutureBuilder(
+                        future: _locationController.displayLocation(
+                          latitude: _retrieveController
+                                  .externalUserModel.value?.latitude ??
+                              0.0,
+                          longitude: _retrieveController
+                                  .externalUserModel.value?.longitude ??
+                              0.0,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text('Location not available');
+                          } else {
+                            return Text(
+                              snapshot.data!,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            );
+                          }
+                        },
                       ),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const SizedBox();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Text('Location not available');
-                        } else {
-                          return Text(
-                            snapshot.data!,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          );
-                        }
-                      },
                     ),
                   ],
                 ),

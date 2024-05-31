@@ -12,31 +12,32 @@ import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class SwipeScreen extends StatefulWidget {
-  const SwipeScreen({super.key});
+  SwipeScreen({super.key});
 
   @override
-  State<SwipeScreen> createState() => SwipeScreenState();
+  State<SwipeScreen> createState() => _SwipeScreenState();
 }
 
-class SwipeScreenState extends State<SwipeScreen> {
+class _SwipeScreenState extends State<SwipeScreen> {
+  final _retrieveController = Get.find<RetrieveController>();
+  final _userController = Get.put(UserController());
+  final controller = CardSwiperController();
+
   @override
   void initState() {
     super.initState();
     _userController.getNearByUSer(
       age: "80",
-      mood: _retrieveController.userModel.value!.mood[0],
-      distance: "80",
+      mood: _retrieveController.userModel.value?.mood[0].toString() ?? "",
+      distance: "50",
       interest: "all",
     );
   }
 
-  final _retrieveController = Get.put(RetrieveController());
-  final _userController = Get.put(UserController());
-
-  CardSwiperController controller = CardSwiperController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,8 +66,13 @@ class SwipeScreenState extends State<SwipeScreen> {
                 return _userController.peopleNearBy.isEmpty
                     ? Expanded(
                         child: Center(
-                          child: Lottie.network(
-                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                          child: Column(
+                            children: [
+                              Lottie.network(
+                                "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                              ),
+                              const Text("Empty? filter your cards above"),
+                            ],
                           ),
                         ),
                       )
@@ -86,9 +92,9 @@ class SwipeScreenState extends State<SwipeScreen> {
                             return SwipeCard(
                               retrieveController: _retrieveController,
                               userController: _userController,
-                              ontap: () async {
-                               await  _retrieveController
-                                    .getSpecificUserId(userModel.id);
+                              ontap: ()  {
+                                //  _retrieveController
+                                //     .getSpecificUserId(userModel.id);
                                 Get.toNamed(
                                   AppRoutes.swipedUserCardProfile,
                                   arguments: {
@@ -475,8 +481,8 @@ class CustomBottomSheet extends StatelessWidget {
   ];
 
   final List<String> _genders = [
-    "Men",
-    "Women",
+    "Male",
+    "Female",
     "Others",
     "All",
   ];
@@ -530,7 +536,7 @@ class CustomBottomSheet extends StatelessWidget {
           FlutterSlider(
             values: const [0, 0],
             rangeSlider: false,
-            max: 500,
+            max: 800,
             min: 0,
             onDragging: (handlerIndex, lowerValue, upperValue) {
               _distanceValue.value = lowerValue - upperValue;
@@ -674,22 +680,24 @@ class CustomBottomSheet extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          CustomButton(
-            ontap: () {
-              controller.getNearByUSer(
-                age: _maxAge.value.toString(),
-                mood: selectedMood,
-                distance: _distanceValue.value.toString(),
-                interest: selectedInterest,
-              );
-              Get.back();
-            },
-            child: const Text(
-              "Apply Now",
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+          Obx(
+            () => CustomButton(
+              ontap: () async {
+                await controller.getNearByUSer(
+                  age: _maxAge.value.toString(),
+                  mood: selectedMood,
+                  distance: _distanceValue.value.toString(),
+                  interest: selectedInterest,
+                );
+                Get.back();
+              },
+              child: controller.isloading.value ?  const Loader() :  const Text(
+                "Apply Now",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

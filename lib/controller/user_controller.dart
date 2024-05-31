@@ -16,7 +16,7 @@ import 'dart:math' show cos, sqrt, atan2, sin, pi;
 class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  final _retrieveController = Get.put(RetrieveController());
+  final _retrieveController = Get.find<RetrieveController>();
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
 
@@ -207,9 +207,11 @@ class UserController extends GetxController {
   }
 
   Future<void> updateUserDetails({
-    required String name,
-    required String bio,
+    String? name,
+    String? bio,
+    String? gender,
   }) async {
+    isloading.value = true;
     final String? token = await TokenStorage().getToken();
     if (token == null) {
       CustomSnackbar.show("Error", "Invalid token, login again");
@@ -222,7 +224,11 @@ class UserController extends GetxController {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
         },
-        body: json.encode({"name": name, "bio": bio}),
+        body: json.encode({
+          "name": name,
+          "bio": bio,
+          "gender": gender,
+        }),
       );
       if (response.statusCode == 401) {
         return CustomSnackbar.show("Error", "Unauthorized");
@@ -231,9 +237,14 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", "Bad Request");
       }
 
-      _retrieveController.getUserDetails();
+      Get.offAllNamed(AppRoutes.dashboard);
+      final RetrieveController retrieveController =
+          Get.put(RetrieveController());
+      retrieveController.getUserDetails();
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
     }
   }
 
@@ -388,8 +399,8 @@ class UserController extends GetxController {
             (e) => UserModel.fromJson(e),
           )
           .toList();
+      peopleNearBy.clear();
       peopleNearBy.value = mapList;
-      print(peopleNearBy.length);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

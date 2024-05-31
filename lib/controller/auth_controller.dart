@@ -63,10 +63,14 @@ class AuthController extends GetxController {
         CustomSnackbar.show("Error", "Video not uploaded");
         return;
       }
+      print(userModel.gender);
+      if (userModel.gender.isEmpty) {
+        Get.toNamed(AppRoutes.selectGender);
+        return CustomSnackbar.show("Error", "Fill out your gender");
+      }
 
       await _retrieveController.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard);
-      
     } catch (e) {
       debugPrint(e.toString());
     } finally {

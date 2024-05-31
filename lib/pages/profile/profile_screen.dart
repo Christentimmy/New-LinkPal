@@ -261,32 +261,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     }
                   },
                 ),
-
-                const SizedBox(height: 5),
-                // Row(
-                //   children: [
-                //     const Icon(
-                //       Icons.location_on,
-                //       color: Colors.blue,
-                //       size: 20,
-                //     ),
-                //     Text(
-                //       _userController
-                //           .getCityNameFromCoordiantion(
-                //               latitude: _retrieveController
-                //                       .userModel.value?.latitude ??
-                //                   "0.0",
-                //               longitude: _retrieveController
-                //                       .userModel.value?.longitude ??
-                //                   "0.0")
-                //           .toString(),
-                //       style: const TextStyle(
-                //         fontSize: 13,
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 20),
+                const Text(
+                  "Gender",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Obx(
+                  () => Text(
+                    _retrieveController.userModel.value?.gender.toUpperCase() ?? "",
+                    style: const TextStyle(
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 const Text(
                   "Bio",
                   style: TextStyle(

@@ -16,20 +16,11 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
   final _retrieveController = Get.put(RetrieveController());
+
   final _postController = Get.put(PostController());
 
   @override

@@ -4,8 +4,6 @@ import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-
-
 class WalkThrough extends StatefulWidget {
   const WalkThrough({super.key});
 
@@ -153,7 +151,6 @@ class _WalkThroughState extends State<WalkThrough> {
             GestureDetector(
               onTap: () {
                 if (_currentPage.value == 2) {
-                  print("Going to login screen");
                   Get.offAllNamed(AppRoutes.signin);
                 }
                 _pageController.nextPage(

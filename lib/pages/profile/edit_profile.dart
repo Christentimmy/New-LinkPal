@@ -254,6 +254,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         updateUserProfile(
           image: image,
         );
+        Get.offAllNamed(AppRoutes.dashboard);
       }
 
       if (name.isNotEmpty && bio.isNotEmpty) {
@@ -267,8 +268,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final RetrieveController retrieveController =
           Get.put(RetrieveController());
       retrieveController.getUserDetails();
-
-      Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
     } finally {

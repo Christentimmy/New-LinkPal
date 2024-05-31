@@ -9,6 +9,7 @@ import 'package:linkingpal/pages/auth/interest_screen.dart';
 import 'package:linkingpal/pages/auth/introduction_video_screen.dart';
 import 'package:linkingpal/pages/auth/location_access_screen.dart';
 import 'package:linkingpal/pages/auth/personal_data_from_user.dart';
+import 'package:linkingpal/pages/auth/select_gender_screen.dart';
 import 'package:linkingpal/pages/auth/sign_in_screen.dart';
 import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
@@ -77,6 +78,7 @@ class AppRoutes {
   static const String personalDataFromUser = '/personalDataFromUser';
   static const String editPost = '/editPost';
   static const String viewVideoPosted = '/viewVideoPosted';
+  static const String selectGender = '/selectGender';
 }
 
 class RouteHandler {
@@ -84,6 +86,10 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.createPost,
       page: () => const CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.selectGender,
+      page: () =>  SelectGenderScreen(),
     ),
     GetPage(
       name: AppRoutes.viewAllPostedPics,
@@ -115,7 +121,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.swipe,
-      page: () => const SwipeScreen(),
+      page: () => SwipeScreen(),
     ),
     GetPage(
       name: AppRoutes.swipedUserCardProfile,
@@ -176,7 +182,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.homescreen,
-      page: () => const HomeScreen(),
+      page: () => HomeScreen(),
     ),
     GetPage(
       name: AppRoutes.notification,
