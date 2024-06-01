@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:linkingpal/pages/dashboard_screen.dart';
-
+import 'package:linkingpal/theme/app_routes.dart';
 
 class SuccessFaceScreen extends StatelessWidget {
   const SuccessFaceScreen({super.key});
@@ -38,7 +37,10 @@ class SuccessFaceScreen extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                Get.to(() => DashBoardScreen());
+                // Get.to(() => DashBoardScreen());
+                Get.toNamed(AppRoutes.dashboard, arguments: {
+                  "startScreen": 0,
+                });
               },
               child: Container(
                 height: 45,

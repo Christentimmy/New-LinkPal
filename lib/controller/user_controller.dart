@@ -72,7 +72,6 @@ class UserController extends GetxController {
   }
 
   Future<void> uploadPicture({required XFile image}) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {

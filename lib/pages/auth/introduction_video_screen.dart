@@ -63,20 +63,16 @@ class IntroductionVideoScreen extends StatelessWidget {
             const SizedBox(
               height: 50,
             ),
-            Obx(
-              () => CustomButton(
-                ontap: () {
-                  pickUserVideo();
-                },
-                child: _userController.isloading.value
-                    ? const Loader()
-                    : const Text(
-                        "Upload video",
-                        style: TextStyle(
-                          color: AppColor.white,
-                          fontSize: 18,
-                        ),
-                      ),
+            CustomButton(
+              ontap: () {
+                pickUserVideo();
+              },
+              child: const Text(
+                "Upload video",
+                style: TextStyle(
+                  color: AppColor.white,
+                  fontSize: 18,
+                ),
               ),
             ),
             const SizedBox(
@@ -93,24 +89,30 @@ class IntroductionVideoScreen extends StatelessWidget {
                   CustomSnackbar.show("Error", "Select a video");
                 }
               },
-              child: Container(
-                height: 50,
-                alignment: Alignment.center,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(
-                      width: 1,
-                      color: Colors.deepOrangeAccent,
-                    )),
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(
-                    color: AppColor.themeColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    decorationColor: AppColor.themeColor,
-                  ),
+              child: Obx(
+                () => Container(
+                  height: 50,
+                  alignment: Alignment.center,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.deepOrangeAccent,
+                      )),
+                  child: _userController.isloading.value
+                      ? const Loader(
+                        color: Colors.deepOrangeAccent,
+                      )
+                      : const Text(
+                          "Submit",
+                          style: TextStyle(
+                            color: AppColor.themeColor,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            decorationColor: AppColor.themeColor,
+                          ),
+                        ),
                 ),
               ),
             ),

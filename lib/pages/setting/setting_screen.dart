@@ -167,9 +167,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () async {
-                    await _tokenStorage.deleteToken();
+                    
                     _retrieveController.userModel.value = null;
                     await _authController.deleteAccount();
+                    await _tokenStorage.deleteToken();
                   },
                   child: Obx(
                     () => Container(

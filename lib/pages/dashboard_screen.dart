@@ -10,7 +10,8 @@ import 'package:linkingpal/pages/setting/setting_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
 
 class DashBoardScreen extends StatefulWidget {
-  const DashBoardScreen({super.key});
+  final int startscreen;
+  const DashBoardScreen({super.key, required this.startscreen});
 
   @override
   State<DashBoardScreen> createState() => _DashBoardScreenState();
@@ -19,7 +20,6 @@ class DashBoardScreen extends StatefulWidget {
 class _DashBoardScreenState extends State<DashBoardScreen> {
   final InternetandConectivityChecker _internetController =
       Get.find<InternetandConectivityChecker>();
-
   final tokenStorage = Get.put(TokenStorage());
 
   final RxList _pages = [
@@ -34,19 +34,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   @override
   void initState() {
-    _setPage();
+    _currentIndex.value = widget.startscreen;
     super.initState();
-  }
-
-  void _setPage() async {
-    bool? isNew = await tokenStorage.getUserState();
-    if (isNew == true) {
-      _currentIndex.value = 1;
-    } else {
-      _currentIndex.value = 1;
-    }
-     final token = Get.put(TokenStorage());
-    await token.setUserState(false);
   }
 
   @override

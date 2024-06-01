@@ -247,7 +247,10 @@ class PersonalDataFromUser extends StatelessWidget {
                                       AppRoutes.interest,
                                       arguments: {
                                         "action": () {
-                                          Get.offAllNamed(AppRoutes.dashboard);
+                                          Get.offAllNamed(AppRoutes.dashboard,
+                                              arguments: {
+                                                "startScreen": 1,
+                                              });
                                         }
                                       },
                                     );

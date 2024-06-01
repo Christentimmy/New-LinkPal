@@ -57,4 +57,5 @@ class LocationController extends GetxController {
       debugPrint("Execution Time: ${stopWatch.elapsed}");
     }
   }
+
 }

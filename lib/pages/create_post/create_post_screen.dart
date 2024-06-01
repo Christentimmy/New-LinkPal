@@ -4,9 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/post_controller.dart';
-import 'package:linkingpal/pages/dashboard_screen.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -70,7 +70,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Get.offAll(() => DashBoardScreen());
+            Get.offAllNamed(AppRoutes.dashboard, arguments: {
+              "startScreen": 0,
+            });
           },
           icon: const Icon(
             Icons.arrow_back_ios,
@@ -335,7 +337,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                           style: TextStyle(
                             color: AppColor.white,
                             fontSize: 14,
-
                             fontWeight: FontWeight.w600,
                           ),
                         ),

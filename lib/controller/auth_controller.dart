@@ -21,7 +21,6 @@ class AuthController extends GetxController {
     required String email,
     required String password,
   }) async {
-    isloading.value = true;
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/auth/login"),
@@ -33,7 +32,6 @@ class AuthController extends GetxController {
           "password": password,
         }),
       );
-
       if (response.statusCode == 401) {
         CustomSnackbar.show("Error", "Check your credentials again");
         return;
@@ -52,19 +50,29 @@ class AuthController extends GetxController {
         CustomSnackbar.show("Error", "Account not verified");
         return Get.toNamed(AppRoutes.verificationChecker, arguments: {
           "onClickToProceed": () {
-            Get.toNamed(AppRoutes.dashboard);
+            Get.toNamed(AppRoutes.dashboard, arguments: {
+              "startScreen": 0,
+            });
           }
         });
       }
       if (userModel.video.isEmpty) {
-        Get.toNamed(AppRoutes.introductionVideo);
+        Get.toNamed(AppRoutes.introductionVideo, arguments: {
+          "action": () {
+            Get.toNamed(AppRoutes.dashboard, arguments: {
+              "startScreen": 0,
+            });
+          }
+        });
         CustomSnackbar.show("Error", "Video not uploaded");
         return;
       }
       if (userModel.gender.isEmpty) {
         Get.toNamed(AppRoutes.selectGender, arguments: {
-          "action": (){
-            Get.offAllNamed(AppRoutes.dashboard);
+          "action": () {
+            Get.offAllNamed(AppRoutes.dashboard, arguments: {
+              "startScreen": 0,
+            });
           }
         });
         return CustomSnackbar.show("Error", "Fill out your gender");
@@ -72,7 +80,9 @@ class AuthController extends GetxController {
 
       final controller = Get.put(RetrieveController());
       await controller.getUserDetails();
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.dashboard, arguments: {
+        "startScreen": 0,
+      });
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -88,7 +98,6 @@ class AuthController extends GetxController {
     required String password,
     required String bio,
   }) async {
-    isloading.value = true;
     try {
       Object userObject = {
         "name": name,
@@ -120,10 +129,9 @@ class AuthController extends GetxController {
       await _tokenStorage.storeToken(decodedResponseBody["token"]);
       final controller = Get.put(RetrieveController());
       await controller.getUserDetails();
-      await _tokenStorage.setUserState(true);
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () async {
-         await _locController.getCurrentCityandUpload(
+          await _locController.getCurrentCityandUpload(
             onCalledWhatNext: () {
               Get.toNamed(AppRoutes.uploadPicture);
             },
@@ -224,7 +232,10 @@ class AuthController extends GetxController {
     try {
       final response = await http.delete(
         Uri.parse("$baseUrl/user"),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {
+          'Authorization': 'Bearer $token',
+          "Content-Type": "application/json",
+        },
       );
       if (response.statusCode == 401) {
         return CustomSnackbar.show("Error", "Unauthorized");

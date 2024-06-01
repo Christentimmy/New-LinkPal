@@ -36,6 +36,18 @@ class SignUp extends StatelessWidget {
     }
   }
 
+  void signUpUser() async {
+    _authController.isloading.value = true;
+    await _authController.signUpUSer(
+      name: _fullNameController.text.trim(),
+      email: _emailController.text.trim(),
+      mobileNumber: _phoneNumberController.text.trim(),
+      dob: _timePickedByUser.value!,
+      password: _passwordController.text,
+      bio: _bioController.text.trim(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -246,14 +258,7 @@ class SignUp extends StatelessWidget {
                               ontap: () {
                                 if (_formKey.value.currentState!.validate() &&
                                     _timePickedByUser.value != null) {
-                                  _authController.signUpUSer(
-                                    name: _fullNameController.text.trim(),
-                                    email: _emailController.text.trim(),
-                                    mobileNumber: _phoneNumberController.text,
-                                    dob: _timePickedByUser.value!,
-                                    password: _passwordController.text,
-                                    bio: _bioController.text,
-                                  );
+                                  signUpUser();
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },

@@ -151,12 +151,14 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                     widget.onClickedToProceed();
                   }
                 },
-                child: _locontroller.isloading.value ? const Loader() : const Text(
-                  "Proceed",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
+                child: _locontroller.isloading.value
+                    ? const Loader()
+                    : const Text(
+                        "Proceed",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
           ],

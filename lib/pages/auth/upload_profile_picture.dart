@@ -21,6 +21,11 @@ class UploadProfilePicture extends StatelessWidget {
     }
   }
 
+  void uploadPic() async {
+    _userController.isloading.value = true;
+    await _userController.uploadPicture(image: _image.value!);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,12 +100,12 @@ class UploadProfilePicture extends StatelessWidget {
             ),
             Obx(
               () => GestureDetector(
-                onTap: () {
-                 if (_image.value != null) {
-                    _userController.uploadPicture(image: _image.value!);
-                 } else {
-                  CustomSnackbar.show("Error", "select an image");
-                 }
+                onTap: () async {
+                  if (_image.value != null) {
+                    uploadPic();
+                  } else {
+                    CustomSnackbar.show("Error", "select an image");
+                  }
                 },
                 child: Container(
                   height: 45,

@@ -207,7 +207,10 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.dashboard,
-      page: () => const DashBoardScreen(),
+      page: () {
+        final int startScreen = Get.arguments["startScreen"];
+        return DashBoardScreen(startscreen: startScreen);
+      },
     ),
     GetPage(
       name: AppRoutes.verification,
