@@ -2,20 +2,29 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
 import 'package:linkingpal/pages/setting/setting_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
 
-class DashBoardScreen extends StatelessWidget {
-  DashBoardScreen({super.key});
+class DashBoardScreen extends StatefulWidget {
+  const DashBoardScreen({super.key});
+
+  @override
+  State<DashBoardScreen> createState() => _DashBoardScreenState();
+}
+
+class _DashBoardScreenState extends State<DashBoardScreen> {
   final InternetandConectivityChecker _internetController =
       Get.find<InternetandConectivityChecker>();
 
+  final tokenStorage = Get.put(TokenStorage());
+
   final RxList _pages = [
     HomeScreen(),
-    SwipeScreen(),
+    const SwipeScreen(),
     const CreatePostScreen(),
     const ProfileScreen(),
     const SettingScreen()
@@ -24,41 +33,61 @@ class DashBoardScreen extends StatelessWidget {
   final RxInt _currentIndex = 0.obs;
 
   @override
+  void initState() {
+    _setPage();
+    super.initState();
+  }
+
+  void _setPage() async {
+    bool? isNew = await tokenStorage.getUserState();
+    if (isNew == true) {
+      _currentIndex.value = 1;
+    } else {
+      _currentIndex.value = 1;
+    }
+     final token = Get.put(TokenStorage());
+    await token.setUserState(false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomSheet: Obx(() {
-        return  _internetController.connectivityResult.value == ConnectivityResult.none ?  Container(
-          padding: const EdgeInsets.all(10),
-          color: _internetController.connectivityResult.value ==
-                      ConnectivityResult.none ||
-                  !_internetController.isConnected.value
-              ? Colors.red
-              : Colors.green,
-          child: Row(
-            children: [
-              Icon(
-                _internetController.connectivityResult.value ==
+        return _internetController.connectivityResult.value ==
+                ConnectivityResult.none
+            ? Container(
+                padding: const EdgeInsets.all(10),
+                color: _internetController.connectivityResult.value ==
                             ConnectivityResult.none ||
                         !_internetController.isConnected.value
-                    ? Icons.signal_wifi_off
-                    : Icons.check_circle,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                _internetController.connectivityResult.value ==
-                            ConnectivityResult.none ||
-                        !_internetController.isConnected.value
-                    ? 'No Internet Connection'
-                    : 'Ready....',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                    ? Colors.red
+                    : Colors.green,
+                child: Row(
+                  children: [
+                    Icon(
+                      _internetController.connectivityResult.value ==
+                                  ConnectivityResult.none ||
+                              !_internetController.isConnected.value
+                          ? Icons.signal_wifi_off
+                          : Icons.check_circle,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      _internetController.connectivityResult.value ==
+                                  ConnectivityResult.none ||
+                              !_internetController.isConnected.value
+                          ? 'No Internet Connection'
+                          : 'Ready....',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-        ) : const SizedBox();
+              )
+            : const SizedBox();
       }),
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(

@@ -36,8 +36,6 @@ class SignUp extends StatelessWidget {
     }
   }
 
-  final RxString _genderSelected = 'Male'.obs;
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -208,7 +206,6 @@ class SignUp extends StatelessWidget {
                             action: TextInputAction.newline,
                             type: TextInputType.multiline,
                           ),
-                         
                           const SizedBox(
                             height: 20,
                           ),
@@ -256,7 +253,6 @@ class SignUp extends StatelessWidget {
                                     dob: _timePickedByUser.value!,
                                     password: _passwordController.text,
                                     bio: _bioController.text,
-                                    gender: _genderSelected.value,
                                   );
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();

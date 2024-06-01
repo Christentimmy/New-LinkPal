@@ -71,7 +71,9 @@ class InterestScreen extends StatelessWidget {
               : SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 15),
+                      horizontal: 15,
+                      vertical: 15,
+                    ),
                     child: Column(
                       children: [
                         CustomTextField(
@@ -96,8 +98,6 @@ class InterestScreen extends StatelessWidget {
                                         _selectedIndex.value = index;
                                         _choosenValue.value =
                                             _allIntetrest[index][1];
-
-                                        print(_choosenValue.value);
                                       },
                                       child: Obx(
                                         () => Chip(

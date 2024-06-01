@@ -183,7 +183,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Get.toNamed(AppRoutes.introductionVideo);
+                    Get.toNamed(AppRoutes.introductionVideo, arguments: {
+                      "action": () {
+                        Get.offAllNamed(AppRoutes.dashboard);
+                      }
+                    });
                   },
                   child: Container(
                     height: 50,
@@ -264,12 +268,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bio: bio,
           onClickToProceed: () {},
         );
-       
       }
 
       final RetrieveController controller = Get.put(RetrieveController());
       await controller.getUserDetails();
-       CustomSnackbar.show("Success", "Details update successfully");
+      CustomSnackbar.show("Success", "Details update successfully");
       Get.offAllNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());

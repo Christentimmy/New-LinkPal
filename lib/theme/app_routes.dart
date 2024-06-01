@@ -7,7 +7,6 @@ import 'package:linkingpal/pages/auth/faceid_req_screen.dart';
 import 'package:linkingpal/pages/auth/forgot_password_screen.dart';
 import 'package:linkingpal/pages/auth/interest_screen.dart';
 import 'package:linkingpal/pages/auth/introduction_video_screen.dart';
-import 'package:linkingpal/pages/auth/location_access_screen.dart';
 import 'package:linkingpal/pages/auth/personal_data_from_user.dart';
 import 'package:linkingpal/pages/auth/select_gender_screen.dart';
 import 'package:linkingpal/pages/auth/sign_in_screen.dart';
@@ -89,7 +88,10 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.selectGender,
-      page: () => SelectGenderScreen(),
+      page: () {
+        final VoidCallback ontap = Get.arguments["action"];
+        return SelectGenderScreen(onClickToProceed: ontap);
+      },
     ),
     GetPage(
       name: AppRoutes.viewAllPostedPics,
@@ -121,7 +123,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.swipe,
-      page: () => SwipeScreen(),
+      page: () => const SwipeScreen(),
     ),
     GetPage(
       name: AppRoutes.swipedUserCardProfile,
@@ -198,11 +200,14 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.introductionVideo,
-      page: () => IntroductionVideoScreen(),
+      page: () {
+        final VoidCallback ontap = Get.arguments["action"];
+        return IntroductionVideoScreen(onClickToProceed: ontap);
+      },
     ),
     GetPage(
       name: AppRoutes.dashboard,
-      page: () => DashBoardScreen(),
+      page: () => const DashBoardScreen(),
     ),
     GetPage(
       name: AppRoutes.verification,
@@ -240,10 +245,10 @@ class RouteHandler {
       name: AppRoutes.uploadPicture,
       page: () => UploadProfilePicture(),
     ),
-    GetPage(
-      name: AppRoutes.locationAccess,
-      page: () => LocationAccessScreen(),
-    ),
+    // GetPage(
+    //   name: AppRoutes.locationAccess,
+    //   page: () => LocationAccessScreen(),
+    // ),
     GetPage(
       name: AppRoutes.errorFace,
       page: () => const ErrorFaceScreen(),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -16,11 +17,13 @@ import 'dart:math' show cos, sqrt, atan2, sin, pi;
 class UserController extends GetxController {
   RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  final _retrieveController = Get.find<RetrieveController>();
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
 
-  Future<void> uploadVideo({required File video}) async {
+  Future<void> uploadVideo({
+    required File video,
+    required VoidCallback onClickToProceed,
+  }) async {
     final tokenStorage = Get.put(TokenStorage());
     isloading.value = true;
     String? token = await tokenStorage.getToken();
@@ -58,12 +61,13 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", message);
       }
 
-      Get.offAllNamed(AppRoutes.dashboard);
+      onClickToProceed();
     } catch (e) {
       debugPrint(e.toString());
     } finally {
+      final retrieveController = Get.put(RetrieveController());
+      await retrieveController.getUserDetails();
       isloading.value = false;
-      await _retrieveController.getUserDetails();
     }
   }
 
@@ -114,7 +118,7 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.selectGender);
+      Get.toNamed(AppRoutes.personalDataFromUser);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -195,8 +199,9 @@ class UserController extends GetxController {
         CustomSnackbar.show("Error", decodedResponse["message"]);
         return;
       }
+      final retrieveController = Get.put(RetrieveController());
+      await retrieveController.getUserDetails();
 
-      _retrieveController.getUserDetails();
       CustomSnackbar.show("Success", 'You have selected your interest');
       onClickWhatNext();
     } catch (e) {

@@ -10,7 +10,11 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:video_player/video_player.dart';
 
 class IntroductionVideoScreen extends StatelessWidget {
-  IntroductionVideoScreen({super.key});
+  final VoidCallback onClickToProceed;
+  IntroductionVideoScreen({
+    super.key,
+    required this.onClickToProceed,
+  });
 
   final Rx<File?> _videoFile = Rx<File?>(null);
   final _userController = Get.put(UserController());
@@ -81,7 +85,10 @@ class IntroductionVideoScreen extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 if (_videoFile.value != null) {
-                  _userController.uploadVideo(video: _videoFile.value!);
+                  _userController.uploadVideo(
+                    video: _videoFile.value!,
+                    onClickToProceed: onClickToProceed,
+                  );
                 } else {
                   CustomSnackbar.show("Error", "Select a video");
                 }

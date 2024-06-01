@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/snack_bar.dart';
 
 class PersonalDataFromUser extends StatelessWidget {
   PersonalDataFromUser({super.key});
 
   final RxString _finanClass = "".obs;
   final RxString _carOwn = "".obs;
+  final RxString _genderSelected = ''.obs;
+
+  final _userController = Get.put(UserController());
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +45,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _finanClass.value = "Ultra High Net Worth |UHNW|";
+                    },
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
                     title: const Text('Ultra High Net Worth |UHNW|'),
@@ -53,6 +62,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _finanClass.value = "High Net Worth |HNW|";
+                    },
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
                     title: const Text('High Net Worth |HNW|'),
@@ -67,6 +79,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _finanClass.value = "Medium Net Worth |MNW|";
+                    },
                     title: const Text('Medium Net Worth |MNW|'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
@@ -81,6 +96,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _finanClass.value = "Small net worth |SNW|";
+                    },
                     title: const Text('Small net worth |SNW|'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
@@ -95,6 +113,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _finanClass.value = "Prefer not to say";
+                    },
                     title: const Text('Prefer not to say'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
@@ -109,6 +130,65 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
                 const Text(
+                  "Gender: ",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Obx(
+                  () => ListTile(
+                    onTap: () {
+                      _genderSelected.value = "Male";
+                    },
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                    horizontalTitleGap: 0,
+                    title: const Text('Male'),
+                    leading: Radio<String>(
+                      value: 'Male',
+                      groupValue: _genderSelected.value,
+                      onChanged: (String? value) {
+                        _genderSelected.value = value!;
+                      },
+                    ),
+                  ),
+                ),
+                Obx(
+                  () => ListTile(
+                    onTap: () {
+                      _genderSelected.value = "Female";
+                    },
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                    horizontalTitleGap: 0,
+                    title: const Text('Female'),
+                    leading: Radio<String>(
+                      value: 'Female',
+                      groupValue: _genderSelected.value,
+                      onChanged: (String? value) {
+                        _genderSelected.value = value!;
+                      },
+                    ),
+                  ),
+                ),
+                Obx(
+                  () => ListTile(
+                    onTap: () {
+                      _genderSelected.value = "Others";
+                    },
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                    horizontalTitleGap: 0,
+                    title: const Text('Others'),
+                    leading: Radio<String>(
+                      value: 'Others',
+                      groupValue: _genderSelected.value,
+                      onChanged: (String? value) {
+                        _genderSelected.value = value!;
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const Text(
                   "Own a car: ",
                   style: TextStyle(
                     fontSize: 15,
@@ -117,6 +197,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _carOwn.value = "Yes";
+                    },
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
                     title: const Text('Yes'),
@@ -131,6 +214,9 @@ class PersonalDataFromUser extends StatelessWidget {
                 ),
                 Obx(
                   () => ListTile(
+                    onTap: () {
+                      _carOwn.value = "No";
+                    },
                     title: const Text('No'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                     horizontalTitleGap: 0,
@@ -144,21 +230,45 @@ class PersonalDataFromUser extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                CustomButton(
-                  ontap: () {
-                    Get.toNamed(AppRoutes.interest, arguments: {
-                      "action": () {
-                        Get.toNamed(AppRoutes.locationAccess);
+                Obx(
+                  () => CustomButton(
+                    ontap: () {
+                      if (_finanClass.value.isNotEmpty &&
+                          _carOwn.value.isNotEmpty &&
+                          _genderSelected.value.isNotEmpty) {
+                        _userController.updateUserDetails(
+                            gender: _genderSelected.value,
+                            onClickToProceed: () {
+                              Get.toNamed(
+                                AppRoutes.introductionVideo,
+                                arguments: {
+                                  "action": () {
+                                    Get.offAllNamed(
+                                      AppRoutes.interest,
+                                      arguments: {
+                                        "action": () {
+                                          Get.offAllNamed(AppRoutes.dashboard);
+                                        }
+                                      },
+                                    );
+                                  },
+                                },
+                              );
+                            });
+                      } else {
+                        CustomSnackbar.show("Error", "Select required fields");
                       }
-                    });
-                  },
-                  child: const Text(
-                    "Continue",
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    },
+                    child: _userController.isloading.value
+                        ? const Loader()
+                        : const Text(
+                            "Continue",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                   ),
                 ),
                 Container(),

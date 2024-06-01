@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
@@ -13,6 +14,7 @@ class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxBool isloading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
+  final _locController = Get.put(LocationController());
   final _tokenStorage = Get.put(TokenStorage());
 
   Future<void> loginUser({
@@ -60,7 +62,11 @@ class AuthController extends GetxController {
         return;
       }
       if (userModel.gender.isEmpty) {
-        Get.toNamed(AppRoutes.selectGender);
+        Get.toNamed(AppRoutes.selectGender, arguments: {
+          "action": (){
+            Get.offAllNamed(AppRoutes.dashboard);
+          }
+        });
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
 
@@ -81,7 +87,6 @@ class AuthController extends GetxController {
     required DateTime dob,
     required String password,
     required String bio,
-    required String gender,
   }) async {
     isloading.value = true;
     try {
@@ -92,7 +97,6 @@ class AuthController extends GetxController {
         "dob": dob.toUtc().toIso8601String(),
         "password": password,
         "bio": bio,
-        "gender": gender,
       };
 
       final responce = await http.post(
@@ -116,10 +120,14 @@ class AuthController extends GetxController {
       await _tokenStorage.storeToken(decodedResponseBody["token"]);
       final controller = Get.put(RetrieveController());
       await controller.getUserDetails();
-
+      await _tokenStorage.setUserState(true);
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
-        "onClickToProceed": () {
-          Get.toNamed(AppRoutes.uploadPicture);
+        "onClickToProceed": () async {
+         await _locController.getCurrentCityandUpload(
+            onCalledWhatNext: () {
+              Get.toNamed(AppRoutes.uploadPicture);
+            },
+          );
         }
       });
     } catch (e) {

@@ -16,7 +16,7 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class SwipeScreen extends StatefulWidget {
-  SwipeScreen({super.key});
+  const SwipeScreen({super.key});
 
   @override
   State<SwipeScreen> createState() => _SwipeScreenState();

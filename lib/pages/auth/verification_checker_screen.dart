@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:lottie/lottie.dart';
 
 class VerificationCheckerScreen extends StatefulWidget {
   final VoidCallback onClickedToProceed;
-  const VerificationCheckerScreen({super.key, required this.onClickedToProceed});
+  const VerificationCheckerScreen({
+    super.key,
+    required this.onClickedToProceed,
+  });
 
   @override
-  State<VerificationCheckerScreen> createState() => _VerificationCheckerScreenState();
+  State<VerificationCheckerScreen> createState() =>
+      _VerificationCheckerScreenState();
 }
 
 class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
   final _retrieveController = Get.put(RetrieveController());
+  final _locontroller = Get.put(LocationController());
   @override
   void initState() {
     super.initState();
     _retrieveController.getUserDetails();
-  
   }
+
   final _verificationCheckerMethod = Get.put(VerificationMethods());
 
   @override
@@ -72,15 +79,17 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
               child: Obx(
                 () => ListTile(
                   title: const Text("Email Verification"),
-                  trailing: _retrieveController.userModel.value?.isEmailVerified ?? false
-                      ? const Icon(
-                          Icons.check,
-                          color: Colors.green,
-                        )
-                      : const Icon(
-                          Icons.cancel,
-                          color: Colors.red,
-                        ),
+                  trailing:
+                      _retrieveController.userModel.value?.isEmailVerified ??
+                              false
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.green,
+                            )
+                          : const Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                            ),
                   onTap: () {
                     _verificationCheckerMethod.verifyEmail(
                       email: _retrieveController.userModel.value!.email,
@@ -106,15 +115,17 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
               child: Obx(
                 () => ListTile(
                   title: const Text("Phone Verification"),
-                  trailing: _retrieveController.userModel.value?.isPhoneVerified ?? false
-                      ? const Icon(
-                          Icons.check,
-                          color: Colors.green,
-                        )
-                      : const Icon(
-                          Icons.cancel,
-                          color: Colors.red,
-                        ),
+                  trailing:
+                      _retrieveController.userModel.value?.isPhoneVerified ??
+                              false
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.green,
+                            )
+                          : const Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                            ),
                   onTap: () {
                     _verificationCheckerMethod.verifyPhone(
                       phoneNumber: _retrieveController
@@ -127,22 +138,24 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            CustomButton(
-              ontap: () {
-                if (!_retrieveController.userModel.value!.isEmailVerified &&
-                    !_retrieveController.userModel.value!.isPhoneVerified) {
-                  return CustomSnackbar.show(
-                    "Error",
-                    "Kindly verify your necessary details",
-                  );
-                } else {
-                  widget.onClickedToProceed();
-                }
-              },
-              child: const Text(
-                "Proceed",
-                style: TextStyle(
-                  color: Colors.white,
+            Obx(
+              () => CustomButton(
+                ontap: () {
+                  if (!_retrieveController.userModel.value!.isEmailVerified &&
+                      !_retrieveController.userModel.value!.isPhoneVerified) {
+                    return CustomSnackbar.show(
+                      "Error",
+                      "Kindly verify your necessary details",
+                    );
+                  } else {
+                    widget.onClickedToProceed();
+                  }
+                },
+                child: _locontroller.isloading.value ? const Loader() : const Text(
+                  "Proceed",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
-import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
 // ignore: must_be_immutable
 class SelectGenderScreen extends StatelessWidget {
-  SelectGenderScreen({super.key});
+  final VoidCallback onClickToProceed;
+  SelectGenderScreen({super.key, required this.onClickToProceed});
 
   final RxList _genderList = [
     [
@@ -39,7 +39,6 @@ class SelectGenderScreen extends StatelessWidget {
   }
 
   final _userController = Get.put(UserController());
-
   RxString selectedGender = "".obs;
 
   @override
@@ -113,9 +112,7 @@ class SelectGenderScreen extends StatelessWidget {
               ontap: () {
                 _userController.updateUserDetails(
                   gender: selectedGender.value.toLowerCase(),
-                  onClickToProceed: (){
-                    Get.toNamed(AppRoutes.personalDataFromUser);
-                  },
+                  onClickToProceed: onClickToProceed,
                 );
               },
               child: _userController.isloading.value
