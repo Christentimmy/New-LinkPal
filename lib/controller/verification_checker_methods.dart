@@ -23,8 +23,8 @@ class VerificationMethods extends GetxController {
     Get.toNamed(AppRoutes.verification, arguments: {
       "token": tempToken,
       "isEmailType": true,
-      "action": () async {
-        await _retrieveController.getUserDetails();
+      "action": () {
+        _retrieveController.getUserDetails();
         Navigator.pop(context);
       },
     });
@@ -40,8 +40,8 @@ class VerificationMethods extends GetxController {
       parameter: "mobile_number",
     );
     Get.toNamed(AppRoutes.verification, arguments: {
-      "action": () async {
-        await _retrieveController.getUserDetails();
+      "action": () {
+        _retrieveController.getUserDetails();
         Navigator.pop(context);
       },
       "token": tempToken,
