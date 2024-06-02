@@ -15,17 +15,17 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
-  RxBool isloading = false.obs;
+  // RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.dasimems.com/v1";
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
 
   Future<void> uploadVideo({
     required File video,
-    required VoidCallback onClickToProceed,
+    required bool isSignUp,
   }) async {
     final tokenStorage = Get.put(TokenStorage());
-    isloading.value = true;
+
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
@@ -61,13 +61,18 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", message);
       }
 
-      onClickToProceed();
+      if (isSignUp) {
+        Get.toNamed(AppRoutes.interest);
+      } else {
+        Get.offAllNamed(AppRoutes.dashboard, arguments: {
+          "startScreen": 0,
+        });
+      }
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      final retrieveController = Get.put(RetrieveController());
+      final retrieveController = Get.find<RetrieveController>();
       await retrieveController.getUserDetails();
-      isloading.value = false;
     }
   }
 
@@ -120,8 +125,6 @@ class UserController extends GetxController {
       Get.toNamed(AppRoutes.personalDataFromUser);
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
@@ -129,10 +132,8 @@ class UserController extends GetxController {
     required double lang,
     required double long,
   }) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
 
-    isloading.value = true;
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
       CustomSnackbar.show("Error", "Login Again");
@@ -160,16 +161,13 @@ class UserController extends GetxController {
       }
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
   Future<void> uploadInterest({
     required List<String> interests,
-    required VoidCallback onClickWhatNext,
+    required bool isSignUp,
   }) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -202,11 +200,17 @@ class UserController extends GetxController {
       await retrieveController.getUserDetails();
 
       CustomSnackbar.show("Success", 'You have selected your interest');
-      onClickWhatNext();
+      if (isSignUp) {
+        Get.offAllNamed(AppRoutes.dashboard, arguments: {
+          "startScreen": 1,
+        });
+      } else {
+        Get.offAllNamed(AppRoutes.dashboard, arguments: {
+          "startScreen": 0,
+        });
+      }
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
@@ -214,9 +218,8 @@ class UserController extends GetxController {
     String? name,
     String? bio,
     String? gender,
-    required VoidCallback onClickToProceed,
+    required bool isSignUp,
   }) async {
-    isloading.value = true;
     final String? token = await TokenStorage().getToken();
     if (token == null) {
       CustomSnackbar.show("Error", "Invalid token, login again");
@@ -243,13 +246,17 @@ class UserController extends GetxController {
       }
 
       final RetrieveController retrieveController =
-          Get.put(RetrieveController());
-      retrieveController.getUserDetails();
-      onClickToProceed();
+          Get.find<RetrieveController>();
+      await retrieveController.getUserDetails();
+      if (isSignUp) {
+        Get.toNamed(AppRoutes.introductionVideo);
+      } else {
+        Get.toNamed(AppRoutes.dashboard, arguments: {
+          "startScreen": 0,
+        });
+      }
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
@@ -270,7 +277,6 @@ class UserController extends GetxController {
   }
 
   Future<void> getAllNotification() async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -294,13 +300,10 @@ class UserController extends GetxController {
       userNotifications.value = decoded["data"];
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
   Future<void> getSingleNotification(String notId) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -326,13 +329,10 @@ class UserController extends GetxController {
       }
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
   Future<void> markNotication(String notId) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -358,8 +358,6 @@ class UserController extends GetxController {
       }
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
@@ -369,7 +367,6 @@ class UserController extends GetxController {
     required String distance,
     required String interest,
   }) async {
-    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
@@ -408,8 +405,6 @@ class UserController extends GetxController {
       peopleNearBy.value = mapList;
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 

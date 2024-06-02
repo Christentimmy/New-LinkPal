@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:video_player/video_player.dart';
 
-class VideoPlayWidget extends StatefulWidget {
+class VideoNetworkPlayWidget extends StatefulWidget {
   final String videoUrl;
-  const VideoPlayWidget({super.key, required this.videoUrl});
+  const VideoNetworkPlayWidget({super.key, required this.videoUrl});
 
   @override
-  State<VideoPlayWidget> createState() => _VideoPlayWidgetState();
+  State<VideoNetworkPlayWidget> createState() => _VideoNetworkPlayWidgetState();
 }
 
-class _VideoPlayWidgetState extends State<VideoPlayWidget> {
+class _VideoNetworkPlayWidgetState extends State<VideoNetworkPlayWidget> {
   late VideoPlayerController _videoController;
   late ChewieController _chewieController;
 

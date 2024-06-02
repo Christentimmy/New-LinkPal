@@ -21,7 +21,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final PageController _pageController = PageController();
   final _postController = Get.put(PostController());
-  final _retrieveController = Get.put(RetrieveController());
+  final _retrieveController = Get.find<RetrieveController>();
   final _locationController = Get.put(LocationController());
   final _userController = Get.put(UserController());
   final _isInitialized = false.obs;
@@ -247,8 +247,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Obx(
                   () => FutureBuilder(
                     future: _locationController.displayLocation(
-                      latitude:  _retrieveController.userModel.value!.latitude,
-                      longitude: _retrieveController.userModel.value!.longitude,
+                      latitude: _retrieveController.userModel.value?.latitude,
+                      longitude: _retrieveController.userModel.value?.longitude,
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -351,11 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Obx(
                   () => GestureDetector(
                     onTap: () {
-                      Get.toNamed(AppRoutes.interest, arguments: {
-                        "action": () {
-                          Get.offAllNamed(AppRoutes.dashboard);
-                        }
-                      });
+                      Get.toNamed(AppRoutes.interest);
                     },
                     child: Container(
                       height: 35,

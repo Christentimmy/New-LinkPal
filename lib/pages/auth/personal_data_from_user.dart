@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
-import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
@@ -12,8 +11,18 @@ class PersonalDataFromUser extends StatelessWidget {
   final RxString _finanClass = "".obs;
   final RxString _carOwn = "".obs;
   final RxString _genderSelected = ''.obs;
+  final RxBool _isloading = false.obs;
 
   final _userController = Get.put(UserController());
+
+  void updateUserDetail() async {
+    _isloading.value = true;
+    await _userController.updateUserDetails(
+      isSignUp: true,
+      gender: _genderSelected.value,
+    );
+    _isloading.value = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,33 +245,12 @@ class PersonalDataFromUser extends StatelessWidget {
                       if (_finanClass.value.isNotEmpty &&
                           _carOwn.value.isNotEmpty &&
                           _genderSelected.value.isNotEmpty) {
-                        _userController.updateUserDetails(
-                            gender: _genderSelected.value,
-                            onClickToProceed: () {
-                              Get.toNamed(
-                                AppRoutes.introductionVideo,
-                                arguments: {
-                                  "action": () {
-                                    Get.offAllNamed(
-                                      AppRoutes.interest,
-                                      arguments: {
-                                        "action": () {
-                                          Get.offAllNamed(AppRoutes.dashboard,
-                                              arguments: {
-                                                "startScreen": 1,
-                                              });
-                                        }
-                                      },
-                                    );
-                                  },
-                                },
-                              );
-                            });
+                        updateUserDetail();
                       } else {
                         CustomSnackbar.show("Error", "Select required fields");
                       }
                     },
-                    child: _userController.isloading.value
+                    child: _isloading.value
                         ? const Loader()
                         : const Text(
                             "Continue",

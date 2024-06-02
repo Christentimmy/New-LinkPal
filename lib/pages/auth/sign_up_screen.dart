@@ -21,6 +21,7 @@ class SignUp extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final _authController = Get.put(AuthController());
   final RxBool _isShowPassword = false.obs;
+  final RxBool _isloading = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
   final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
 
@@ -37,7 +38,7 @@ class SignUp extends StatelessWidget {
   }
 
   void signUpUser() async {
-    _authController.isloading.value = true;
+    _isloading.value = true;
     await _authController.signUpUSer(
       name: _fullNameController.text.trim(),
       email: _emailController.text.trim(),
@@ -46,6 +47,7 @@ class SignUp extends StatelessWidget {
       password: _passwordController.text,
       bio: _bioController.text.trim(),
     );
+    _isloading.value = false;
   }
 
   @override
@@ -262,7 +264,7 @@ class SignUp extends StatelessWidget {
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },
-                              child: _authController.isloading.value
+                              child: _isloading.value
                                   ? const Loader()
                                   : const Text(
                                       "Sign Up",

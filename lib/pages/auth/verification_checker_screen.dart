@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:lottie/lottie.dart';
@@ -21,15 +21,33 @@ class VerificationCheckerScreen extends StatefulWidget {
 }
 
 class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
-  final _retrieveController = Get.put(RetrieveController());
-  final _locontroller = Get.put(LocationController());
+  final _retrieveController = Get.find<RetrieveController>();
+  final RxBool _isloading = false.obs;
+  final _locController = Get.put(LocationController());
+
   @override
   void initState() {
     super.initState();
     _retrieveController.getUserDetails();
   }
 
-  final _verificationCheckerMethod = Get.put(VerificationMethods());
+  void verifier() async {
+    _isloading.value = true;
+    final controller = Get.put(RetrieveController());
+    await controller.getUserDetails();
+    if (!controller.userModel.value!.isEmailVerified &&
+        !controller.userModel.value!.isPhoneVerified) {
+      return CustomSnackbar.show(
+        "Error",
+        "Kindly verify your necessary details",
+      );
+    } else {
+      widget.onClickedToProceed();
+      await _locController.getCurrentCityandUpload();
+    }
+
+    _isloading.value = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +109,7 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                               color: Colors.red,
                             ),
                   onTap: () {
-                    _verificationCheckerMethod.verifyEmail(
-                      email: _retrieveController.userModel.value!.email,
-                      context: context,
-                    );
+                    Get.toNamed(AppRoutes.verificationScreenEMail);
                   },
                 ),
               ),
@@ -127,12 +142,7 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                               color: Colors.red,
                             ),
                   onTap: () {
-                    _verificationCheckerMethod.verifyPhone(
-                      phoneNumber: _retrieveController
-                          .userModel.value!.mobileNumber
-                          .toString(),
-                      context: context,
-                    );
+                    Get.toNamed(AppRoutes.verificationScreenPhone);
                   },
                 ),
               ),
@@ -141,17 +151,9 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
             Obx(
               () => CustomButton(
                 ontap: () {
-                  if (!_retrieveController.userModel.value!.isEmailVerified &&
-                      !_retrieveController.userModel.value!.isPhoneVerified) {
-                    return CustomSnackbar.show(
-                      "Error",
-                      "Kindly verify your necessary details",
-                    );
-                  } else {
-                    widget.onClickedToProceed();
-                  }
+                  verifier();
                 },
-                child: _locontroller.isloading.value
+                child: _isloading.value
                     ? const Loader()
                     : const Text(
                         "Proceed",

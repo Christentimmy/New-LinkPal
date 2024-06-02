@@ -14,10 +14,17 @@ class ChangePasswordScreen extends StatelessWidget {
 
   final RxBool _isNewPassword = false.obs;
   final RxBool _isConPassword = false.obs;
+  final RxBool _isloading = false.obs;
 
   final _passwordController = TextEditingController();
   final _confrimPasswordController = TextEditingController();
   final _authController = Get.put(AuthController());
+
+  void changePassword() async {
+    _isloading.value = true;
+    _authController.changePassword(password: _confrimPasswordController.text);
+    _isloading.value = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +86,13 @@ class ChangePasswordScreen extends StatelessWidget {
                     ontap: () {
                       if (_passwordController.text ==
                           _confrimPasswordController.text) {
-                        _authController.changePassword(
-                            password: _confrimPasswordController.text);
+                            changePassword();
                       } else {
-                        CustomSnackbar.show("Error", 'Fill all fields and ensure password match');
+                        CustomSnackbar.show("Error",
+                            'Fill all fields and ensure password match');
                       }
                     },
-                    child: _authController.isloading.value
+                    child: _isloading.value
                         ? const Loader()
                         : const Text(
                             "Update",

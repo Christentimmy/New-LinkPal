@@ -43,6 +43,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   final RxBool _isloading = false.obs;
+  final RxBool _islocationloading = false.obs;
   final _userController = Get.put(UserController());
 
   void _pickImageForUser() async {
@@ -50,6 +51,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (imagePicked != null) {
       _image.value = imagePicked;
     }
+  }
+
+  void getLocAndUpload() async {
+    _islocationloading.value = true;
+    await _locationController.getCurrentCityandUpload();
+    Get.offAllNamed(AppRoutes.dashboard);
+    _islocationloading.value = false;
   }
 
   @override
@@ -148,10 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    _locationController.getCurrentCityandUpload(
-                        onCalledWhatNext: () {
-                      Get.offAllNamed(AppRoutes.dashboard);
-                    });
+                    getLocAndUpload();
                   },
                   child: Obx(
                     () => Container(
@@ -165,7 +170,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           color: Colors.deepOrangeAccent,
                         ),
                       ),
-                      child: _locationController.isloading.value
+                      child: _islocationloading.value
                           ? const Center(
                               child: CircularProgressIndicator(
                               color: Colors.deepOrangeAccent,
@@ -183,11 +188,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
-                    Get.toNamed(AppRoutes.introductionVideo, arguments: {
-                      "action": () {
-                        Get.offAllNamed(AppRoutes.dashboard);
-                      }
-                    });
+                    Get.toNamed(AppRoutes.updateVideo);
                   },
                   child: Container(
                     height: 50,
@@ -258,22 +259,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         updateUserProfile(
           image: image,
         );
-        final RetrieveController controller = Get.put(RetrieveController());
-        await controller.getUserDetails();
       }
 
       if (name.isNotEmpty && bio.isNotEmpty) {
-        _userController.updateUserDetails(
+        await _userController.updateUserDetails(
           name: name,
           bio: bio,
-          onClickToProceed: () {},
+          isSignUp: false,
         );
       }
-
-      final RetrieveController controller = Get.put(RetrieveController());
-      await controller.getUserDetails();
       CustomSnackbar.show("Success", "Details update successfully");
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.dashboard, arguments: {
+        "startScreen": 0,
+      });
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -325,6 +323,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           "An error occured, try again",
         );
       }
+
+      final RetrieveController retrieveController =
+          Get.find<RetrieveController>();
+      await retrieveController.getUserDetails();
     } catch (e) {
       debugPrint(e.toString());
     }

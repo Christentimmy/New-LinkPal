@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
-import 'package:linkingpal/controller/post_controller.dart';
-import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -25,22 +23,24 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController = Get.put(AuthController());
   final RxBool _isShowPassword = false.obs;
+  final RxBool _isloading = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
 
   void loginUser() async {
-    _authController.isloading.value = true;
+    _isloading.value = true;
     await _authController.loginUser(
       email: _emailController.text,
       password: _passwordController.text,
     );
+    _isloading.value = false;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    Get.put(RetrieveController());
-    Get.put(PostController());
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   Get.put(RetrieveController());
+  //   Get.put(PostController());
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +181,7 @@ class _SignInState extends State<SignIn> {
                               }
                               FocusManager.instance.primaryFocus?.unfocus();
                             },
-                            child: _authController.isloading.value
+                            child: _isloading.value
                                 ? const Loader()
                                 : const Text(
                                     "Login",

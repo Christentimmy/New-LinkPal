@@ -14,7 +14,8 @@ import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
 import 'package:linkingpal/pages/auth/upload_profile_picture.dart';
 import 'package:linkingpal/pages/auth/verification_checker_screen.dart';
-import 'package:linkingpal/pages/auth/verification_screen.dart';
+import 'package:linkingpal/pages/auth/verification_screen_for_email.dart';
+import 'package:linkingpal/pages/auth/verification_screen_for_phone.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/create_post/edit_post_screen.dart';
 import 'package:linkingpal/pages/dashboard_screen.dart';
@@ -26,6 +27,8 @@ import 'package:linkingpal/pages/onboarding/onboarding_screen.dart';
 import 'package:linkingpal/pages/profile/all_post_screen.dart';
 import 'package:linkingpal/pages/profile/edit_profile.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
+import 'package:linkingpal/pages/profile/update_interest.dart';
+import 'package:linkingpal/pages/profile/update_video.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
@@ -44,6 +47,7 @@ class AppRoutes {
   static const String walkthrough = '/walkthrough';
   static const String viewAllPostedPics = '/viewAllPostedPics';
   static const String introductionVideo = '/introductionVideo';
+  static const String updateVideo = '/updateVideo';
   static const String homescreen = '/homescreen';
   static const String dashboard = '/dashboard';
   static const String verification = '/Verification';
@@ -78,6 +82,9 @@ class AppRoutes {
   static const String editPost = '/editPost';
   static const String viewVideoPosted = '/viewVideoPosted';
   static const String selectGender = '/selectGender';
+  static const String verificationScreenEMail = '/verificationScreenEMail';
+  static const String verificationScreenPhone = '/verificationScreenPhone';
+  static const String updateInterest = '/updateInterest';
 }
 
 class RouteHandler {
@@ -87,11 +94,24 @@ class RouteHandler {
       page: () => const CreatePostScreen(),
     ),
     GetPage(
+      name: AppRoutes.updateInterest,
+      page: () => UpdateInterestScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.verificationScreenPhone,
+      page: () => const VerificationScreenPhone(),
+    ),
+    GetPage(
+      name: AppRoutes.verificationScreenEMail,
+      page: () => const VerificationScreenEmail(),
+    ),
+    GetPage(
       name: AppRoutes.selectGender,
-      page: () {
-        final VoidCallback ontap = Get.arguments["action"];
-        return SelectGenderScreen(onClickToProceed: ontap);
-      },
+      page: () => SelectGenderScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.updateVideo,
+      page: () => UpdateVideoScreen(),
     ),
     GetPage(
       name: AppRoutes.viewAllPostedPics,
@@ -200,29 +220,13 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.introductionVideo,
-      page: () {
-        final VoidCallback ontap = Get.arguments["action"];
-        return IntroductionVideoScreen(onClickToProceed: ontap);
-      },
+      page: () => IntroductionVideoScreen(),
     ),
     GetPage(
       name: AppRoutes.dashboard,
       page: () {
         final int startScreen = Get.arguments["startScreen"];
         return DashBoardScreen(startscreen: startScreen);
-      },
-    ),
-    GetPage(
-      name: AppRoutes.verification,
-      page: () {
-        final VoidCallback? action = Get.arguments["action"];
-        final String? tempToken = Get.arguments["token"];
-        final bool? isEmailType = Get.arguments["isEmailType"];
-        return VerificationScreen(
-          onClickButtonNext: action ?? () {},
-          token: tempToken ?? "",
-          isEmailType: isEmailType ?? false,
-        );
       },
     ),
     GetPage(
@@ -239,10 +243,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.interest,
-      page: () {
-        final VoidCallback action = Get.arguments["action"];
-        return InterestScreen(onClickWhatNext: action);
-      },
+      page: () => InterestScreen(),
     ),
     GetPage(
       name: AppRoutes.uploadPicture,

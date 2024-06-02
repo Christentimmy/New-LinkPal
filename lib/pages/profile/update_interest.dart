@@ -5,8 +5,8 @@ import 'package:linkingpal/res/common_textfield.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
-class InterestScreen extends StatelessWidget {
-  InterestScreen({super.key});
+class UpdateInterestScreen extends StatelessWidget {
+  UpdateInterestScreen({super.key});
 
   final TextEditingController _searchController = TextEditingController();
   final _userController = Get.put(UserController());
@@ -44,7 +44,7 @@ class InterestScreen extends StatelessWidget {
       interests: [
         _choosenValue.value,
       ],
-      isSignUp: true,
+      isSignUp: false,
     );
     _isloading.value = false;
   }
@@ -114,13 +114,7 @@ class InterestScreen extends StatelessWidget {
                                               size: 17,
                                             ),
                                           ),
-                                          label: Text(
-                                            _allIntetrest[index][1],
-                                            style: const TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
+                                          label: Text(_allIntetrest[index][1]),
                                           side: BorderSide(
                                             color: _selectedIndex.value == index
                                                 ? Colors.deepOrangeAccent

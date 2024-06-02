@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
@@ -12,9 +11,8 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 
 class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  RxBool isloading = false.obs;
+  // RxBool isloading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
-  final _locController = Get.put(LocationController());
   final _tokenStorage = Get.put(TokenStorage());
 
   Future<void> loginUser({
@@ -24,27 +22,22 @@ class AuthController extends GetxController {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/auth/login"),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           "email": email,
           "password": password,
         }),
       );
+      if (response.statusCode == 404) {
+        return CustomSnackbar.show("Error", "Invalid Credentials");
+      }
       if (response.statusCode == 401) {
-        CustomSnackbar.show("Error", "Check your credentials again");
-        return;
+        return CustomSnackbar.show("Error", "Check your credentials again");
       }
 
       final responseData = await json.decode(response.body);
       final userModel = UserModel.fromJson(responseData["data"]);
       _tokenStorage.storeToken(responseData["token"]);
-
-      if (response.statusCode == 404) {
-        CustomSnackbar.show("Error", "Invalid Credentials");
-        return;
-      }
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -57,36 +50,21 @@ class AuthController extends GetxController {
         });
       }
       if (userModel.video.isEmpty) {
-        Get.toNamed(AppRoutes.introductionVideo, arguments: {
-          "action": () {
-            Get.toNamed(AppRoutes.dashboard, arguments: {
-              "startScreen": 0,
-            });
-          }
-        });
-        CustomSnackbar.show("Error", "Video not uploaded");
-        return;
+        Get.toNamed(AppRoutes.updateVideo);
+        return CustomSnackbar.show("Error", "Video not uploaded");
       }
       if (userModel.gender.isEmpty) {
-        Get.toNamed(AppRoutes.selectGender, arguments: {
-          "action": () {
-            Get.offAllNamed(AppRoutes.dashboard, arguments: {
-              "startScreen": 0,
-            });
-          }
-        });
+        Get.toNamed(AppRoutes.selectGender);
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
 
-      final controller = Get.put(RetrieveController());
+      final controller = Get.find<RetrieveController>();
       await controller.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
@@ -127,26 +105,19 @@ class AuthController extends GetxController {
 
       await _tokenStorage.deleteToken();
       await _tokenStorage.storeToken(decodedResponseBody["token"]);
-      final controller = Get.put(RetrieveController());
+      final controller = Get.find<RetrieveController>();
       await controller.getUserDetails();
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
-        "onClickToProceed": () async {
-          await _locController.getCurrentCityandUpload(
-            onCalledWhatNext: () {
-              Get.toNamed(AppRoutes.uploadPicture);
-            },
-          );
+        "onClickToProceed": () {
+          Get.toNamed(AppRoutes.uploadPicture);
         }
       });
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
   Future<void> changePassword({required String password}) async {
-    isloading.value = true;
     FocusManager.instance.primaryFocus?.unfocus();
     try {
       final responce = await http.post(
@@ -168,13 +139,10 @@ class AuthController extends GetxController {
       Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
-    }
+    } finally {}
   }
 
   Future<void> forgotPassword({required String email}) async {
-    isloading.value = true;
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/auth/forgot-password"),
@@ -189,14 +157,10 @@ class AuthController extends GetxController {
       }
 
       var decodedResponce = await json.decode(response.body);
-
-      String tempToken = await _verificationController.sendOTP(
-        emailOrPhoneNumber: email,
-        parameter: "email",
-      );
+      String tempToken =
+          await _verificationController.sendOTPEmail(email: email);
 
       //todo: change the logic because the forgotpassword have otp
-
       String? extractedCode = _verificationController
           .extractFourDigitCode(decodedResponce["message"].toString());
 
@@ -217,13 +181,10 @@ class AuthController extends GetxController {
       );
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 
   Future<void> deleteAccount() async {
-    isloading.value = true;
     final String? token = await TokenStorage().getToken();
     if (token == null) {
       CustomSnackbar.show("Error", "Invalid token, login again");
@@ -245,8 +206,6 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoutes.signin);
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
     }
   }
 }

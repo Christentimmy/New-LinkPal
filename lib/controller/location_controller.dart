@@ -6,7 +6,6 @@ import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class LocationController extends GetxController {
-  RxBool isloading = false.obs;
   final _userController = Get.put(UserController());
 
   Future<String> displayLocation({
@@ -26,10 +25,7 @@ class LocationController extends GetxController {
     }
   }
 
-  Future<void> getCurrentCityandUpload({
-    required VoidCallback onCalledWhatNext,
-  }) async {
-    isloading.value = true;
+  Future<void> getCurrentCityandUpload() async {
     final stopWatch = Stopwatch()..start();
     try {
       LocationPermission permission = await Geolocator.checkPermission();
@@ -47,15 +43,12 @@ class LocationController extends GetxController {
         "Success",
         "Location Uploaded Successfully",
       );
-      onCalledWhatNext();
     } catch (e) {
       debugPrint(e.toString());
       CustomSnackbar.show("Error", "An unexpected error occurred");
     } finally {
-      isloading.value = false;
       stopWatch.stop();
       debugPrint("Execution Time: ${stopWatch.elapsed}");
     }
   }
-
 }

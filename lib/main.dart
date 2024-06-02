@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
 void main() {
   Get.put(InternetandConectivityChecker());
+  Get.put(RetrieveController());
   runApp(const MyApp());
 }
 

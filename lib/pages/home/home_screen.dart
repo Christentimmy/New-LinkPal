@@ -19,8 +19,7 @@ import 'package:lottie/lottie.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
-  final _retrieveController = Get.put(RetrieveController());
-
+  final _retrieveController = Get.find<RetrieveController>();
   final _postController = Get.put(PostController());
 
   @override
@@ -206,7 +205,7 @@ class PostCardDisplay extends StatelessWidget {
                                 ),
                                 imageUrl: files,
                               )
-                            : VideoPlayWidget(videoUrl: files),
+                            : VideoNetworkPlayWidget(videoUrl: files),
                       );
                     },
                   ),

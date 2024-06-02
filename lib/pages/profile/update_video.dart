@@ -10,16 +10,14 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:video_player/video_player.dart';
 
-
-
-class IntroductionVideoScreen extends StatelessWidget {
-  IntroductionVideoScreen({
+class UpdateVideoScreen extends StatelessWidget {
+  UpdateVideoScreen({
     super.key,
   });
 
   final Rx<File?> _videoFile = Rx<File?>(null);
   final _userController = Get.put(UserController());
-  final RxBool _isLoading = false.obs;
+  final RxBool _isloading = false.obs;
   final RxBool _isVideoInitialized = false.obs;
 
   final Rx<VideoPlayerController?> _videoPlayerController =
@@ -45,23 +43,19 @@ class IntroductionVideoScreen extends StatelessWidget {
   }
 
   void submitVideo() async {
-    if (_videoFile.value != null) {
-      _isLoading.value = true;
-      await _userController.uploadVideo(
-        video: _videoFile.value!,
-        isSignUp: true,
-      );
-      _isLoading.value = false;
-    } else {
-      CustomSnackbar.show("Error", "Select a video");
-    }
+    _isloading.value = true;
+    await _userController.uploadVideo(
+      video: _videoFile.value!,
+      isSignUp: false,
+    );
+    _isloading.value = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Introduction Video"),
+        title: const Text("Update Video"),
         centerTitle: true,
       ),
       backgroundColor: AppColor.white,
@@ -92,7 +86,8 @@ class IntroductionVideoScreen extends StatelessWidget {
                     );
                   } else {
                     return AspectRatio(
-                      aspectRatio: _videoPlayerController.value!.value.aspectRatio,
+                      aspectRatio:
+                          _videoPlayerController.value!.value.aspectRatio,
                       child: Chewie(controller: _chewieController.value!),
                     );
                   }
@@ -102,7 +97,9 @@ class IntroductionVideoScreen extends StatelessWidget {
                 height: 10,
               ),
               CustomButton(
-                ontap: pickUserVideo,
+                ontap: () {
+                  pickUserVideo();
+                },
                 child: const Text(
                   "Upload video",
                   style: TextStyle(
@@ -115,7 +112,13 @@ class IntroductionVideoScreen extends StatelessWidget {
                 height: 10,
               ),
               GestureDetector(
-                onTap: submitVideo,
+                onTap: () {
+                  if (_videoFile.value != null) {
+                    submitVideo();
+                  } else {
+                    CustomSnackbar.show("Error", "Select a video");
+                  }
+                },
                 child: Obx(
                   () => Container(
                     height: 50,
@@ -128,7 +131,7 @@ class IntroductionVideoScreen extends StatelessWidget {
                         color: Colors.deepOrangeAccent,
                       ),
                     ),
-                    child: _isLoading.value
+                    child: _isloading.value
                         ? const Loader(
                             color: Colors.deepOrangeAccent,
                           )

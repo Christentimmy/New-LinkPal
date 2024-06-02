@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
@@ -12,6 +11,15 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   final TextEditingController _emailController = TextEditingController();
   final _authController = Get.put(AuthController());
+  final RxBool _isloading = false.obs;
+
+  void forgotPassword() async {
+    _isloading.value = true;
+    _authController.forgotPassword(
+      email: _emailController.text.trim(),
+    );
+    _isloading.value = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,17 +54,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Obx(
                   () => CustomButton(
                     ontap: () {
-                      _authController.forgotPassword(
-                        email: _emailController.text.trim(),
-                      );
+                      forgotPassword();
                       FocusManager.instance.primaryFocus?.unfocus();
                     },
-                    child: _authController.isloading.value ? const Loader() :  const Text(
-                      "Submit",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: _isloading.value
+                        ? const Loader()
+                        : const Text(
+                            "Submit",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
                 Container(),

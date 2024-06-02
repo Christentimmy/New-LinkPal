@@ -29,11 +29,15 @@ class _SwipeScreenState extends State<SwipeScreen> {
 
   @override
   void initState() {
+    getCards();
     super.initState();
-    _userController.getNearByUSer(
-      age: "80",
+  }
+
+  void getCards() async {
+    await _userController.getNearByUSer(
+      age: "90",
       mood: _retrieveController.userModel.value?.mood[0].toString() ?? "",
-      distance: "50",
+      distance: "800",
       interest: "all",
     );
   }
@@ -205,8 +209,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                 errorWidget: (context, url, error) => const Center(
                   child: Icon(Icons.error),
                 ),
-                imageUrl: controller.userModel.value?.image ??
-                    "https://images.unsplash.com/photo-1516637787777-d175e2e95b65?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjN8fGZlbWFsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D",
+                imageUrl: controller.userModel.value!.image,
               ),
             ),
             const SizedBox(width: 8),
@@ -460,6 +463,8 @@ class CustomBottomSheet extends StatelessWidget {
     required this.controller,
   });
 
+  final RxBool _isloading = false.obs;
+
   final List _allIntetrest = [
     "Game",
     "Clubbing",
@@ -499,6 +504,18 @@ class CustomBottomSheet extends StatelessWidget {
 
   String selectedInterest = "";
   String selectedMood = "";
+
+  void filterCards() async {
+    _isloading.value = true;
+    controller.peopleNearBy.clear();
+    await controller.getNearByUSer(
+      age: _maxAge.value.toString(),
+      mood: selectedMood,
+      distance: _distanceValue.value.toString(),
+      interest: selectedInterest,
+    );
+    _isloading.value = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -686,17 +703,11 @@ class CustomBottomSheet extends StatelessWidget {
           const Spacer(),
           Obx(
             () => CustomButton(
-              ontap: () async {
-                controller.peopleNearBy.clear();
-                await controller.getNearByUSer(
-                  age: _maxAge.value.toString(),
-                  mood: selectedMood,
-                  distance: _distanceValue.value.toString(),
-                  interest: selectedInterest,
-                );
+              ontap: () {
+                filterCards();
                 Get.back();
               },
-              child: controller.isloading.value
+              child: _isloading.value
                   ? const Loader()
                   : const Text(
                       "Apply Now",

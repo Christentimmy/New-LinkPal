@@ -13,6 +13,7 @@ class UploadProfilePicture extends StatelessWidget {
 
   final Rx<XFile?> _image = Rx<XFile?>(null);
   final _userController = Get.put(UserController());
+  final RxBool _isloading = false.obs;
 
   void _pickImageForUser() async {
     final imagePicked = await selectImageInFileFormat();
@@ -22,8 +23,9 @@ class UploadProfilePicture extends StatelessWidget {
   }
 
   void uploadPic() async {
-    _userController.isloading.value = true;
+    _isloading.value = true;
     await _userController.uploadPicture(image: _image.value!);
+    _isloading.value = false;
   }
 
   @override
@@ -116,7 +118,7 @@ class UploadProfilePicture extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                     color: Colors.black,
                   ),
-                  child: _userController.isloading.value
+                  child: _isloading.value
                       ? const Loader()
                       : const Text(
                           "Upload Picture",

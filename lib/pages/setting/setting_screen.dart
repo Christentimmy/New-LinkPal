@@ -24,6 +24,22 @@ class _SettingScreenState extends State<SettingScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _authController = Get.put(AuthController());
 
+  final RxBool _isloadingDelete = false.obs;
+
+  void deleteUser() async {
+    _isloadingDelete.value = true;
+    _retrieveController.userModel.value = null;
+    await _authController.deleteAccount();
+    await _tokenStorage.deleteToken();
+    _isloadingDelete.value = false;
+  }
+
+  void logOut() async {
+    _tokenStorage.deleteToken();
+    _retrieveController.userModel.value = null;
+    Get.offAllNamed(AppRoutes.walkthrough);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,9 +156,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 const SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
-                    _tokenStorage.deleteToken();
-                    _retrieveController.userModel.value = null;
-                    Get.offAllNamed(AppRoutes.walkthrough);
+                    logOut();
                   },
                   child: Container(
                     height: 50,
@@ -166,11 +180,8 @@ class _SettingScreenState extends State<SettingScreen> {
                 ),
                 const SizedBox(height: 10),
                 GestureDetector(
-                  onTap: () async {
-                    
-                    _retrieveController.userModel.value = null;
-                    await _authController.deleteAccount();
-                    await _tokenStorage.deleteToken();
+                  onTap: () {
+                    deleteUser();
                   },
                   child: Obx(
                     () => Container(
@@ -183,7 +194,7 @@ class _SettingScreenState extends State<SettingScreen> {
                           color: Colors.red,
                         ),
                       ),
-                      child: _authController.isloading.value
+                      child: _isloadingDelete.value
                           ? const Loader(
                               color: Colors.deepOrangeAccent,
                             )
