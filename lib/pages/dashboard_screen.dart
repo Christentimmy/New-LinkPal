@@ -10,7 +10,7 @@ import 'package:linkingpal/pages/setting/setting_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
 
 class DashBoardScreen extends StatefulWidget {
-  final int startscreen;
+  final int? startscreen;
   const DashBoardScreen({super.key, required this.startscreen});
 
   @override
@@ -34,7 +34,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   @override
   void initState() {
-    _currentIndex.value = widget.startscreen;
+    _currentIndex.value = widget.startscreen ?? 0;
     super.initState();
   }
 

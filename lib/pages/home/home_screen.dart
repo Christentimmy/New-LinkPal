@@ -267,8 +267,8 @@ class PostCardDisplay extends StatelessWidget {
                   left: 10,
                   child: GestureDetector(
                     onTap: () async {
-                      await _retrieveController
-                          .getSpecificUserId(postModel.value.createdBy.id);
+                      // await _retrieveController
+                      //     .getSpecificUserId(postModel.value.createdBy.id);
                       Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
                         "userId": postModel.value.createdBy.id,
                       });

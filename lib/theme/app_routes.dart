@@ -225,8 +225,8 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.dashboard,
       page: () {
-        final int startScreen = Get.arguments["startScreen"];
-        return DashBoardScreen(startscreen: startScreen);
+        final int? startScreen = Get.arguments["startScreen"];
+        return DashBoardScreen(startscreen: startScreen ?? 0);
       },
     ),
     GetPage(

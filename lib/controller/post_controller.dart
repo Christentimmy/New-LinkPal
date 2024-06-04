@@ -84,7 +84,9 @@ class PostController extends GetxController {
 
       await getAllPost();
       await getAllUserPost();
-      Get.offAllNamed(AppRoutes.dashboard);
+      Get.offAllNamed(AppRoutes.dashboard, arguments: {
+        "startScreen": 0,
+      });
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -296,11 +298,12 @@ class PostController extends GetxController {
       if (response.statusCode != 200) {
         return CustomSnackbar.show("Error", decodedResponce["message"]);
       }
-      Navigator.pop(context);
+      
     } catch (e) {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
+      Navigator.pop(context);
     }
   }
 
