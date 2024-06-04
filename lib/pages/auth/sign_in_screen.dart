@@ -35,13 +35,6 @@ class _SignInState extends State<SignIn> {
     _isloading.value = false;
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   Get.put(RetrieveController());
-  //   Get.put(PostController());
-  // }
-
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -79,7 +72,7 @@ class _SignInState extends State<SignIn> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/newlogo.jpeg"),
+                          image: AssetImage("assets/images/logo1.png"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -255,6 +248,9 @@ class _SignInState extends State<SignIn> {
                     "Sign Up",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
+                      fontSize: 15,
+                      color: Colors.deepOrangeAccent,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),

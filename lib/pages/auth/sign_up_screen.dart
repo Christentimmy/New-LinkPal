@@ -91,7 +91,7 @@ class SignUp extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/newlogo.jpeg"),
+                          image: AssetImage("assets/images/logo1.png"),
                           fit: BoxFit.cover,
                         ),
                       ),

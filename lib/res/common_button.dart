@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class CustomButton extends StatelessWidget {
   final VoidCallback ontap;
   final Widget child;
@@ -21,11 +20,10 @@ class CustomButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           gradient: const LinearGradient(
             colors: [
-              Colors.orangeAccent,
-              Colors.redAccent,
               Colors.deepPurpleAccent,
+              Colors.redAccent,
+              Colors.orangeAccent,
             ],
-           
           ),
         ),
         child: child,

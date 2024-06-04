@@ -9,6 +9,7 @@ import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/image_picker.dart';
+import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:video_player/video_player.dart';
