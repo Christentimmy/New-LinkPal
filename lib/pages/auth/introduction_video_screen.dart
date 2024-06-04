@@ -10,8 +10,6 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:video_player/video_player.dart';
 
-
-
 class IntroductionVideoScreen extends StatelessWidget {
   IntroductionVideoScreen({
     super.key,
@@ -74,12 +72,22 @@ class IntroductionVideoScreen extends StatelessWidget {
               Obx(
                 () {
                   if (_videoFile.value == null) {
-                    return const SizedBox(
-                      height: 300,
+                    return Container(
+                      height: 500,
                       width: 400,
-                      child: Icon(
-                        Icons.cloud_upload,
-                        size: 120,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: 2,
+                          color: Colors.black,
+                        ),
+                      ),
+                      child: const Text(
+                        "Upload Video",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     );
                   } else if (!_isVideoInitialized.value) {
@@ -92,7 +100,8 @@ class IntroductionVideoScreen extends StatelessWidget {
                     );
                   } else {
                     return AspectRatio(
-                      aspectRatio: _videoPlayerController.value!.value.aspectRatio,
+                      aspectRatio:
+                          _videoPlayerController.value!.value.aspectRatio,
                       child: Chewie(controller: _chewieController.value!),
                     );
                   }

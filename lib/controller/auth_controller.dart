@@ -11,7 +11,7 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 
 class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.dasimems.com/v1";
-  // RxBool isloading = false.obs;
+  RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
 
@@ -94,6 +94,15 @@ class AuthController extends GetxController {
         body: json.encode(userObject),
       );
       var decodedResponseBody = json.decode(responce.body);
+      print(decodedResponseBody);
+
+      if (responce.statusCode == 409) {
+        return CustomSnackbar.show(
+          "Error",
+          "Email already exist. Please login instead",
+        );
+      }
+
       if (responce.statusCode == 400) {
         return CustomSnackbar.show(
             "Error", decodedResponseBody["message"].toString());
@@ -114,6 +123,8 @@ class AuthController extends GetxController {
       });
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isLoading.value = false;
     }
   }
 

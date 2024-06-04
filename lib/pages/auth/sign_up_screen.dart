@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/date_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -20,34 +20,28 @@ class SignUp extends StatelessWidget {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final _authController = Get.put(AuthController());
+  final _dateController = Get.put(DateController());
   final RxBool _isShowPassword = false.obs;
-  final RxBool _isloading = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
-  final Rx<DateTime?> _timePickedByUser = Rx<DateTime?>(null);
-
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1920),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      _timePickedByUser.value = picked;
-    }
-  }
+  final RxInt _selectedDay = (-2).obs;
+  final RxInt _selectedMonth = (-2).obs;
+  final RxInt _selectedYear = (-2).obs;
 
   void signUpUser() async {
-    _isloading.value = true;
+    _authController.isLoading.value = true;
+    DateTime convertToDate = _dateController.getDate(
+      _selectedDay,
+      _selectedMonth,
+      _selectedYear,
+    );
     await _authController.signUpUSer(
       name: _fullNameController.text.trim(),
       email: _emailController.text.trim(),
       mobileNumber: _phoneNumberController.text.trim(),
-      dob: _timePickedByUser.value!,
+      dob: convertToDate,
       password: _passwordController.text,
       bio: _bioController.text.trim(),
     );
-    _isloading.value = false;
   }
 
   @override
@@ -168,46 +162,90 @@ class SignUp extends StatelessWidget {
                             isObscureText: false,
                             icon: Icons.email,
                             type: TextInputType.number,
+                            action: TextInputAction.next,
                           ),
                           const SizedBox(
                             height: 20,
                           ),
-                          GestureDetector(
-                            onTap: () async {
-                              _selectDate(context);
-                            },
-                            child: Container(
-                              height: 50,
-                              alignment: Alignment.centerLeft,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(
-                                  width: 1,
-                                  color: Colors.grey,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  _dateController.showCustomDays(
+                                      context, _selectedDay);
+                                },
+                                child: Obx(
+                                  () => Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.25,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: Colors.grey),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: _selectedDay.value == -2
+                                        ? const Text("DD")
+                                        : Text(
+                                            _selectedDay.value.toString(),
+                                          ),
+                                  ),
                                 ),
                               ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.date_range_rounded),
-                                  const SizedBox(width: 12),
-                                  Obx(
-                                    () => Text(
-                                      _timePickedByUser.value != null
-                                          ? DateFormat("MMM dd yyyy")
-                                              .format(_timePickedByUser.value!)
-                                          : "Date of Birth",
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        color: Colors.grey.shade700,
-                                      ),
+                              GestureDetector(
+                                onTap: () {
+                                  _dateController.showCustomMonths(
+                                    context,
+                                    _selectedMonth,
+                                  );
+                                },
+                                child: Obx(
+                                  () => Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.25,
+                                    height: 50,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: Colors.grey),
                                     ),
+                                    alignment: Alignment.center,
+                                    child: _selectedMonth.value == -2
+                                        ? const Text("MM")
+                                        : Text(_selectedMonth.value.toString()),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                              GestureDetector(
+                                onTap: () {
+                                  _dateController.showYearRange(
+                                    context,
+                                    _selectedYear,
+                                  );
+                                },
+                                child: Obx(
+                                  () => Container(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.25,
+                                    height: 50,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(color: Colors.grey),
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: _selectedYear.value == -2
+                                        ? const Text("YYYY")
+                                        : Text(
+                                            _selectedYear.value.toString(),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(
                             height: 20,
@@ -259,12 +297,14 @@ class SignUp extends StatelessWidget {
                             () => CustomButton(
                               ontap: () {
                                 if (_formKey.value.currentState!.validate() &&
-                                    _timePickedByUser.value != null) {
+                                    _selectedDay.value != -2 &&
+                                    _selectedMonth.value != -2 &&
+                                    _selectedYear.value != -2) {
                                   signUpUser();
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },
-                              child: _isloading.value
+                              child: _authController.isLoading.value
                                   ? const Loader()
                                   : const Text(
                                       "Sign Up",

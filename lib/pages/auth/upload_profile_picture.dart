@@ -32,73 +32,60 @@ class UploadProfilePicture extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SizedBox(
-        height: Get.height,
-        width: Get.width,
+      body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              child: Stack(
+            const SizedBox(height: 20),
+            Obx(
+              () => Stack(
+                alignment: Alignment.center,
                 children: [
                   Container(
-                    height: Get.height / 1.8,
-                    decoration: const BoxDecoration(
-                      color: AppColor.themeColor,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(200),
+                    height: MediaQuery.of(context).size.height * 0.57,
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 55,
+                      horizontal: 25,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        width: 2,
+                        color: Colors.grey,
                       ),
+                      color: Colors.white,
+                      image: _image.value != null
+                          ? DecorationImage(
+                              image: FileImage(
+                                File(_image.value!.path),
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const SizedBox(
-                        height: 100,
-                      ),
-                      Obx(
-                        () => Expanded(
-                          child: GestureDetector(
-                            onTap: _pickImageForUser,
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 55,
-                                horizontal: 35,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  width: 2,
-                                  color: Colors.grey,
-                                ),
-                                color: Colors.white,
-                                image: _image.value != null
-                                    ? DecorationImage(
-                                        image: FileImage(
-                                          File(_image.value!.path),
-                                        ),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : const DecorationImage(
-                                        image:
-                                            AssetImage("assets/images/pp1.jpg"),
-                                        fit: BoxFit.contain,
-                                      ),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                            ),
-                          ),
+                  GestureDetector(
+                    onTap: _pickImageForUser,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 2,
+                          color: Colors.black,
                         ),
+                        color: Colors.grey.shade50,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(
-                        height: 40,
-                      ),
-                    ],
-                  ),
+                      child: const Icon(Icons.cloud_upload_outlined, size: 50),
+                    ),
+                  )
                 ],
               ),
             ),
             const SizedBox(
-              height: 45,
+              height: 40,
             ),
             Obx(
               () => GestureDetector(
