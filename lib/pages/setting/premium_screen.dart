@@ -108,7 +108,7 @@ class PremiumCard extends StatelessWidget {
                 ),
               ),
               const Text(
-                "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Qui quas nulla ",
+                "Select or re-select activities/moods multiple times and have unlimited swipes",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,

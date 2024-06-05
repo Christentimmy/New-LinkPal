@@ -135,7 +135,10 @@ class CustomBioTextField extends StatelessWidget {
           horizontal: 20,
           vertical: 10,
         ),
-        labelText: hintText,
+        labelText: "$hintText(Optional)",
+        labelStyle: const TextStyle(
+          fontSize: 12,
+        ),
         prefixIcon: Icon(icon),
         suffixIcon: IconButton(
           onPressed: suffixTap,

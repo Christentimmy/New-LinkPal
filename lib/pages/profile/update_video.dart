@@ -68,12 +68,23 @@ class UpdateVideoScreen extends StatelessWidget {
               Obx(
                 () {
                   if (_videoFile.value == null) {
-                    return const SizedBox(
-                      height: 300,
+                    return Container(
+                      height: 500,
                       width: 400,
-                      child: Icon(
-                        Icons.cloud_upload,
-                        size: 120,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: 2,
+                          color: Colors.black,
+                        ),
+                      ),
+                      child: const Text(
+                        "Click Select Video\nButton Below",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     );
                   } else if (!_isVideoInitialized.value) {
@@ -101,10 +112,11 @@ class UpdateVideoScreen extends StatelessWidget {
                   pickUserVideo();
                 },
                 child: const Text(
-                  "Upload video",
+                  "Select video",
                   style: TextStyle(
                     color: AppColor.white,
-                    fontSize: 18,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -139,8 +151,8 @@ class UpdateVideoScreen extends StatelessWidget {
                             "Submit",
                             style: TextStyle(
                               color: AppColor.themeColor,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
                               decorationColor: AppColor.themeColor,
                             ),
                           ),

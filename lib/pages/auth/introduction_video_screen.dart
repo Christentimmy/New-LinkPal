@@ -84,7 +84,8 @@ class IntroductionVideoScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        "Upload Video",
+                        "Click Select Video\nButton Below",
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                         ),
@@ -113,10 +114,11 @@ class IntroductionVideoScreen extends StatelessWidget {
               CustomButton(
                 ontap: pickUserVideo,
                 child: const Text(
-                  "Upload video",
+                  "Select video",
                   style: TextStyle(
                     color: AppColor.white,
-                    fontSize: 18,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -145,8 +147,8 @@ class IntroductionVideoScreen extends StatelessWidget {
                             "Submit",
                             style: TextStyle(
                               color: AppColor.themeColor,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
                               decorationColor: AppColor.themeColor,
                             ),
                           ),

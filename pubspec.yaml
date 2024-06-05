@@ -60,6 +60,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^25.2.6
   wheel_slider: ^1.2.1
   flutter_spinbox: ^0.13.1
+  mockito: ^5.4.4
 
 dev_dependencies:
   flutter_test:

@@ -14,17 +14,24 @@ class AuthController extends GetxController {
   RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
+    late http.Client client;
+
+
+   AuthController({http.Client? client}) {
+    this.client = client ?? http.Client();
+  }
 
   Future<void> loginUser({
     required String email,
     required String password,
+    required bool isEmail,
   }) async {
     try {
-      final response = await http.post(
+      final response = await client.post(
         Uri.parse("$baseUrl/auth/login"),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          "email": email,
+        isEmail ? "email" : "mobile_number" : email,
           "password": password,
         }),
       );

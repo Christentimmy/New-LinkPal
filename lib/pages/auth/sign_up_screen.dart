@@ -137,7 +137,7 @@ class SignUp extends StatelessWidget {
                             height: 35,
                           ),
                           CustomTextField(
-                            hintText: "Enter Full Name",
+                            hintText: "Full Name",
                             controller: _fullNameController,
                             isObscureText: false,
                             icon: Icons.person,
@@ -147,7 +147,7 @@ class SignUp extends StatelessWidget {
                             height: 20,
                           ),
                           CustomTextField(
-                            hintText: "Enter Email",
+                            hintText: "Email",
                             controller: _emailController,
                             isObscureText: false,
                             icon: Icons.email,
@@ -157,7 +157,7 @@ class SignUp extends StatelessWidget {
                             height: 20,
                           ),
                           CustomTextField(
-                            hintText: "Enter Phone Number",
+                            hintText: "Phone Number",
                             controller: _phoneNumberController,
                             isObscureText: false,
                             icon: Icons.email,
@@ -231,7 +231,8 @@ class SignUp extends StatelessWidget {
                                         0.25,
                                     height: 50,
                                     margin: const EdgeInsets.symmetric(
-                                        horizontal: 5),
+                                      horizontal: 5,
+                                    ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
                                       border: Border.all(color: Colors.grey),
@@ -251,7 +252,7 @@ class SignUp extends StatelessWidget {
                             height: 20,
                           ),
                           CustomBioTextField(
-                            hintText: "Enter Bio",
+                            hintText: "Bio",
                             controller: _bioController,
                             isObscureText: false,
                             icon: Icons.person_pin,

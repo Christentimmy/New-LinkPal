@@ -28,9 +28,11 @@ class _SignInState extends State<SignIn> {
 
   void loginUser() async {
     _isloading.value = true;
+    bool isEmail = _emailController.text.contains("@");
     await _authController.loginUser(
       email: _emailController.text,
       password: _passwordController.text,
+      isEmail: isEmail,
     );
     _isloading.value = false;
   }
@@ -111,7 +113,7 @@ class _SignInState extends State<SignIn> {
                     child: Column(
                       children: [
                         CustomTextField(
-                          hintText: "Email",
+                          hintText: "Email / Phone Number",
                           controller: _emailController,
                           isObscureText: false,
                           icon: Icons.email,
