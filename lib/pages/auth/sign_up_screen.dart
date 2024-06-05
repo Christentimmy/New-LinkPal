@@ -30,9 +30,9 @@ class SignUp extends StatelessWidget {
   void signUpUser() async {
     _authController.isLoading.value = true;
     DateTime convertToDate = _dateController.getDate(
-      _selectedDay,
-      _selectedMonth,
-      _selectedYear,
+      _selectedDay.value,
+      _selectedMonth.value,
+      _selectedYear.value,
     );
     await _authController.signUpUSer(
       name: _fullNameController.text.trim(),

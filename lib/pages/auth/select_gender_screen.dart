@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
 // ignore: must_be_immutable
@@ -48,6 +49,9 @@ class SelectGenderScreen extends StatelessWidget {
       isSignUp: false,
     );
     _isloading.value = false;
+    Get.offAllNamed(AppRoutes.dashboard, arguments: {
+      "startScreen"  : 0,
+    });
   }
 
   @override

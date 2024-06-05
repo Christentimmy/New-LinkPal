@@ -221,15 +221,11 @@ class DateController extends GetxController {
     );
   }
 
-  DateTime getDate(RxInt selectedDay, RxInt selectedMonth, RxInt selectedYear) {
-    int day = selectedDay.value;
-    int month = selectedMonth.value;
-    int year = selectedYear.value;
-
+  DateTime getDate(int selectedDay, int selectedMonth, int selectedYear) {
     // Ensure the date is valid
-    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1) {
+    if (selectedDay < 1 || selectedDay > 31 || selectedMonth < 1 || selectedMonth > 12 || selectedYear < 1) {
       throw ArgumentError('Invalid date');
     }
-    return DateTime(year, month, day);
+    return DateTime(selectedYear, selectedMonth, selectedDay);
   }
 }
