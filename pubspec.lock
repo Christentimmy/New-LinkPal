@@ -422,14 +422,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.20"
-  flutter_spinbox:
-    dependency: "direct main"
-    description:
-      name: flutter_spinbox
-      sha256: "38d8c1a3a39f0fa72823d4470785f5e165f2deb53531ca7803b54ba45e4dbd46"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.13.1"
   flutter_staggered_animations:
     dependency: "direct main"
     description:
@@ -1394,22 +1386,6 @@ packages:
     description:
       name: webkit_inspection_protocol
       sha256: "87d3f2333bb240704cd3f1c6b5b7acd8a10e7f0bc28c28dcf14e782014f4a572"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
-  wheel_chooser:
-    dependency: transitive
-    description:
-      name: wheel_chooser
-      sha256: "3fee36f081f321c58a0b7b4afcdd92599f2ca520b3a1420084774e6b19cca1d8"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
-  wheel_slider:
-    dependency: "direct main"
-    description:
-      name: wheel_slider
-      sha256: "63a4cdfeb262d5c5bce2f59b6488b070c192960dcd789e9344a80e1e29ca6c2c"
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"

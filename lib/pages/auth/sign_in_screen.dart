@@ -9,7 +9,7 @@ import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
-import 'package:linkingpal/widgets/snack_bar.dart';
+// import 'package:linkingpal/widgets/snack_bar.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -166,15 +166,16 @@ class _SignInState extends State<SignIn> {
                         Obx(
                           () => CustomButton(
                             ontap: () {
-                              if (_formKey.value.currentState!.validate()) {
-                                loginUser();
-                              } else {
-                                CustomSnackbar.show(
-                                  "Error",
-                                  "Filled up the fields",
-                                );
-                              }
-                              FocusManager.instance.primaryFocus?.unfocus();
+                              Get.toNamed(AppRoutes.dashboard);
+                              // if (_formKey.value.currentState!.validate()) {
+                              //   loginUser();
+                              // } else {
+                              //   CustomSnackbar.show(
+                              //     "Error",
+                              //     "Filled up the fields",
+                              //   );
+                              // }
+                              // FocusManager.instance.primaryFocus?.unfocus();
                             },
                             child: _isloading.value
                                 ? const Loader()

@@ -13,6 +13,7 @@ import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:video_player/video_player.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class CreatePostScreen extends StatefulWidget {
   const CreatePostScreen({super.key});
@@ -28,6 +29,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   final Map<int, VideoPlayerController> _videoControllers = {};
   final RxList<XFile> _filesList = <XFile>[].obs;
   final RxList _tagList = [].obs;
+  RxBool _isloading = false.obs;
 
   void _pickImageForUser() async {
     final imagePicked = await selectImageInFileFormat();
@@ -56,6 +58,22 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     _tagList.value = hashtags;
   }
 
+  void postContent() async {
+    _postController.isloading.value = true;
+    extractHashtags(_textController.text);
+    if (_textController.text.isNotEmpty && _filesList.isNotEmpty) {
+      _postController.createPost(
+        textController: _textController,
+        pickedFiles: _filesList,
+        tags: _tagList,
+        context: context,
+      );
+      FocusManager.instance.primaryFocus?.unfocus();
+    } else {
+      CustomSnackbar.show("Error", "Fill the text and fill");
+    }
+  }
+
   @override
   void dispose() {
     // Dispose all video controllers
@@ -64,6 +82,30 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     });
     super.dispose();
   }
+
+  final List _allIntetrest = [
+    "Game",
+    "Clubbing",
+    "Having breakfast",
+    "Going out for lunch",
+    "Having dinner together",
+    "Going for drinks",
+    "Working out at the gym",
+    "Attending church/mosque",
+    "Going on holiday trips",
+    "Getting spa treatments",
+    "Shopping together",
+    "Watching Netflix and chilling",
+    "Being event or party partners",
+    "Cooking and chilling",
+    "Smoking together",
+    "Studying together",
+    "Playing sports",
+    "Going to concerts",
+    "Hiking or outdoor activities",
+    "Playing board games or video games",
+    "Traveling buddy",
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -317,19 +359,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               Obx(
                 () => CustomButton(
                   ontap: () {
-                    extractHashtags(_textController.text);
-                    if (_textController.text.isNotEmpty &&
-                        _filesList.isNotEmpty) {
-                      _postController.createPost(
-                        textController: _textController,
-                        pickedFiles: _filesList,
-                        tags: _tagList,
-                        context: context,
-                      );
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    } else {
-                      CustomSnackbar.show("Error", "Fill the text and fill");
-                    }
+                    postContent();
                   },
                   child: _postController.isloading.value
                       ? const Loader()
@@ -343,7 +373,118 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                         ),
                 ),
               ),
-              Container(),
+              const SizedBox(height: 10),
+              Obx(
+                () {
+                  return _isloading.value
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                "Activity/Mood",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 35,
+                              child: ListView.builder(
+                                itemCount: _allIntetrest.length,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 2,
+                                      ),
+                                      margin: const EdgeInsets.only(
+                                          left: 9, top: 5),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(40),
+                                      ),
+                                      child: Text(
+                                        _allIntetrest[index],
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            const Padding(
+                              padding: EdgeInsets.only(left: 8.0),
+                              child: Text(
+                                "Date",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                SfDateRangePicker();
+                              },
+                              child: Container(
+                                height: 45,
+                                width: double.infinity,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.only(left: 10),
+                                margin: const EdgeInsets.symmetric(horizontal: 5),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    width: 1,
+                                    color: Colors.black,
+                                  )
+                                ),
+                                child:const  Text("DD/MM/YYYY"),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                          ],
+                        )
+                      : const SizedBox();
+                },
+              ),
+              GestureDetector(
+                onTap: () {
+                  _isloading.value = !_isloading.value;
+                },
+                child: Container(
+                  height: 45,
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      width: 1,
+                      color: Colors.redAccent,
+                    ),
+                  ),
+                  child: const Text(
+                    "Create Event",
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.deepOrangeAccent,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -8,8 +8,8 @@ import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
-import 'package:video_player/video_player.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,55 +24,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _locationController = Get.put(LocationController());
   final _userController = Get.put(UserController());
-  final _isInitialized = false.obs;
   var isPlaying = false.obs;
-  final Rx<VideoPlayerController?> _controller =
-      Rx<VideoPlayerController?>(null);
-
-  void _onVideoPlayerChanged() {
-    if (_controller.value!.value.position ==
-        _controller.value!.value.duration) {
-      isPlaying.value = false;
-    } else {
-      isPlaying.value = _controller.value!.value.isPlaying;
-    }
-  }
 
   bool _isImage(String file) {
     final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     final extension = file.split('.').last.toLowerCase();
     return imageExtensions.contains(extension);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.value = VideoPlayerController.networkUrl(
-      Uri.parse(
-        _retrieveController.userModel.value?.video ?? "",
-      ),
-    );
-    _controller.value!.initialize().then((_) {
-      _isInitialized.value = true;
-      isPlaying.value = true;
-      _controller.value!.addListener(_onVideoPlayerChanged);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.value!.dispose();
-    _controller.value!.removeListener(_onVideoPlayerChanged);
-    super.dispose();
-  }
-
-  void playPause() {
-    if (_controller.value!.value.isPlaying) {
-      _controller.value!.pause();
-    } else {
-      _controller.value!.play();
-    }
-    isPlaying.value = _controller.value!.value.isPlaying;
   }
 
   @override
@@ -133,39 +90,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 )),
                           ),
-                          Obx(() {
-                            if (_isInitialized.value) {
-                              return Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: AspectRatio(
-                                      aspectRatio:
-                                          _controller.value!.value.aspectRatio,
-                                      child: VideoPlayer(
-                                        _controller.value!,
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: playPause,
-                                    child: Icon(
-                                      isPlaying.value
-                                          ? Icons.pause_circle_filled
-                                          : Icons.play_circle_filled,
-                                      size: 50,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                          }),
+                          Obx(
+                            () => VideoNetworkPlayWidget(
+                              videoUrl:
+                                  _retrieveController.userModel.value?.video ??
+                                      "",
+                            ),
+                          ),
                         ],
                       ),
                       Container(
@@ -186,7 +117,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   duration: const Duration(milliseconds: 600),
                                   curve: Curves.easeInOut,
                                 );
-                                _controller.value!.pause();
                               },
                               child: Container(
                                 height: 30,
@@ -206,7 +136,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   duration: const Duration(milliseconds: 600),
                                   curve: Curves.easeInOut,
                                 );
-                                _controller.value!.play();
                               },
                               child: Container(
                                 height: 30,

@@ -33,8 +33,6 @@ class PostController extends GetxController {
     List<dynamic>? tags,
     required BuildContext context,
   }) async {
-    isloading.value = true;
-
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
@@ -135,7 +133,6 @@ class PostController extends GetxController {
   }
 
   Future<void> getAllUserPost() async {
-    isloading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();

@@ -122,7 +122,9 @@ class SelectGenderScreen extends StatelessWidget {
           () => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: CustomButton(
-              ontap: () {},
+              ontap: () {
+                updateGender();
+              },
               child: _isloading.value
                   ? const Loader()
                   : const Text(

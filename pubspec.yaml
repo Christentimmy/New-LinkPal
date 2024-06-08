@@ -58,8 +58,6 @@ dependencies:
   vimeo_video_player: ^0.0.15
   chewie: ^1.5.0
   syncfusion_flutter_datepicker: ^25.2.6
-  wheel_slider: ^1.2.1
-  flutter_spinbox: ^0.13.1
 
 
 dev_dependencies:

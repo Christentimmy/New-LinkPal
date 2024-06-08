@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
@@ -26,6 +27,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _userController = Get.put(UserController());
   final controller = CardSwiperController();
+  final _swipeController = Get.put(SwipeController());
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                     builder: (context) {
                       return CustomBottomSheet(
                         controller: _userController,
+                        retrieveController: _retrieveController,
                       );
                     },
                   );
@@ -84,21 +87,26 @@ class _SwipeScreenState extends State<SwipeScreen> {
                         child: CardSwiper(
                           controller: controller,
                           cardsCount: _userController.peopleNearBy.length,
+                          onSwipe: (previousIndex, currentIndex, direction) {
+                            bool isBool = _swipeController.swipe();
+                            return isBool;
+                          },
                           allowedSwipeDirection:
                               const AllowedSwipeDirection.symmetric(
-                                  horizontal: true),
-                          cardBuilder: (context,
-                              index,
-                              horizontalOffsetPercentage,
-                              verticalOffsetPercentage) {
+                            horizontal: true,
+                          ),
+                          cardBuilder: (
+                            context,
+                            index,
+                            horizontalOffsetPercentage,
+                            verticalOffsetPercentage,
+                          ) {
                             final UserModel userModel =
                                 _userController.peopleNearBy[index];
                             return SwipeCard(
                               retrieveController: _retrieveController,
                               userController: _userController,
                               ontap: () {
-                                //  _retrieveController
-                                //     .getSpecificUserId(userModel.id);
                                 Get.toNamed(
                                   AppRoutes.swipedUserCardProfile,
                                   arguments: {
@@ -209,7 +217,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                 errorWidget: (context, url, error) => const Center(
                   child: Icon(Icons.error),
                 ),
-                imageUrl: controller.userModel.value!.image,
+                imageUrl: controller.userModel.value?.image ?? "",
               ),
             ),
             const SizedBox(width: 8),
@@ -458,9 +466,11 @@ class SwipeCard extends StatelessWidget {
 // ignore: must_be_immutable
 class CustomBottomSheet extends StatelessWidget {
   final UserController controller;
+  final RetrieveController retrieveController;
   CustomBottomSheet({
     super.key,
     required this.controller,
+    required this.retrieveController,
   });
 
   final RxBool _isloading = false.obs;
@@ -515,6 +525,16 @@ class CustomBottomSheet extends StatelessWidget {
       interest: selectedInterest,
     );
     _isloading.value = false;
+  }
+
+  void clearFilter(BuildContext context) async {
+    Navigator.pop(context);
+    await controller.getNearByUSer(
+      age: "80",
+      mood: retrieveController.userModel.value!.mood[0].toString(),
+      distance: "10",
+      interest: retrieveController.userModel.value!.gender,
+    );
   }
 
   @override
@@ -701,23 +721,44 @@ class CustomBottomSheet extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Obx(
-            () => CustomButton(
-              ontap: () {
-                filterCards();
-                Get.back();
-              },
-              child: _isloading.value
-                  ? const Loader()
-                  : const Text(
-                      "Apply Now",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+          Row(
+            children: [
+              Expanded(
+                child: Obx(
+                  () => CustomButton(
+                    ontap: () {
+                      filterCards();
+                      Get.back();
+                    },
+                    child: _isloading.value
+                        ? const Loader()
+                        : const Text(
+                            "Apply Now",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: CustomButton(
+                  ontap: () {
+                    clearFilter(context);
+                  },
+                  child: const Text(
+                    "Clear Filter",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
                     ),
-            ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
         ],

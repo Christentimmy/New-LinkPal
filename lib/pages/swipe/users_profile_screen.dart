@@ -6,6 +6,7 @@ import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class UsersProfileScreen extends StatefulWidget {
@@ -22,6 +23,7 @@ class UsersProfileScreen extends StatefulWidget {
 class _UsersProfileScreenState extends State<UsersProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -62,27 +64,113 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 15),
-                Obx(
-                  () => ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: CachedNetworkImage(
-                      imageUrl:
-                          _retrieveController.externalUserModel.value?.image ??
-                              "",
-                      height: MediaQuery.of(context).size.height / 3.2,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) {
-                        return const Center(
-                          child: Loader(
-                            color: Colors.deepOrangeAccent,
-                          ),
-                        );
-                      },
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Icons.error),
-                      ),
+                Container(
+                  height: MediaQuery.of(context).size.height / 2.4,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 2,
                     ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      PageView(
+                        controller: _pageController,
+                        children: [
+                          Obx(
+                            () => _retrieveController.externalUserModel.value?.image ==
+                                    null
+                                ? const Center(
+                                    child: Loader(
+                                      color: Colors.deepOrangeAccent,
+                                    ),
+                                  )
+                                : ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
+                                    child: CachedNetworkImage(
+                                      imageUrl: _retrieveController
+                                          .externalUserModel.value?.image ?? "",
+                                      height: double.infinity,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          const Center(
+                                        child: Loader(
+                                          color: Colors.deepOrangeAccent,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Center(
+                                        child: Icon(Icons.error),
+                                      ),
+                                    )),
+                          ),
+                          Obx(
+                            () => VideoNetworkPlayWidget(
+                              videoUrl: _retrieveController
+                                      .externalUserModel.value?.video ??
+                                  "",
+                            ),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        height: 55,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: const Icon(Icons.arrow_back_ios_new),
+                              ),
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                alignment: Alignment.center,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                child: const Icon(Icons.arrow_forward_ios),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 

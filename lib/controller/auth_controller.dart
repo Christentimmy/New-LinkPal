@@ -30,6 +30,7 @@ class AuthController extends GetxController {
           "password": password,
         }),
       );
+      print(response.body);
       if (response.statusCode == 404) {
         return CustomSnackbar.show("Error", "Invalid Credentials");
       }
@@ -55,7 +56,7 @@ class AuthController extends GetxController {
         Get.toNamed(AppRoutes.updateVideo);
         return CustomSnackbar.show("Error", "Video not uploaded");
       }
-      if (userModel.gender.isEmpty) {
+      if (userModel.gender.toLowerCase() == "null") {
         Get.toNamed(AppRoutes.selectGender);
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
