@@ -8,7 +8,7 @@ import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class RetrieveController extends GetxController {
-  String baseUrl = "https://linkingpal.dasimems.com/v1";
+  String baseUrl = "https://linkingpal.onrender.com/v1";
   @override
   void onInit() {
     getUserDetails();

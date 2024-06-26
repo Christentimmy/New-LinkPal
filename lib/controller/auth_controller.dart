@@ -10,7 +10,7 @@ import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class AuthController extends GetxController {
-  String baseUrl = "https://linkingpal.dasimems.com/v1";
+  String baseUrl = "https://linkingpal.onrender.com/v1";
   RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
@@ -62,7 +62,7 @@ class AuthController extends GetxController {
       }
 
       final controller = Get.find<RetrieveController>();
-      await controller.getUserDetails();
+      controller.getUserDetails();
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });

@@ -11,7 +11,6 @@ import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/message/message_screen.dart';
-import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
@@ -724,12 +723,42 @@ class CustomBottomSheet extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Obx(
-                  () => CustomButton(
-                    ontap: () {
-                      filterCards();
-                      Get.back();
-                    },
+                child: GestureDetector(
+                  onTap: () {
+                    clearFilter(context);
+                  },
+                  child: Container(
+                    height: 45,
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      "Clear Filter",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    filterCards();
+                    Get.back();
+                  },
+                  child: Container(
+                    height: 45,
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.redAccent,
+                    ),
                     child: _isloading.value
                         ? const Loader()
                         : const Text(
@@ -740,21 +769,6 @@ class CustomBottomSheet extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: CustomButton(
-                  ontap: () {
-                    clearFilter(context);
-                  },
-                  child: const Text(
-                    "Clear Filter",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
                   ),
                 ),
               ),

@@ -6,7 +6,7 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:http/http.dart' as http;
 
 class VerificationMethods extends GetxController {
-  String baseUrl = "https://linkingpal.dasimems.com/v1";
+  String baseUrl = "https://linkingpal.onrender.com/v1";
   RxBool isloading = false.obs;
 
   // Future<void> verifyEmail({

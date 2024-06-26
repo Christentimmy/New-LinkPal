@@ -14,6 +14,7 @@ import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -21,6 +22,12 @@ class HomeScreen extends StatelessWidget {
 
   final _retrieveController = Get.find<RetrieveController>();
   final _postController = Get.put(PostController());
+  final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey =
+      GlobalKey<LiquidPullToRefreshState>();
+
+  Future<void> _handleRefresh() async {
+    await _postController.getAllPost();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,37 +35,44 @@ class HomeScreen extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       backgroundColor: const Color.fromARGB(50, 158, 158, 158),
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: UserNameWidget(controller: _retrieveController),
-            ),
-            const SizedBox(height: 5),
-            Obx(
-              () {
-                return _postController.allPost.isEmpty
-                    ? Center(
-                        child: Lottie.network(
-                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                        ),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: _postController.allPost.length,
-                          itemBuilder: (context, index) {
-                            final post = _postController.allPost[index].obs;
-                            return PostCardDisplay(
-                              postModel: post,
-                              retrieveController: _retrieveController,
-                            );
-                          },
-                        ),
-                      );
-              },
-            ),
-          ],
+        child: LiquidPullToRefresh(
+          key: _refreshIndicatorKey,
+          onRefresh: _handleRefresh,
+          showChildOpacityTransition: false,
+          height: 60,
+          animSpeedFactor: 3.0,
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: UserNameWidget(controller: _retrieveController),
+              ),
+              const SizedBox(height: 5),
+              Obx(
+                () {
+                  return _postController.allPost.isEmpty
+                      ? Center(
+                          child: Lottie.network(
+                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                          ),
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: _postController.allPost.length,
+                            itemBuilder: (context, index) {
+                              final post = _postController.allPost[index].obs;
+                              return PostCardDisplay(
+                                postModel: post,
+                                retrieveController: _retrieveController,
+                              );
+                            },
+                          ),
+                        );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -702,86 +716,94 @@ class _CommentCardState extends State<CommentCard> {
       constraints: const BoxConstraints(
         minHeight: 60,
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 17,
-            backgroundImage: NetworkImage(
-              widget.commentModel.createdBy.avatar,
+      child: GestureDetector(
+        onTap: () {
+          Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
+            "userId": widget.commentModel.createdBy.id,
+          });
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 17,
+              backgroundImage: NetworkImage(
+                widget.commentModel.createdBy.avatar,
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            width: MediaQuery.of(context).size.width / 1.6,
-            constraints: const BoxConstraints(
-              minHeight: 50,
+            const SizedBox(width: 10),
+            Container(
+              width: MediaQuery.of(context).size.width / 1.6,
+              constraints: const BoxConstraints(
+                minHeight: 50,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.commentModel.createdBy.name,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    widget.commentModel.comment,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  // const SizedBox(height: 5),
+                  // const Text(
+                  //   "Reply",
+                  //   style: TextStyle(
+                  //     fontSize: 12,
+                  //     color: Colors.grey,
+                  //     fontStyle: FontStyle.italic,
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const Spacer(),
+            Column(
               children: [
-                Text(
-                  widget.commentModel.createdBy.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                GestureDetector(
+                  onTap: () {
+                    if (widget.commentModel.isLikeByUser) {
+                      widget.postController
+                          .dislikeComement(widget.commentModel.id);
+                      setState(() {});
+                    } else {
+                      widget.postController
+                          .likeComement(widget.commentModel.id);
+                      setState(() {});
+                    }
+                  },
+                  child: widget.commentModel.isLikeByUser
+                      ? const Icon(
+                          Icons.favorite,
+                          color: Colors.redAccent,
+                          size: 18,
+                        )
+                      : const Icon(
+                          Icons.favorite,
+                          color: Colors.grey,
+                          size: 18,
+                        ),
                 ),
                 Text(
-                  widget.commentModel.comment,
+                  widget.commentModel.likes.toString(),
                   style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                const Text(
-                  "Reply",
-                  style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ],
-            ),
-          ),
-          const Spacer(),
-          Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (widget.commentModel.isLikeByUser) {
-                    widget.postController
-                        .dislikeComement(widget.commentModel.id);
-                    setState(() {});
-                  } else {
-                    widget.postController.likeComement(widget.commentModel.id);
-                    setState(() {});
-                  }
-                },
-                child: widget.commentModel.isLikeByUser
-                    ? const Icon(
-                        Icons.favorite,
-                        color: Colors.redAccent,
-                        size: 18,
-                      )
-                    : const Icon(
-                        Icons.favorite,
-                        color: Colors.grey,
-                        size: 18,
-                      ),
-              ),
-              Text(
-                widget.commentModel.likes.toString(),
-                style: const TextStyle(
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }

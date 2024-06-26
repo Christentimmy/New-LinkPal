@@ -9,6 +9,7 @@ import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/snack_bar.dart';
 // import 'package:linkingpal/widgets/snack_bar.dart';
 
 class SignIn extends StatefulWidget {
@@ -74,7 +75,7 @@ class _SignInState extends State<SignIn> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/logo1.png"),
+                          image: AssetImage("assets/images/newlogo.jpeg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -166,16 +167,16 @@ class _SignInState extends State<SignIn> {
                         Obx(
                           () => CustomButton(
                             ontap: () {
-                              Get.toNamed(AppRoutes.dashboard);
-                              // if (_formKey.value.currentState!.validate()) {
-                              //   loginUser();
-                              // } else {
-                              //   CustomSnackbar.show(
-                              //     "Error",
-                              //     "Filled up the fields",
-                              //   );
-                              // }
-                              // FocusManager.instance.primaryFocus?.unfocus();
+                             
+                              if (_formKey.value.currentState!.validate()) {
+                                loginUser();
+                              } else {
+                                CustomSnackbar.show(
+                                  "Error",
+                                  "Filled up the fields",
+                                );
+                              }
+                              FocusManager.instance.primaryFocus?.unfocus();
                             },
                             child: _isloading.value
                                 ? const Loader()

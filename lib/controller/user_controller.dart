@@ -16,7 +16,7 @@ import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
   // RxBool isloading = false.obs;
-  String baseUrl = "https://linkingpal.dasimems.com/v1";
+  String baseUrl = "https://linkingpal.onrender.com/v1";
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
 

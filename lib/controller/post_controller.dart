@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 class PostController extends GetxController {
   RxBool isloading = false.obs;
   RxBool isCommentLoading = false.obs;
-  String baseUrl = "https://linkingpal.dasimems.com/v1";
+  String baseUrl = "https://linkingpal.onrender.com/v1";
   RxList<PostModel> allPost = RxList<PostModel>();
   RxList<PostModel> allUserPost = RxList<PostModel>();
   RxList<LikesModel> allLikes = RxList<LikesModel>();
@@ -42,7 +42,7 @@ class PostController extends GetxController {
     }
 
     try {
-      var uri = Uri.parse('https://linkingpal.dasimems.com/v1/post');
+      var uri = Uri.parse('$baseUrl/post');
       var request = http.MultipartRequest('POST', uri);
 
       //Authorization
@@ -124,6 +124,7 @@ class PostController extends GetxController {
       List<PostModel> postModels =
           postsFromData.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      allPost.clear();
       allPost.addAll(postModels);
     } catch (e) {
       debugPrint(e.toString());
@@ -333,6 +334,7 @@ class PostController extends GetxController {
         }),
       );
       final decodedResponce = json.decode(response.body);
+      print(decodedResponce);
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
