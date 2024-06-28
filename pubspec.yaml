@@ -60,6 +60,7 @@ dependencies:
   syncfusion_flutter_datepicker: ^25.2.6
   liquid_pull_to_refresh: ^3.0.1
   swipe_refresh: ^1.1.2
+  appinio_swiper: ^2.1.1
 
 
 dev_dependencies:

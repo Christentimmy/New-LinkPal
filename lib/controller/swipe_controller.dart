@@ -1,14 +1,22 @@
-
-
+import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/controller/user_controller.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class SwipeController extends GetxController {
   var swipeCount = 0.obs;
+  RxBool isloading = false.obs;
   var lastSwipeDate = ''.obs;
+  RxBool isDisable = false.obs;
+  String baseUrl = "https://linkingpal.onrender.com/v1";
+  final _userController = Get.put(UserController());
 
   @override
   void onInit() {
@@ -32,13 +40,17 @@ class SwipeController extends GetxController {
     }
   }
 
-  bool swipe() {
+  bool swipe({required String receiverId}) {
     if (swipeCount.value <= 10) {
       swipeCount.value++;
       _saveSwipeData();
+      sendMatchRequest(receiverId: receiverId);
       return true;
     } else {
-      CustomSnackbar.show("Limit Reached", "You have reached your daily swipe limit");
+      CustomSnackbar.show(
+        "Limit Reached",
+        "You have reached your daily swipe limit",
+      );
       Get.toNamed(AppRoutes.premium);
       return false;
     }
@@ -49,4 +61,46 @@ class SwipeController extends GetxController {
     prefs.setInt('swipeCount', swipeCount.value);
     prefs.setString('lastSwipeDate', lastSwipeDate.value);
   }
+
+  Future<bool> sendMatchRequest({
+    required String receiverId,
+  }) async {
+    isloading.value = true;
+    try {
+      final String? token = await TokenStorage().getToken();
+      final uri = Uri.parse("$baseUrl/user/match/request/$receiverId")
+          .replace(queryParameters: {
+        "receiverId": receiverId,
+      });
+      final response = await http.post(
+        uri,
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': 'Bearer $token',
+        },
+      );
+      final decodedResponse = json.decode(response.body);
+      if (response.statusCode == 400) {
+        CustomSnackbar.show("Sucess", decodedResponse["message"]);
+        return true;
+      }
+      if (response.statusCode != 201) {
+        CustomSnackbar.show("Error", decodedResponse["message"]);
+        return false;
+      }
+
+      UserModel user = _userController.peopleNearBy
+          .firstWhere((user) => user.id == receiverId);
+      user.isMatchRequestSent = true;
+      _userController.peopleNearBy.refresh();
+      return true;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    } finally {
+      isloading.value = false;
+    }
+  }
+
+
 }

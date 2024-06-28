@@ -17,8 +17,10 @@ class UserModel {
   final String image;
   final dynamic latitude;
   final dynamic longitude;
+  bool isMatchRequestSent;
 
-  const UserModel({
+   UserModel({
+    this.isMatchRequestSent = false,
     required this.email,
     required this.id,
     required this.isEmailVerified,

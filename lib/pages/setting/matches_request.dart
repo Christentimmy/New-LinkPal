@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
-import 'package:linkingpal/theme/app_routes.dart';
 import 'package:lottie/lottie.dart';
 
-class MatchesScreen extends StatefulWidget {
-  const MatchesScreen({super.key});
+class MatchesRequestScreen extends StatefulWidget {
+  const MatchesRequestScreen({super.key});
 
   @override
-  State<MatchesScreen> createState() => _MatchesScreenState();
+  State<MatchesRequestScreen> createState() => _MatchesRequestScreenState();
 }
 
-class _MatchesScreenState extends State<MatchesScreen> {
+class _MatchesRequestScreenState extends State<MatchesRequestScreen> {
   final _userController = Get.put(UserController());
   final _locationController = Get.put(LocationController());
   String animationLink =
@@ -21,7 +21,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   @override
   void initState() {
-    _userController.myMatches();
+    _userController.matchesRequestFromOthers();
     super.initState();
   }
 
@@ -31,7 +31,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text(
-          "My Matches",
+          "Matches Request",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -46,13 +46,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
             children: [
               const SizedBox(height: 10),
               Obx(
-                () => _userController.matches.isEmpty
+                () => _userController.matchesRequest.isEmpty
                     ? Center(
                         child: Lottie.network(animationLink),
                       )
                     : Expanded(
                         child: GridView.builder(
-                          itemCount: _userController.matches.length,
+                          itemCount: _userController.matchesRequest.length,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
@@ -62,17 +62,11 @@ class _MatchesScreenState extends State<MatchesScreen> {
                           ),
                           itemBuilder: (context, index) {
                             final UserModel users =
-                                _userController.matches[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Get.toNamed(AppRoutes.userProfileScreen, arguments: {
-                                  "userId": users.id,
-                                });
-                              },
-                              child: MatchesCard(
-                                users: users,
-                                locationController: _locationController,
-                              ),
+                                _userController.matchesRequest[index];
+                            return MatchesRequestCard(
+                              users: users,
+                              locationController: _locationController,
+                              userController: _userController,
                             );
                           },
                         ),
@@ -86,15 +80,18 @@ class _MatchesScreenState extends State<MatchesScreen> {
   }
 }
 
-class MatchesCard extends StatelessWidget {
-  final UserModel users;
-  final LocationController locationController;
-
-  const MatchesCard({
+class MatchesRequestCard extends StatelessWidget {
+  const MatchesRequestCard({
     super.key,
-    required this.locationController,
     required this.users,
-  });
+    required LocationController locationController,
+    required UserController userController,
+  })  : _locationController = locationController,
+        _userController = userController;
+
+  final UserModel users;
+  final LocationController _locationController;
+  final UserController _userController;
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +113,12 @@ class MatchesCard extends StatelessWidget {
             alignment: Alignment.bottomCenter,
             child: Container(
               height: 100,
+              margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -151,7 +152,7 @@ class MatchesCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       FutureBuilder(
-                        future: locationController.displayLocation(
+                        future: _locationController.displayLocation(
                           latitude: users.latitude ?? 0.0,
                           longitude: users.longitude ?? 0.0,
                         ),
@@ -178,6 +179,32 @@ class MatchesCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+        ),
+
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            onTap: () {
+              _userController.acceptMatchRequest(senderId: users.id);
+            },
+            child: Container(
+              height: 35,
+              alignment: Alignment.center,
+              color: Colors.deepPurpleAccent,
+              child: _userController.isFriendAccept.value
+                  ? const Icon(
+                      FontAwesomeIcons.check,
+                      color: Colors.white,
+                    )
+                  : const Text(
+                      "Accept",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ),

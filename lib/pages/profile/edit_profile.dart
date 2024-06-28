@@ -300,7 +300,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     var request = http.MultipartRequest(
       'POST',
-      Uri.parse("https://linkingpal.dasimems.com/v1/user/image"),
+      Uri.parse("${_retrieveController.baseUrl}/user/image"),
     );
     request.headers['Authorization'] = token;
     request.files.add(multipartFile);

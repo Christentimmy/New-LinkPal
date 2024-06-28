@@ -5,7 +5,6 @@ import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/pages/setting/matches_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
@@ -176,8 +175,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Obx(
                   () => FutureBuilder(
                     future: _locationController.displayLocation(
-                      latitude: _retrieveController.userModel.value?.latitude,
-                      longitude: _retrieveController.userModel.value?.longitude,
+                      latitude:
+                          _retrieveController.userModel.value?.latitude ?? 0.0,
+                      longitude:
+                          _retrieveController.userModel.value?.longitude ?? 0.0,
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -294,7 +295,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Text(
-                        _retrieveController.userModel.value?.mood[0],
+                        _retrieveController.userModel.value!.mood.isEmpty
+                            ? "Null"
+                            : _retrieveController.userModel.value!.mood[0],
                         style: const TextStyle(
                           color: Colors.deepPurple,
                           fontSize: 12,
@@ -432,7 +435,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
-                    Get.to(() => const MatchesScreen());
+                    Get.toNamed(AppRoutes.matches);
                   },
                   child: Container(
                     height: 45,
@@ -443,6 +446,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: const Text(
                       "My Matches",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.matchesRequest);
+                  },
+                  child: Container(
+                    height: 45,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xffFF496C),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      "Matches Request",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,

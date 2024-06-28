@@ -2,7 +2,6 @@ import 'package:another_xlider/another_xlider.dart';
 import 'package:another_xlider/models/handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
@@ -14,6 +13,7 @@ import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
+import 'package:appinio_swiper/appinio_swiper.dart';
 
 class SwipeScreen extends StatefulWidget {
   const SwipeScreen({super.key});
@@ -22,11 +22,15 @@ class SwipeScreen extends StatefulWidget {
   State<SwipeScreen> createState() => _SwipeScreenState();
 }
 
-class _SwipeScreenState extends State<SwipeScreen> {
+class _SwipeScreenState extends State<SwipeScreen>
+    with SingleTickerProviderStateMixin {
   final _retrieveController = Get.find<RetrieveController>();
   final _userController = Get.put(UserController());
-  final controller = CardSwiperController();
+  final AppinioSwiperController _controller = AppinioSwiperController();
   final _swipeController = Get.put(SwipeController());
+
+  final RxBool _isSwipeRight = false.obs;
+  final RxBool _isSwipeLeft = false.obs;
 
   @override
   void initState() {
@@ -48,7 +52,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 15),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(
             children: [
               widget1(
@@ -82,24 +86,30 @@ class _SwipeScreenState extends State<SwipeScreen> {
                           ),
                         ),
                       )
-                    : Expanded(
-                        child: CardSwiper(
-                          controller: controller,
-                          cardsCount: _userController.peopleNearBy.length,
-                          onSwipe: (previousIndex, currentIndex, direction) {
-                            bool isBool = _swipeController.swipe();
-                            return isBool;
+                    : SizedBox(
+                      height: MediaQuery.of(context).size.height / 1.49,
+                        child: AppinioSwiper(
+                          loop: true,
+                          controller: _controller,
+                          onSwipeBegin: (previousIndex, targetIndex, activity) {
+                            final UserModel userModel =
+                                _userController.peopleNearBy[previousIndex];
+                            final String receiverId = userModel.id;
+
+                            if (activity.direction == AxisDirection.right) {
+                              _isSwipeRight.value = true;
+                               _swipeController.swipe(receiverId: receiverId);
+                            } else {
+                              _isSwipeLeft.value = true;
+                            }
+                            Future.delayed(const Duration(seconds: 1), () {
+                              _isSwipeLeft.value = false;
+                              _isSwipeRight.value = false;
+                            });
                           },
-                          allowedSwipeDirection:
-                              const AllowedSwipeDirection.symmetric(
-                            horizontal: true,
-                          ),
-                          cardBuilder: (
-                            context,
-                            index,
-                            horizontalOffsetPercentage,
-                            verticalOffsetPercentage,
-                          ) {
+                          swipeOptions:
+                              const SwipeOptions.symmetric(horizontal: true),
+                          cardBuilder: (context, index) {
                             final UserModel userModel =
                                 _userController.peopleNearBy[index];
                             return SwipeCard(
@@ -110,14 +120,53 @@ class _SwipeScreenState extends State<SwipeScreen> {
                                   AppRoutes.swipedUserCardProfile,
                                   arguments: {
                                     "userId": userModel.id,
+                                    "isSent": userModel.isMatchRequestSent,
                                   },
                                 );
                               },
                               userModel: userModel,
                             );
                           },
+                          cardCount: _userController.peopleNearBy.length,
                         ),
                       );
+                // : Expanded(
+                //     child: CardSwiper(
+                //       controller: controller,
+                //       cardsCount: _userController.peopleNearBy.length,
+                //       onSwipe: (previousIndex, currentIndex, direction) {
+                //         bool isBool = _swipeController.swipe();
+                //         return isBool;
+                //       },
+                //       allowedSwipeDirection:
+                //           const AllowedSwipeDirection.symmetric(
+                //         horizontal: true,
+                //       ),
+                //       cardBuilder: (
+                //         context,
+                //         index,
+                //         horizontalOffsetPercentage,
+                //         verticalOffsetPercentage,
+                //       ) {
+                //         final UserModel userModel =
+                //             _userController.peopleNearBy[index];
+                //         return SwipeCard(
+                //           retrieveController: _retrieveController,
+                //           userController: _userController,
+                //           ontap: () {
+                //             Get.toNamed(
+                //               AppRoutes.swipedUserCardProfile,
+                //               arguments: {
+                //                 "userId": userModel.id,
+                //                 "isSent": userModel.isMatchRequestSent,
+                //               },
+                //             );
+                //           },
+                //           userModel: userModel,
+                //         );
+                //       },
+                //     ),
+                //   );
               }),
               const SizedBox(height: 20),
               Obx(() {
@@ -129,42 +178,44 @@ class _SwipeScreenState extends State<SwipeScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                controller.swipe(CardSwiperDirection.left);
+                                _controller.swipeLeft();
                               },
-                              child: Container(
-                                  height: 60,
-                                  width: 60,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        offset: const Offset(2, 2),
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 5,
-                                        blurRadius: 10,
-                                      ),
-                                    ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child:
-                                      const Icon(FontAwesomeIcons.x, size: 20)),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                height: _isSwipeLeft.value ? 70 : 60,
+                                width: _isSwipeLeft.value ? 70 : 60,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      offset: const Offset(2, 2),
+                                      color: Colors.black.withOpacity(0.05),
+                                      spreadRadius: 5,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                alignment: Alignment.center,
+                                child: const Icon(FontAwesomeIcons.x, size: 20),
+                              ),
                             ),
                             const Spacer(),
                             GestureDetector(
                               onTap: () {
-                                controller.swipe(CardSwiperDirection.right);
+                                _controller.swipeRight();
                               },
-                              child: Container(
-                                height: 60,
-                                width: 60,
+                              child: AnimatedContainer(
+                                height: _isSwipeRight.value ? 70 : 60,
+                                width: _isSwipeRight.value ? 70 : 60,
+                                duration: const Duration(milliseconds: 300),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
                                       offset: const Offset(2, 2),
-                                      color: Colors.black.withOpacity(0.2),
+                                      color: Colors.black.withOpacity(0.05),
                                       spreadRadius: 5,
                                       blurRadius: 10,
                                     ),
@@ -182,7 +233,7 @@ class _SwipeScreenState extends State<SwipeScreen> {
                         ),
                       );
               }),
-              const SizedBox(height: 40),
+              
             ],
           ),
         ),
@@ -333,7 +384,7 @@ class SwipeCard extends StatelessWidget {
       onTap: ontap,
       child: Container(
         margin: const EdgeInsets.symmetric(
-          horizontal: 5,
+          horizontal: 15,
           vertical: 15,
         ),
         child: Stack(

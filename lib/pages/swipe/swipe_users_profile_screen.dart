@@ -4,26 +4,32 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
-class UsersProfileScreen extends StatefulWidget {
+// ignore: must_be_immutable
+class SwipeUsersProfileScreen extends StatefulWidget {
   final String userId;
-  const UsersProfileScreen({
+  bool isSent;
+  SwipeUsersProfileScreen({
     super.key,
     required this.userId,
+    required this.isSent,
   });
 
   @override
-  State<UsersProfileScreen> createState() => _UsersProfileScreenState();
+  State<SwipeUsersProfileScreen> createState() =>
+      _SwipeUsersProfileScreenState();
 }
 
-class _UsersProfileScreenState extends State<UsersProfileScreen> {
+class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
   final PageController _pageController = PageController();
+  final _swipeController = Get.put(SwipeController());
 
   @override
   void initState() {
@@ -46,6 +52,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.isSent);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -82,7 +89,8 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                         controller: _pageController,
                         children: [
                           Obx(
-                            () => _retrieveController.externalUserModel.value?.image ==
+                            () => _retrieveController
+                                        .externalUserModel.value?.image ==
                                     null
                                 ? const Center(
                                     child: Loader(
@@ -93,7 +101,8 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                                     borderRadius: BorderRadius.circular(15),
                                     child: CachedNetworkImage(
                                       imageUrl: _retrieveController
-                                          .externalUserModel.value?.image ?? "",
+                                              .externalUserModel.value?.image ??
+                                          "",
                                       height: double.infinity,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
@@ -270,38 +279,39 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                         ),
                       ),
                       const Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          height: 60,
-                          width: 60,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                offset: const Offset(2, 2),
-                                color: Colors.black.withOpacity(0.2),
-                                spreadRadius: 5,
-                                blurRadius: 10,
-                              ),
-                            ],
+                      Obx(
+                        () => GestureDetector(
+                          onTap: () async {
+                            if (!widget.isSent) {
+                              widget.isSent = await _swipeController
+                                  .sendMatchRequest(receiverId: widget.userId);
+                            }
+                          },
+                          child: Container(
+                            height: 60,
+                            width: 60,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  offset: const Offset(2, 2),
+                                  color: Colors.black.withOpacity(0.2),
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: _swipeController.isloading.value
+                                ? const Loader(color: Colors.deepPurpleAccent)
+                                : Icon(
+                                    FontAwesomeIcons.solidHeart,
+                                    color: widget.isSent
+                                        ? Colors.redAccent
+                                        : Colors.grey,
+                                  ),
                           ),
-                          child: const Icon(
-                            FontAwesomeIcons.solidHeart,
-                            color: Colors.grey,
-                          ),
-                          // child: widget.model.value!.isLikeByUser
-                          //     ? const Icon(
-                          //         FontAwesomeIcons.solidHeart,
-                          //         color: Colors.redAccent,
-                          //         size: 30,
-                          //       )
-                          //     : const Icon(
-                          //         FontAwesomeIcons.solidHeart,
-                          //         color: Colors.grey,
-                          //       ),
                         ),
                       ),
                     ],

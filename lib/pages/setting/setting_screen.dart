@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
+import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -23,6 +24,7 @@ class _SettingScreenState extends State<SettingScreen> {
   final _tokenStorage = Get.put(TokenStorage());
   final _retrieveController = Get.find<RetrieveController>();
   final _authController = Get.put(AuthController());
+  final _userController = Get.put(UserController());
 
   final RxBool _isloadingDelete = false.obs;
 
@@ -37,6 +39,9 @@ class _SettingScreenState extends State<SettingScreen> {
   void logOut() async {
     _tokenStorage.deleteToken();
     _retrieveController.userModel.value = null;
+    _userController.matchesRequest.clear();
+    _userController.peopleNearBy.clear();
+    _userController.userNotifications.clear();
     Get.offAllNamed(AppRoutes.walkthrough);
   }
 

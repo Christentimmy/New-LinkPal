@@ -26,11 +26,13 @@ import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/onboarding/onboarding_screen.dart';
 import 'package:linkingpal/pages/profile/all_post_screen.dart';
 import 'package:linkingpal/pages/profile/edit_profile.dart';
+import 'package:linkingpal/pages/profile/other_users_profile.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
 import 'package:linkingpal/pages/profile/update_interest.dart';
 import 'package:linkingpal/pages/profile/update_video.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
+import 'package:linkingpal/pages/setting/matches_request.dart';
 import 'package:linkingpal/pages/setting/matches_screen.dart';
 import 'package:linkingpal/pages/setting/premium_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -39,7 +41,7 @@ import 'package:linkingpal/pages/setting/subcription_screen.dart';
 import 'package:linkingpal/pages/setting/terms_screen.dart';
 import 'package:linkingpal/pages/splash/splash_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
-import 'package:linkingpal/pages/swipe/users_profile_screen.dart';
+import 'package:linkingpal/pages/swipe/swipe_users_profile_screen.dart';
 import 'package:linkingpal/pages/swipe/view_posted_pics.dart';
 
 class AppRoutes {
@@ -85,6 +87,8 @@ class AppRoutes {
   static const String verificationScreenEMail = '/verificationScreenEMail';
   static const String verificationScreenPhone = '/verificationScreenPhone';
   static const String updateInterest = '/updateInterest';
+  static const String userProfileScreen = '/userProfileScreen';
+  static const String matchesRequest= '/matchesRequest';
 }
 
 class RouteHandler {
@@ -149,6 +153,17 @@ class RouteHandler {
       name: AppRoutes.swipedUserCardProfile,
       page: () {
         final String userId = Get.arguments["userId"];
+        final bool isSent = Get.arguments["isSent"];
+        return SwipeUsersProfileScreen(
+          userId: userId,
+          isSent: isSent,
+        );
+      },
+    ),
+    GetPage(
+      name: AppRoutes.userProfileScreen,
+      page: () {
+        final String userId = Get.arguments["userId"];
         return UsersProfileScreen(
           userId: userId,
         );
@@ -173,6 +188,10 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.matches,
       page: () => const MatchesScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.matchesRequest,
+      page: () => const MatchesRequestScreen(),
     ),
     GetPage(
       name: AppRoutes.blockedUser,

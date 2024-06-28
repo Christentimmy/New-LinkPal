@@ -15,22 +15,26 @@ class AuthController extends GetxController {
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.put(TokenStorage());
 
-
   Future<void> loginUser({
     required String email,
     required String password,
     required bool isEmail,
   }) async {
+    Stopwatch stopwatch = Stopwatch()..start();
     try {
+      final body = json.encode({
+        isEmail ? "email" : "mobile_number": email,
+        "password": password,
+      });
+
+      final requestTime = Stopwatch()..start();
       final response = await http.post(
         Uri.parse("$baseUrl/auth/login"),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          isEmail ? "email" : "mobile_number": email,
-          "password": password,
-        }),
+        body: body,
       );
-      print(response.body);
+      print("Network request time: ${requestTime.elapsed}");
+
       if (response.statusCode == 404) {
         return CustomSnackbar.show("Error", "Invalid Credentials");
       }
@@ -38,7 +42,10 @@ class AuthController extends GetxController {
         return CustomSnackbar.show("Error", "Check your credentials again");
       }
 
-      final responseData = await json.decode(response.body);
+      final decodeTime = Stopwatch()..start();
+      final responseData = json.decode(response.body);
+      print("JSON decode time: ${decodeTime.elapsed}");
+
       final userModel = UserModel.fromJson(responseData["data"]);
       _tokenStorage.storeToken(responseData["token"]);
 
@@ -61,13 +68,18 @@ class AuthController extends GetxController {
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
 
+      final controllerTime = Stopwatch()..start();
       final controller = Get.find<RetrieveController>();
       controller.getUserDetails();
+      print("Controller operation time: ${controllerTime.elapsed}");
+
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      print("Total execution time: ${stopwatch.elapsed}");
     }
   }
 

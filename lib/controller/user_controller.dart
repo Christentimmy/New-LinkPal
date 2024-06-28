@@ -16,9 +16,13 @@ import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
   // RxBool isloading = false.obs;
+  RxBool isFriendAccept = false.obs;
   String baseUrl = "https://linkingpal.onrender.com/v1";
+  final _retrieveController = Get.put(RetrieveController());
   RxList userNotifications = [].obs;
   RxList peopleNearBy = [].obs;
+  RxList matchesRequest = [].obs;
+  RxList matches = [].obs;
 
   Future<void> uploadVideo({
     required File video,
@@ -373,7 +377,6 @@ class UserController extends GetxController {
       CustomSnackbar.show("Error", "Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
-
     try {
       final uri = Uri.parse(
         "$baseUrl/user/nearby?age=$age&mood=$mood&distance=$distance&interest=$interest",
@@ -396,13 +399,89 @@ class UserController extends GetxController {
       }
 
       List<dynamic> dataFromResponse = responseData["data"];
-      List<UserModel> mapList = dataFromResponse
-          .map(
-            (e) => UserModel.fromJson(e),
-          )
+      List<UserModel> mapList =
+          dataFromResponse.map((e) => UserModel.fromJson(e)).toList();
+
+      List<UserModel> filteredList = mapList
+          .where((x) => x.id != _retrieveController.userModel.value!.id)
           .toList();
       peopleNearBy.clear();
-      peopleNearBy.value = mapList;
+      peopleNearBy.value = filteredList;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> matchesRequestFromOthers() async {
+    try {
+      final tokenStorage = Get.put(TokenStorage());
+      String? token = await tokenStorage.getToken();
+      final response =
+          await http.get(Uri.parse("$baseUrl/user/match/request"), headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      });
+      final decodedResponse = json.decode(response.body);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show("Error", decodedResponse["message"]);
+      }
+      final List data = decodedResponse["data"];
+      List mapped = data.map((e) => UserModel.fromJson(e)).toList();
+      matchesRequest.clear();
+      matchesRequest.value = mapped;
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> myMatches() async {
+    try {
+      final tokenStorage = Get.put(TokenStorage());
+      String? token = await tokenStorage.getToken();
+      final response = await http.get(
+        Uri.parse("$baseUrl/user/match"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      final decodedResponse = json.decode(response.body);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.show("Error", decodedResponse["message"]);
+      }
+      final List data = decodedResponse["data"];
+      List<UserModel> mappedData =
+          data.map((e) => UserModel.fromJson(e)).toList();
+      List excludeCurrentUSer = mappedData
+          .where((x) => x.id != _retrieveController.userModel.value!.id)
+          .toList();
+      matches.value = excludeCurrentUSer;
+      matches.refresh();
+      print(matches.length);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> acceptMatchRequest({required String senderId}) async {
+    try {
+      final tokenStorage = Get.put(TokenStorage());
+      String? token = await tokenStorage.getToken();
+      final uri = Uri.parse("$baseUrl/user/match/request/$senderId")
+          .replace(queryParameters: {
+        "senderId": senderId,
+      });
+
+      final response = await http.patch(uri, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      });
+      final decodedResponse = json.decode(response.body);
+      if (response.statusCode == 400) {
+        CustomSnackbar.show("Error", decodedResponse["message"]);
+        isFriendAccept.value = true;
+      }
+      isFriendAccept.value = true;
     } catch (e) {
       debugPrint(e.toString());
     }
