@@ -95,7 +95,6 @@ class _SwipeScreenState extends State<SwipeScreen>
                             final UserModel userModel =
                                 _userController.peopleNearBy[previousIndex];
                             final String receiverId = userModel.id;
-
                             if (activity.direction == AxisDirection.right) {
                               _isSwipeRight.value = true;
                                _swipeController.swipe(receiverId: receiverId);

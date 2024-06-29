@@ -528,6 +528,9 @@ class PostController extends GetxController {
       );
       final decoded = json.decode(response.body);
       List<dynamic> allLikesFromResponse = decoded["data"]["likes"];
+      for (var element in allLikesFromResponse) {
+        print(element);
+      }
       List<LikesModel> mapLikes =
           allLikesFromResponse.map((e) => LikesModel.fromJson(e)).toList();
       allLikes.value = mapLikes;

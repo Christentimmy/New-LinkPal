@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/models/likes_model.dart';
 import 'package:linkingpal/models/post_model.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
@@ -54,21 +55,34 @@ class _ReactedScreenState extends State<ReactedScreen> {
                   child: Column(
                     children: [
                       const Divider(),
-                     Obx(() => _postController.allLikes.isEmpty ?
-                     Center(
-                        child: Lottie.network(
-                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                        ),
-                      )
-                      :  Expanded(
-                        child: ListView.builder(
-                          itemCount: _postController.allLikes.length,
-                          itemBuilder: (context, index) {
-                            final likeData = _postController.allLikes[index];
-                            return DisplayLikesCard(likeData: likeData);
-                          },
-                        ),
-                      ),),
+                      Obx(
+                        () => _postController.allLikes.isEmpty
+                            ? Center(
+                                child: Lottie.network(
+                                  "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                ),
+                              )
+                            : Expanded(
+                                child: ListView.builder(
+                                  itemCount: _postController.allLikes.length,
+                                  itemBuilder: (context, index) {
+                                    final likeData =
+                                        _postController.allLikes[index];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Get.toNamed(AppRoutes.userProfileScreen,
+                                            arguments: {
+                                              "userId": likeData.createdBy.id,
+                                            });
+                                      },
+                                      child: DisplayLikesCard(
+                                        likeData: likeData,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                      ),
                     ],
                   ),
                 ),
@@ -91,8 +105,7 @@ class DisplayLikesCard extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 0),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 0),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: CachedNetworkImage(
@@ -104,8 +117,7 @@ class DisplayLikesCard extends StatelessWidget {
                   color: Colors.deepOrangeAccent,
                 ),
               ),
-              errorWidget: (context, url, error) =>
-                  const Center(
+              errorWidget: (context, url, error) => const Center(
                 child: Icon(Icons.error),
               ),
               imageUrl: likeData.createdBy.avatar,
