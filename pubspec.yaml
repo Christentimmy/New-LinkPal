@@ -61,6 +61,7 @@ dependencies:
   liquid_pull_to_refresh: ^3.0.1
   swipe_refresh: ^1.1.2
   appinio_swiper: ^2.1.1
+  web_socket_channel: ^2.4.5
 
 
 dev_dependencies:

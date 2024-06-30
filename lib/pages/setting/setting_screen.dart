@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
@@ -25,6 +26,7 @@ class _SettingScreenState extends State<SettingScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
+  final _postController = Get.put(PostController());
 
   final RxBool _isloadingDelete = false.obs;
 
@@ -42,6 +44,10 @@ class _SettingScreenState extends State<SettingScreen> {
     _userController.matchesRequest.clear();
     _userController.peopleNearBy.clear();
     _userController.userNotifications.clear();
+    _postController.allPost.clear();
+    _postController.allLikes.clear();
+    _postController.allUserPost.clear();
+    _postController.commentModelsList.clear();
     Get.offAllNamed(AppRoutes.walkthrough);
   }
 
