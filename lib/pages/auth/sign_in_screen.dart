@@ -75,9 +75,8 @@ class _SignInState extends State<SignIn> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/newlogo.jpeg"),
-                          fit: BoxFit.cover,
-                        ),
+                            image: AssetImage("assets/images/logo23.jpg"),
+                            fit: BoxFit.cover),
                       ),
                     ),
                   ),
@@ -167,7 +166,6 @@ class _SignInState extends State<SignIn> {
                         Obx(
                           () => CustomButton(
                             ontap: () {
-                             
                               if (_formKey.value.currentState!.validate()) {
                                 loginUser();
                               } else {
@@ -183,8 +181,9 @@ class _SignInState extends State<SignIn> {
                                 : const Text(
                                     "Login",
                                     style: TextStyle(
-                                      color: AppColor.white,
+                                      color: AppColor.pink,
                                       fontSize: 18,
+                                      fontWeight: FontWeight.w600
                                     ),
                                   ),
                           ),
@@ -253,8 +252,8 @@ class _SignInState extends State<SignIn> {
                     style: TextStyle(
                       decoration: TextDecoration.underline,
                       fontSize: 15,
-                      color: Colors.deepOrangeAccent,
-                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),

@@ -807,7 +807,7 @@ class CustomBottomSheet extends StatelessWidget {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: Colors.redAccent,
+                      color: Colors.black,
                     ),
                     child: _isloading.value
                         ? const Loader()

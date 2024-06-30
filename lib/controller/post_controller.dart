@@ -71,7 +71,6 @@ class PostController extends GetxController {
       http.StreamedResponse response = await request.send();
       var responseBody = await response.stream.bytesToString();
       final decodedResponse = await json.decode(responseBody);
-      debugPrint(decodedResponse.toString());
       if (response.statusCode != 201) {
         return CustomSnackbar.show(
           "Error",
@@ -81,7 +80,7 @@ class PostController extends GetxController {
       CustomSnackbar.show("Success", "Your post is now live!");
 
       await getAllPost();
-      await getAllUserPost();
+      getAllUserPost();
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
@@ -89,8 +88,8 @@ class PostController extends GetxController {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
-      pickedFiles.clear();
-      textController.clear();
+      // pickedFiles.clear();
+      // textController.clear();
     }
   }
 
@@ -121,6 +120,9 @@ class PostController extends GetxController {
         );
       }
       List<dynamic> postsFromData = decodedResponce["data"];
+      for (var i = 0; i < postsFromData.length; i++) {
+        print(postsFromData[i]["created_by"]);
+      }
       List<PostModel> postModels =
           postsFromData.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -296,7 +298,6 @@ class PostController extends GetxController {
       if (response.statusCode != 200) {
         return CustomSnackbar.show("Error", decodedResponce["message"]);
       }
-      
     } catch (e) {
       debugPrint(e.toString());
     } finally {

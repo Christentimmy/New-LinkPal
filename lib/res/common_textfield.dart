@@ -68,21 +68,21 @@ class CustomTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             width: 1,
-            color: Colors.orangeAccent,
+            color: Colors.pinkAccent,
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             width: 1,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             width: 1,
-            color: Colors.redAccent,
+            color: Colors.red,
           ),
         ),
       ),
@@ -155,7 +155,7 @@ class CustomBioTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(
             width: 1,
-            color: Colors.orangeAccent,
+            color: Colors.pinkAccent,
           ),
         ),
         errorBorder: OutlineInputBorder(

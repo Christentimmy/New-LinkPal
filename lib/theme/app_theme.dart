@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 
 class AppColor{
-
   static const themeColor = Color(0xFF000000);
+  static const pink = Colors.pink;
   static const bgColor = Color(0xFFF4F4F4);
   static const dummyText = Color(0xFF5E5E5E);
   static const redColor = Color(0xFFFF2929);

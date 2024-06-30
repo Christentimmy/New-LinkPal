@@ -83,7 +83,6 @@ class SignUp extends StatelessWidget {
                   const SizedBox(
                     height: 20,
                   ),
-
                   Center(
                     child: Container(
                       height: 80,
@@ -91,7 +90,7 @@ class SignUp extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/newlogo.jpeg"),
+                          image: AssetImage("assets/images/logo23.jpg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -333,6 +332,7 @@ class SignUp extends StatelessWidget {
                                   "Log In",
                                   style: TextStyle(
                                     decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),

@@ -87,7 +87,7 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
                         image: const DecorationImage(
-                          image: AssetImage("assets/images/newlogo.jpeg"),
+                          image: AssetImage("assets/images/logo23.jpg"),
                           fit: BoxFit.cover,
                         ),
                       ),
