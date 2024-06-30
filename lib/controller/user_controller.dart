@@ -426,7 +426,14 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", decodedResponse["message"]);
       }
       final List data = decodedResponse["data"];
-      List mapped = data.map((e) => UserModel.fromJson(e)).toList();
+      List filterMap = data
+          .where((e) =>
+              e.containsKey("avatar") &&
+              e.containsKey("longitude") &&
+              e.containsKey("latitude") &&
+              e.containsKey("name"))
+          .toList();
+      List mapped = filterMap.map((e) => UserModel.fromJson(e)).toList();
       matchesRequest.clear();
       matchesRequest.value = mapped;
     } catch (e) {
@@ -450,14 +457,20 @@ class UserController extends GetxController {
         return CustomSnackbar.show("Error", decodedResponse["message"]);
       }
       final List data = decodedResponse["data"];
+      final filterMap = data
+          .where((e) =>
+              e.containsKey("avatar") &&
+              e.containsKey("name") &&
+              e.containsKey("latitude") &&
+              e.containsKey("longitude"))
+          .toList();
       List<UserModel> mappedData =
-          data.map((e) => UserModel.fromJson(e)).toList();
+          filterMap.map((e) => UserModel.fromJson(e)).toList();
       List excludeCurrentUSer = mappedData
           .where((x) => x.id != _retrieveController.userModel.value!.id)
           .toList();
       matches.value = excludeCurrentUSer;
       matches.refresh();
-      print(matches.length);
     } catch (e) {
       debugPrint(e.toString());
     }

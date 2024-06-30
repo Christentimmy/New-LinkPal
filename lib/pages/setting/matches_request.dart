@@ -99,7 +99,10 @@ class MatchesRequestCard extends StatelessWidget {
       children: [
         // Image
         ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+          ),
           child: Image.network(
             users.image,
             fit: BoxFit.cover,
@@ -115,10 +118,7 @@ class MatchesRequestCard extends StatelessWidget {
               height: 100,
               margin: const EdgeInsets.only(bottom: 30),
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
+                borderRadius: const BorderRadius.only(),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -153,8 +153,8 @@ class MatchesRequestCard extends StatelessWidget {
                       const SizedBox(width: 5),
                       FutureBuilder(
                         future: _locationController.displayLocation(
-                          latitude: users.latitude ?? 0.0,
-                          longitude: users.longitude ?? 0.0,
+                          latitude: users.latitude,
+                          longitude: users.longitude,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==

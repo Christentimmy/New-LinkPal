@@ -120,11 +120,9 @@ class PostController extends GetxController {
         );
       }
       List<dynamic> postsFromData = decodedResponce["data"];
-      for (var i = 0; i < postsFromData.length; i++) {
-        print(postsFromData[i]["created_by"]);
-      }
+      List filterMap = postsFromData.where((e) => e.containsKey("created_by")).toList();
       List<PostModel> postModels =
-          postsFromData.map((e) => PostModel.fromJson(e)).toList();
+          filterMap.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       allPost.clear();
       allPost.addAll(postModels);
@@ -529,11 +527,9 @@ class PostController extends GetxController {
       );
       final decoded = json.decode(response.body);
       List<dynamic> allLikesFromResponse = decoded["data"]["likes"];
-      for (var element in allLikesFromResponse) {
-        print(element);
-      }
+      List filterMap = allLikesFromResponse.where((e)=> e.containsKey("created_by")).toList();
       List<LikesModel> mapLikes =
-          allLikesFromResponse.map((e) => LikesModel.fromJson(e)).toList();
+          filterMap.map((e) => LikesModel.fromJson(e)).toList();
       allLikes.value = mapLikes;
     } catch (e) {
       debugPrint(e.toString());
