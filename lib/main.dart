@@ -5,6 +5,7 @@ import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/swipe_controller.dart';
+import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
 void main() {
@@ -24,6 +25,8 @@ class MyApp extends StatelessWidget {
         Get.put(InternetandConectivityChecker());
         Get.put(RetrieveController());
         Get.put(PostController());
+        Get.put(WebSocketService());
+
       }),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

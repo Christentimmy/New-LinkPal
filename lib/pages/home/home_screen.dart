@@ -4,11 +4,13 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/home/people_who_reacted.dart';
+import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -44,6 +46,31 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
+              CustomButton(
+                ontap: () {
+                  final websocketService = Get.put(WebSocketService());
+                  websocketService.connect();
+                },
+                child: const Text(
+                  "connect",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              CustomButton(
+                ontap: () {
+                  final websocketService = Get.put(WebSocketService());
+                  websocketService.disconnect();
+                },
+                child: const Text(
+                  "disconnect",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: UserNameWidget(controller: _retrieveController),

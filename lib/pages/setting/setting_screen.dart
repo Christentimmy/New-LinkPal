@@ -35,6 +35,13 @@ class _SettingScreenState extends State<SettingScreen> {
     _retrieveController.userModel.value = null;
     await _authController.deleteAccount();
     await _tokenStorage.deleteToken();
+    _userController.matchesRequest.clear();
+    _userController.peopleNearBy.clear();
+    _userController.userNotifications.clear();
+    _postController.allPost.clear();
+    _postController.allLikes.clear();
+    _postController.allUserPost.clear();
+    _postController.commentModelsList.clear();
     _isloadingDelete.value = false;
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -10,6 +11,7 @@ class InterestScreen extends StatelessWidget {
 
   final TextEditingController _searchController = TextEditingController();
   final _userController = Get.put(UserController());
+  final _postController = Get.put(PostController());
 
   final List _allIntetrest = [
     [FontAwesomeIcons.music, "Clubbing"],
@@ -46,6 +48,7 @@ class InterestScreen extends StatelessWidget {
       ],
       isSignUp: true,
     );
+    await _postController.getAllPost();
     _isloading.value = false;
   }
 

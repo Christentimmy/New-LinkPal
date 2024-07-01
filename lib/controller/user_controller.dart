@@ -15,8 +15,7 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
-  // RxBool isloading = false.obs;
-  RxBool isFriendAccept = false.obs;
+  RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.onrender.com/v1";
   final _retrieveController = Get.put(RetrieveController());
   RxList userNotifications = [].obs;
@@ -477,6 +476,7 @@ class UserController extends GetxController {
   }
 
   Future<void> acceptMatchRequest({required String senderId}) async {
+    isloading.value = true;
     try {
       final tokenStorage = Get.put(TokenStorage());
       String? token = await tokenStorage.getToken();
@@ -490,13 +490,20 @@ class UserController extends GetxController {
         "Authorization": "Bearer $token",
       });
       final decodedResponse = json.decode(response.body);
+      print("reponse status code: ${response.statusCode}");
+      print(decodedResponse);
       if (response.statusCode == 400) {
-        CustomSnackbar.show("Error", decodedResponse["message"]);
-        isFriendAccept.value = true;
+        return CustomSnackbar.show("Error", decodedResponse["message"]);
       }
-      isFriendAccept.value = true;
+      final index = matchesRequest.indexWhere((element) => element.id == senderId);
+      if(index != -1){
+        List copyList = List.from(matchesRequest);
+      }
+      print(index);
     } catch (e) {
       debugPrint(e.toString());
+    } finally {
+      isloading.value = false;
     }
   }
 

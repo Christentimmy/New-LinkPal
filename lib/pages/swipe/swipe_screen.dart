@@ -74,7 +74,8 @@ class _SwipeScreenState extends State<SwipeScreen>
               ),
               Obx(() {
                 return _userController.peopleNearBy.isEmpty
-                    ? Expanded(
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height / 1.49,
                         child: Center(
                           child: Column(
                             children: [
@@ -87,7 +88,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                         ),
                       )
                     : SizedBox(
-                      height: MediaQuery.of(context).size.height / 1.49,
+                        height: MediaQuery.of(context).size.height / 1.49,
                         child: AppinioSwiper(
                           loop: true,
                           controller: _controller,
@@ -97,7 +98,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                             final String receiverId = userModel.id;
                             if (activity.direction == AxisDirection.right) {
                               _isSwipeRight.value = true;
-                               _swipeController.swipe(receiverId: receiverId);
+                              _swipeController.swipe(receiverId: receiverId);
                             } else {
                               _isSwipeLeft.value = true;
                             }
@@ -232,7 +233,6 @@ class _SwipeScreenState extends State<SwipeScreen>
                         ),
                       );
               }),
-              
             ],
           ),
         ),

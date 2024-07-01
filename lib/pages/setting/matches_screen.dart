@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -65,9 +66,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 _userController.matches[index];
                             return GestureDetector(
                               onTap: () {
-                                Get.toNamed(AppRoutes.userProfileScreen, arguments: {
-                                  "userId": users.id,
-                                });
+                                Get.toNamed(AppRoutes.userProfileScreen,
+                                    arguments: {
+                                      "userId": users.id,
+                                    });
                               },
                               child: MatchesCard(
                                 users: users,
@@ -105,6 +107,7 @@ class MatchesCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Image.network(
             users.image,
+            height: double.infinity,
             fit: BoxFit.cover,
             width: double.infinity,
           ),

@@ -88,7 +88,7 @@ class AppRoutes {
   static const String verificationScreenPhone = '/verificationScreenPhone';
   static const String updateInterest = '/updateInterest';
   static const String userProfileScreen = '/userProfileScreen';
-  static const String matchesRequest= '/matchesRequest';
+  static const String matchesRequest = '/matchesRequest';
 }
 
 class RouteHandler {

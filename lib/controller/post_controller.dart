@@ -23,6 +23,7 @@ class PostController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    print("Working here");
     getAllUserPost();
     getAllPost();
   }
@@ -88,8 +89,8 @@ class PostController extends GetxController {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
-      // pickedFiles.clear();
-      // textController.clear();
+      pickedFiles.clear();
+      textController.clear();
     }
   }
 
@@ -112,7 +113,7 @@ class PostController extends GetxController {
       );
 
       final decodedResponce = await json.decode(response.body);
-
+      print(decodedResponce);
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",
@@ -120,7 +121,8 @@ class PostController extends GetxController {
         );
       }
       List<dynamic> postsFromData = decodedResponce["data"];
-      List filterMap = postsFromData.where((e) => e.containsKey("created_by")).toList();
+      List filterMap =
+          postsFromData.where((e) => e.containsKey("created_by")).toList();
       List<PostModel> postModels =
           filterMap.map((e) => PostModel.fromJson(e)).toList();
       postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -146,6 +148,7 @@ class PostController extends GetxController {
       final response = await http.get(
         Uri.parse("$baseUrl/post"),
         headers: {
+          "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
       );
@@ -166,6 +169,7 @@ class PostController extends GetxController {
       postModelUserData.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       allUserPost.clear();
       allUserPost.addAll(postModelUserData);
+      allUserPost.refresh();
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -527,7 +531,9 @@ class PostController extends GetxController {
       );
       final decoded = json.decode(response.body);
       List<dynamic> allLikesFromResponse = decoded["data"]["likes"];
-      List filterMap = allLikesFromResponse.where((e)=> e.containsKey("created_by")).toList();
+      List filterMap = allLikesFromResponse
+          .where((e) => e.containsKey("created_by"))
+          .toList();
       List<LikesModel> mapLikes =
           filterMap.map((e) => LikesModel.fromJson(e)).toList();
       allLikes.value = mapLikes;

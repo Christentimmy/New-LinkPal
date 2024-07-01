@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
@@ -70,7 +71,10 @@ class AuthController extends GetxController {
 
       final controllerTime = Stopwatch()..start();
       final controller = Get.find<RetrieveController>();
+      final postController = Get.find<PostController>();
       controller.getUserDetails();
+      postController.getAllPost();
+      postController.getAllUserPost();
       print("Controller operation time: ${controllerTime.elapsed}");
 
       Get.offAllNamed(AppRoutes.dashboard, arguments: {

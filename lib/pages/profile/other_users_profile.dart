@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/websocket_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
@@ -23,6 +24,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
   final PageController _pageController = PageController();
+  final _webSocketController = Get.put(WebSocketController());
 
   @override
   void initState() {
@@ -247,8 +249,11 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                     ),
                     const Spacer(),
                     GestureDetector(
-                      onTap: () {
-                        Get.toNamed(AppRoutes.message);
+                      onTap: () async {
+                        String channelId = await _webSocketController
+                            .getChannelId(widget.userId);
+                        print(channelId);
+                        Get.toNamed(AppRoutes.chat);
                       },
                       child: Container(
                         width: 50,

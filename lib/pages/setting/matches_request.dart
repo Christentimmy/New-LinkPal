@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class MatchesRequestScreen extends StatefulWidget {
@@ -105,6 +105,7 @@ class MatchesRequestCard extends StatelessWidget {
           ),
           child: Image.network(
             users.image,
+            height: double.infinity,
             fit: BoxFit.cover,
             width: double.infinity,
           ),
@@ -164,7 +165,7 @@ class MatchesRequestCard extends StatelessWidget {
                             return Text('Error: ${snapshot.error}');
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return const Text('Location not available');
+                            return const Text('Unavailable');
                           } else {
                             return Text(
                               snapshot.data!,
@@ -186,25 +187,36 @@ class MatchesRequestCard extends StatelessWidget {
         Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
-            onTap: () {
-              _userController.acceptMatchRequest(senderId: users.id);
+            onTap: () async {
+              await _userController.acceptMatchRequest(senderId: users.id);
             },
-            child: Container(
-              height: 35,
-              alignment: Alignment.center,
-              color: Colors.deepPurpleAccent,
-              child: _userController.isFriendAccept.value
-                  ? const Icon(
-                      FontAwesomeIcons.check,
-                      color: Colors.white,
-                    )
-                  : const Text(
-                      "Accept",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+            child: Obx(
+              () => Container(
+                height: 35,
+                alignment: Alignment.center,
+                color: Colors.deepPurpleAccent,
+                child: _userController.isloading.value
+                    ? const Loader()
+                    : const Text(
+                        "Accept",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                // child: _userController.isFriendAccept.value
+                //     ? const Icon(
+                //         FontAwesomeIcons.check,
+                //         color: Colors.white,
+                //       )
+                //     : const Text(
+                //         "Accept",
+                //         style: TextStyle(
+                //           color: Colors.white,
+                //           fontWeight: FontWeight.w600,
+                //         ),
+                //       ),
+              ),
             ),
           ),
         ),
