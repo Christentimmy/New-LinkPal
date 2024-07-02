@@ -26,6 +26,7 @@ import 'package:linkingpal/pages/message/message_screen.dart';
 import 'package:linkingpal/pages/onboarding/onboarding_screen.dart';
 import 'package:linkingpal/pages/profile/all_post_screen.dart';
 import 'package:linkingpal/pages/profile/edit_profile.dart';
+import 'package:linkingpal/pages/profile/match_profile_screen.dart';
 import 'package:linkingpal/pages/profile/other_users_profile.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
 import 'package:linkingpal/pages/profile/update_interest.dart';
@@ -47,6 +48,7 @@ import 'package:linkingpal/pages/swipe/view_posted_pics.dart';
 class AppRoutes {
   static const String initial = '/';
   static const String walkthrough = '/walkthrough';
+  static const String matchesProfileScreen = '/matchesProfileScreen';
   static const String viewAllPostedPics = '/viewAllPostedPics';
   static const String introductionVideo = '/introductionVideo';
   static const String updateVideo = '/updateVideo';
@@ -96,6 +98,13 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.createPost,
       page: () => const CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.matchesProfileScreen,
+      page: (){
+        final userId = Get.arguments["userId"];
+        return MatchesProfileScreen(userId: userId);
+      },
     ),
     GetPage(
       name: AppRoutes.updateInterest,
@@ -215,7 +224,10 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.chat,
-      page: () => const ChatScreen(),
+      page: () {
+        final userId = Get.arguments["userId"];
+        return ChatScreen(userId: userId);
+      },
     ),
     GetPage(
       name: AppRoutes.message,

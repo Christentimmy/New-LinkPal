@@ -15,7 +15,6 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 import 'dart:math' show cos, sqrt, atan2, sin, pi;
 
 class UserController extends GetxController {
-  RxBool isloading = false.obs;
   String baseUrl = "https://linkingpal.onrender.com/v1";
   final _retrieveController = Get.put(RetrieveController());
   RxList userNotifications = [].obs;
@@ -433,6 +432,9 @@ class UserController extends GetxController {
               e.containsKey("name"))
           .toList();
       List mapped = filterMap.map((e) => UserModel.fromJson(e)).toList();
+      for (var i = 0; i < data.length; i++) {
+        print(data[i]);
+      }
       matchesRequest.clear();
       matchesRequest.value = mapped;
     } catch (e) {
@@ -475,35 +477,34 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> acceptMatchRequest({required String senderId}) async {
-    isloading.value = true;
+  Future<bool> acceptMatchRequest({
+    required String senderId,
+  }) async {
     try {
       final tokenStorage = Get.put(TokenStorage());
       String? token = await tokenStorage.getToken();
-      final uri = Uri.parse("$baseUrl/user/match/request/$senderId")
-          .replace(queryParameters: {
-        "senderId": senderId,
-      });
-
+      final uri = Uri.parse("$baseUrl/user/match/request/$senderId");
       final response = await http.patch(uri, headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       });
+      if (response.body.isEmpty) {
+        return true;
+      }
       final decodedResponse = json.decode(response.body);
-      print("reponse status code: ${response.statusCode}");
-      print(decodedResponse);
+      if (decodedResponse["message"] == "Already accepted") {
+        CustomSnackbar.show("Error", decodedResponse["message"]);
+        return true;
+      }
+
       if (response.statusCode == 400) {
-        return CustomSnackbar.show("Error", decodedResponse["message"]);
+        CustomSnackbar.show("Error", decodedResponse["message"]);
+        return false;
       }
-      final index = matchesRequest.indexWhere((element) => element.id == senderId);
-      if(index != -1){
-        List copyList = List.from(matchesRequest);
-      }
-      print(index);
+      return false;
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      isloading.value = false;
+      return false;
     }
   }
 

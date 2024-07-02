@@ -8,18 +8,18 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
-class UsersProfileScreen extends StatefulWidget {
+class MatchesProfileScreen extends StatefulWidget {
   final String userId;
-  const UsersProfileScreen({
+  const MatchesProfileScreen({
     super.key,
     required this.userId,
   });
 
   @override
-  State<UsersProfileScreen> createState() => _UsersProfileScreenState();
+  State<MatchesProfileScreen> createState() => _MatchesProfileScreenState();
 }
 
-class _UsersProfileScreenState extends State<UsersProfileScreen> {
+class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
   final PageController _pageController = PageController();
@@ -175,59 +175,94 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Obx(
-                  () => Row(
-                    children: [
-                      Text(
-                        _retrieveController.userModel.value?.name ?? "",
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.blue,
-                        size: 20,
-                      )
-                    ],
-                  ),
-                ),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.location_on,
-                      color: Colors.blue,
-                      size: 16,
-                    ),
-                    Obx(
-                      () => FutureBuilder(
-                        future: _locationController.displayLocation(
-                          latitude: _retrieveController
-                                  .externalUserModel.value?.latitude ??
-                              0.00,
-                          longitude: _retrieveController
-                                  .externalUserModel.value?.longitude ??
-                              0.00,
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const SizedBox();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text('Location not available');
-                          } else {
-                            return Text(
-                              snapshot.data!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w600,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Obx(
+                              () => Text(
+                                _retrieveController
+                                        .externalUserModel.value?.name ??
+                                    "",
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
-                            );
-                          }
-                        },
+                            ),
+                            const Icon(
+                              Icons.check_circle,
+                              color: Colors.blue,
+                              size: 20,
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 5),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.location_on,
+                              color: Colors.blue,
+                              size: 16,
+                            ),
+                            Obx(
+                              () => FutureBuilder(
+                                future: _locationController.displayLocation(
+                                  latitude: _retrieveController
+                                          .externalUserModel.value?.latitude ??
+                                      0.00,
+                                  longitude: _retrieveController
+                                          .externalUserModel.value?.longitude ??
+                                      0.00,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const SizedBox();
+                                  } else if (snapshot.hasError) {
+                                    return Text('Error: ${snapshot.error}');
+                                  } else if (!snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
+                                    return const Text('Location not available');
+                                  } else {
+                                    return Text(
+                                      snapshot.data!,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () async {
+                        Get.toNamed(AppRoutes.chat, arguments: {
+                          "userId": widget.userId,
+                        });
+                      },
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        child: const Icon(
+                          Icons.message,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ],
@@ -405,3 +440,23 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
 
 
 
+ //     GestureDetector(
+                //       onTap: () async {
+                //         String channelId = await _webSocketController
+                //             .getChannelId(widget.userId);
+                //             print(channelId);
+                //         Get.toNamed(AppRoutes.chat);
+                //       },
+                //       child: Container(
+                //         width: 50,
+                //         height: 50,
+                //         decoration: const BoxDecoration(
+                //           shape: BoxShape.circle,
+                //           color: Colors.deepPurpleAccent,
+                //         ),
+                //         child: const Icon(
+                //           Icons.message,
+                //           color: Colors.white,
+                //         ),
+                //       ),
+                //     ),

@@ -1,14 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/websocket_controller.dart';
+import 'package:linkingpal/controller/websocket_services_controller.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String userId;
+  const ChatScreen({super.key, required this.userId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final _webSocketController = Get.put(WebSocketController());
+  final _webSocketService = Get.put(WebSocketService());
+  final _textController = TextEditingController();
+  RxString channelId = "".obs;
+
+  @override
+  void initState() {
+    getChannelAndStreamExChat();
+    super.initState();
+  }
+
+  void getChannelAndStreamExChat() async {
+    channelId.value = await _webSocketController.getChannelId(widget.userId);
+    _webSocketService.streamLatestChat(channelId.value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,8 +162,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 40,
+                        height: 50,
                         width: 120,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 5),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -178,20 +199,37 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: TextFormField(
-                        decoration: const InputDecoration(
-                          suffixIcon: Icon(Icons.send, color: Colors.redAccent),
+                        controller: _textController,
+                        decoration: InputDecoration(
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              _webSocketService.sendMessage(
+                                _textController.text,
+                                channelId.value,
+                              );
+                              _webSocketService.streamLatestChat(channelId.value);
+                            },
+                            child: const Icon(
+                              Icons.send,
+                              color: Colors.redAccent,
+                            ),
+                          ),
                           hintText: "Type Here...",
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide.none,
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide.none,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const Icon(Icons.image, color: Colors.deepPurpleAccent, size: 30),
+                  const Icon(
+                    Icons.image,
+                    color: Colors.deepPurpleAccent,
+                    size: 30,
+                  ),
                 ],
               ),
             ],

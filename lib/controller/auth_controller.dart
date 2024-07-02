@@ -34,6 +34,7 @@ class AuthController extends GetxController {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
+      print(response.body);
       print("Network request time: ${requestTime.elapsed}");
 
       if (response.statusCode == 404) {
@@ -48,7 +49,7 @@ class AuthController extends GetxController {
       print("JSON decode time: ${decodeTime.elapsed}");
 
       final userModel = UserModel.fromJson(responseData["data"]);
-      _tokenStorage.storeToken(responseData["token"]);
+      await _tokenStorage.storeToken(responseData["token"]);
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");

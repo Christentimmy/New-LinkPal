@@ -113,7 +113,6 @@ class PostController extends GetxController {
       );
 
       final decodedResponce = await json.decode(response.body);
-      print(decodedResponce);
       if (response.statusCode != 200) {
         return CustomSnackbar.show(
           "Error",

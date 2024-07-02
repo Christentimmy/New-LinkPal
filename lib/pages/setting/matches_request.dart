@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
@@ -23,6 +24,12 @@ class _MatchesRequestScreenState extends State<MatchesRequestScreen> {
   void initState() {
     _userController.matchesRequestFromOthers();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _userController.matchesRequest.clear();
+    super.dispose();
   }
 
   @override
@@ -81,7 +88,7 @@ class _MatchesRequestScreenState extends State<MatchesRequestScreen> {
 }
 
 class MatchesRequestCard extends StatelessWidget {
-  const MatchesRequestCard({
+  MatchesRequestCard({
     super.key,
     required this.users,
     required LocationController locationController,
@@ -92,6 +99,18 @@ class MatchesRequestCard extends StatelessWidget {
   final UserModel users;
   final LocationController _locationController;
   final UserController _userController;
+  final RxBool _isloading = false.obs;
+
+  Future<void> sendMatchRequest() async {
+    _isloading.value = true;
+    _isFriendAccpeted.value = await _userController.acceptMatchRequest(
+      senderId: users.id,
+    );
+    print(_isFriendAccpeted.value);
+    _isloading.value = false;
+  }
+
+  final RxBool _isFriendAccpeted = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -187,23 +206,28 @@ class MatchesRequestCard extends StatelessWidget {
         Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
-            onTap: () async {
-              await _userController.acceptMatchRequest(senderId: users.id);
+            onTap: () {
+              sendMatchRequest();
             },
             child: Obx(
               () => Container(
                 height: 35,
                 alignment: Alignment.center,
                 color: Colors.deepPurpleAccent,
-                child: _userController.isloading.value
+                child: _isloading.value
                     ? const Loader()
-                    : const Text(
-                        "Accept",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                    : _isFriendAccpeted.value
+                        ? const Icon(
+                            FontAwesomeIcons.check,
+                            color: Colors.white,
+                          )
+                        : const Text(
+                            "Accept",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                 // child: _userController.isFriendAccept.value
                 //     ? const Icon(
                 //         FontAwesomeIcons.check,

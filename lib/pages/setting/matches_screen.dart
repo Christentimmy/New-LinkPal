@@ -1,10 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
-import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -66,7 +67,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 _userController.matches[index];
                             return GestureDetector(
                               onTap: () {
-                                Get.toNamed(AppRoutes.userProfileScreen,
+                                Get.toNamed(AppRoutes.matchesProfileScreen,
                                     arguments: {
                                       "userId": users.id,
                                     });
@@ -105,11 +106,19 @@ class MatchesCard extends StatelessWidget {
         // Image
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
-          child: Image.network(
-            users.image,
+          child: CachedNetworkImage(
+            imageUrl: users.image,
             height: double.infinity,
-            fit: BoxFit.cover,
             width: double.infinity,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => const Center(
+              child: Loader(
+                color: Colors.deepOrangeAccent,
+              ),
+            ),
+            errorWidget: (context, url, error) => const Center(
+              child: Icon(Icons.error),
+            ),
           ),
         ),
 

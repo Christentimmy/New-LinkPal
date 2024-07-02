@@ -46,31 +46,31 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              CustomButton(
-                ontap: () {
-                  final websocketService = Get.put(WebSocketService());
-                  websocketService.connect();
-                },
-                child: const Text(
-                  "connect",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              CustomButton(
-                ontap: () {
-                  final websocketService = Get.put(WebSocketService());
-                  websocketService.disconnect();
-                },
-                child: const Text(
-                  "disconnect",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+              // CustomButton(
+              //   ontap: () {
+              //     final websocketService = Get.put(WebSocketService());
+              //     websocketService.connect();
+              //   },
+              //   child: const Text(
+              //     "connect",
+              //     style: TextStyle(
+              //       color: Colors.white,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 20),
+              // CustomButton(
+              //   ontap: () {
+              //     final websocketService = Get.put(WebSocketService());
+              //     websocketService.disconnect();
+              //   },
+              //   child: const Text(
+              //     "disconnect",
+              //     style: TextStyle(
+              //       color: Colors.white,
+              //     ),
+              //   ),
+              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: UserNameWidget(controller: _retrieveController),

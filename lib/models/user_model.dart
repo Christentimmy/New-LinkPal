@@ -19,7 +19,7 @@ class UserModel {
   final dynamic longitude;
   bool isMatchRequestSent;
 
-   UserModel({
+  UserModel({
     this.isMatchRequestSent = false,
     required this.email,
     required this.id,
@@ -61,9 +61,29 @@ class UserModel {
       latitude: json["latitude"] ?? "",
       longitude: json["longitude"] ?? "",
       gender: json["gender"] ?? "",
-     );
+    );
+  }
+
+  factory UserModel.empty() {
+    return UserModel(
+      email: "",
+      id: "",
+      isEmailVerified: false,
+      isPhoneVerified: false,
+      isVerified: false,
+      hasSubscribed: false,
+      createdAt: "",
+      updatedAt: "",
+      video: "",
+      name: "",
+      bio: "",
+      dob: "",
+      mood: [],
+      mobileNumber: 0,
+      image: "",
+      latitude: "",
+      longitude: "",
+      gender: "",
+    );
   }
 }
-
-
-

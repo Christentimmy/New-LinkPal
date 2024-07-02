@@ -6,6 +6,8 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
+import 'package:linkingpal/controller/websocket_services_controller.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -27,6 +29,7 @@ class _SettingScreenState extends State<SettingScreen> {
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
+  final _webSocketController = Get.put(WebSocketService());
 
   final RxBool _isloadingDelete = false.obs;
 
@@ -48,7 +51,10 @@ class _SettingScreenState extends State<SettingScreen> {
   void logOut() async {
     _tokenStorage.deleteToken();
     _retrieveController.userModel.value = null;
+    _webSocketController.disconnect();
+    UserModel.empty();
     _userController.matchesRequest.clear();
+    _userController.matches.clear();
     _userController.peopleNearBy.clear();
     _userController.userNotifications.clear();
     _postController.allPost.clear();
