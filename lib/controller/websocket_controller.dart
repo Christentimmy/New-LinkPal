@@ -7,6 +7,8 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 
 class WebSocketController extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
+
+  
   Future<String> getChannelId(String recieverId) async {
     try {
       final token = await TokenStorage().getToken();

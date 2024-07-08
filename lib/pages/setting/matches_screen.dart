@@ -70,6 +70,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 Get.toNamed(AppRoutes.matchesProfileScreen,
                                     arguments: {
                                       "userId": users.id,
+                                      "name": users.name,
                                     });
                               },
                               child: MatchesCard(

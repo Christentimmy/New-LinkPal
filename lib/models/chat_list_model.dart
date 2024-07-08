@@ -1,4 +1,122 @@
-import 'package:linkingpal/models/user_model.dart';
+// import 'package:linkingpal/models/user_model.dart';
+
+// class ChatListModel {
+//   final String channel;
+//   final String name;
+//   final LastSentMessage lastSentMessage;
+//   final int unRead;
+//   final DateTime lastTimeUpdated;
+//   final bool canSendMessage;
+
+//   ChatListModel({
+//     required this.channel,
+//     required this.name,
+//     required this.lastSentMessage,
+//     required this.unRead,
+//     required this.lastTimeUpdated,
+//     required this.canSendMessage,
+//   });
+
+//   factory ChatListModel.fromJson(Map<String, dynamic> json) {
+//     return ChatListModel(
+//       channel: json["channel"] ?? "",
+//       name: json["name"] ?? "",
+//       lastSentMessage: json["last_sent_message"] != null
+//           ? LastSentMessage.fromJson(json["last_sent_message"])
+//           : LastSentMessage.empty(),
+//       unRead: json["un_read"] ?? 0,
+//       lastTimeUpdated: json["last_time_updated"] ?? DateTime.now(),
+//       canSendMessage: json["can_send_message"] ?? false,
+//     );
+//   }
+// }
+
+// class LastSentMessage {
+//   final String id;
+//   final DateTime createdAt;
+//   final DateTime updatedAt;
+//   final String channel;
+//   final List<UserChatListModel> users;
+//   final String message;
+//   final List<String> files;
+//   final String senderId;
+//   final int v;
+
+//   LastSentMessage({
+//     required this.id,
+//     required this.createdAt,
+//     required this.updatedAt,
+//     required this.channel,
+//     required this.users,
+//     required this.message,
+//     required this.files,
+//     required this.senderId,
+//     required this.v,
+//   });
+
+//   factory LastSentMessage.fromJson(Map<String, dynamic> json) {
+//     return LastSentMessage(
+//       id: json["id"] ?? "",
+//       createdAt: json["created at"] ?? DateTime.now(),
+//       updatedAt: json["updated_at"] ?? DateTime.now(),
+//       channel: json["channel"] ?? "",
+//       users: json["users"] !=  null ? json["users"].map((e)=> UserModel.fromJson(e)).toList() : [],
+//       message: json["message"] ?? "",
+//       files: List<String>.from(json["files"] ?? []),
+//       senderId: json["senderId"] ?? "",
+//       v: json["__v"] ?? 0,
+//     );
+//   }
+
+//   factory LastSentMessage.empty() {
+//     return LastSentMessage(
+//       id: "",
+//       createdAt: DateTime.now(),
+//       updatedAt: DateTime.now(),
+//       channel: "",
+//       users: [],
+//       message: "",
+//       files: [],
+//       senderId: "",
+//       v: 0,
+//     );
+//   }
+// }
+
+// class UserChatListModel {
+//   final String userId;
+//   final DateTime seenAt;
+//   final DateTime deletedAt;
+//   final String id;
+
+//   UserChatListModel({
+//     required this.userId,
+//     required this.seenAt,
+//     required this.deletedAt,
+//     required this.id,
+//   });
+
+//   factory UserChatListModel.empty() {
+//     return UserChatListModel(
+//       userId: "",
+//       seenAt: DateTime.now(),
+//       deletedAt: DateTime.now(),
+//       id: "",
+//     );
+//   }
+
+//   factory UserChatListModel.fromJson(Map<String, dynamic> json) {
+//     return UserChatListModel(
+//       userId: json["user_id"] ?? "",
+//       seenAt: json["seen_at"] ?? DateTime.now(),
+//       deletedAt: json["deleted_at"] ?? DateTime.now(),
+//       id: json["_id"] ?? "",
+//     );
+//   }
+// }
+
+
+
 
 class ChatListModel {
   final String channel;
@@ -25,7 +143,7 @@ class ChatListModel {
           ? LastSentMessage.fromJson(json["last_sent_message"])
           : LastSentMessage.empty(),
       unRead: json["un_read"] ?? 0,
-      lastTimeUpdated: json["last_time_updated"] ?? DateTime.now(),
+      lastTimeUpdated: DateTime.parse(json["last_time_updated"] ?? DateTime.now().toIso8601String()),
       canSendMessage: json["can_send_message"] ?? false,
     );
   }
@@ -34,7 +152,7 @@ class ChatListModel {
 class LastSentMessage {
   final String id;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
   final String channel;
   final List<UserChatListModel> users;
   final String message;
@@ -45,7 +163,7 @@ class LastSentMessage {
   LastSentMessage({
     required this.id,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
     required this.channel,
     required this.users,
     required this.message,
@@ -56,14 +174,17 @@ class LastSentMessage {
 
   factory LastSentMessage.fromJson(Map<String, dynamic> json) {
     return LastSentMessage(
-      id: json["id"] ?? "",
-      createdAt: json["created at"] ?? DateTime.now(),
-      updatedAt: json["updated_at"] ?? DateTime.now(),
+      id: json["_id"] ?? "",
+      createdAt: DateTime.parse(json["created_at"] ?? DateTime.now().toIso8601String()),
+      updatedAt: json["updated_at"] != null ? DateTime.parse(json["updated_at"]) : null,
       channel: json["channel"] ?? "",
-      users: json["users"] !=  null ? json["users"].map((e)=> UserModel.fromJson(e)).toList() : [],
+      users: (json["users"] as List<dynamic>?)
+              ?.map((e) => UserChatListModel.fromJson(e))
+              .toList() ??
+          [],
       message: json["message"] ?? "",
       files: List<String>.from(json["files"] ?? []),
-      senderId: json["senderId"] ?? "",
+      senderId: json["sender_id"] ?? "",
       v: json["__v"] ?? 0,
     );
   }
@@ -72,7 +193,7 @@ class LastSentMessage {
     return LastSentMessage(
       id: "",
       createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      updatedAt: null,
       channel: "",
       users: [],
       message: "",
@@ -85,22 +206,22 @@ class LastSentMessage {
 
 class UserChatListModel {
   final String userId;
-  final DateTime seenAt;
-  final DateTime deletedAt;
+  final DateTime? seenAt;
+  final DateTime? deletedAt;
   final String id;
 
   UserChatListModel({
     required this.userId,
-    required this.seenAt,
-    required this.deletedAt,
+    this.seenAt,
+    this.deletedAt,
     required this.id,
   });
 
   factory UserChatListModel.empty() {
     return UserChatListModel(
       userId: "",
-      seenAt: DateTime.now(),
-      deletedAt: DateTime.now(),
+      seenAt: null,
+      deletedAt: null,
       id: "",
     );
   }
@@ -108,8 +229,8 @@ class UserChatListModel {
   factory UserChatListModel.fromJson(Map<String, dynamic> json) {
     return UserChatListModel(
       userId: json["user_id"] ?? "",
-      seenAt: json["seen_at"] ?? DateTime.now(),
-      deletedAt: json["deleted_at"] ?? DateTime.now(),
+      seenAt: json["seen_at"] != null ? DateTime.parse(json["seen_at"]) : null,
+      deletedAt: json["deleted_at"] != null ? DateTime.parse(json["deleted_at"]) : null,
       id: json["_id"] ?? "",
     );
   }

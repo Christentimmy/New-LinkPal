@@ -64,7 +64,7 @@ class UserController extends GetxController {
       }
 
       if (isSignUp) {
-        Get.toNamed(AppRoutes.interest);
+        Get.toNamed(AppRoutes.personalDataFromUser);
       } else {
         Get.offAllNamed(AppRoutes.dashboard, arguments: {
           "startScreen": 0,
@@ -124,7 +124,8 @@ class UserController extends GetxController {
         "Success",
         "Profile Image Uploaded Successfully",
       );
-      Get.toNamed(AppRoutes.personalDataFromUser);
+      Get.toNamed(AppRoutes.introductionVideo);
+      // Get.toNamed(AppRoutes.personalDataFromUser);
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -251,7 +252,7 @@ class UserController extends GetxController {
           Get.find<RetrieveController>();
       await retrieveController.getUserDetails();
       if (isSignUp) {
-        Get.toNamed(AppRoutes.introductionVideo);
+        Get.toNamed(AppRoutes.interest);
       } else {
         Get.toNamed(AppRoutes.dashboard, arguments: {
           "startScreen": 0,
@@ -524,5 +525,12 @@ class UserController extends GetxController {
 
   double _degToRad(double degree) {
     return degree * pi / 180;
+  }
+
+  void reset() {
+    userNotifications.clear();
+    peopleNearBy.clear();
+    matchesRequest.clear();
+    matches.clear();
   }
 }

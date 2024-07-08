@@ -68,7 +68,7 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
           children: [
             Center(
               child: Lottie.asset(
-                "assets/images/verify.json",
+                "assets/images/verification.json",
                 height: 230,
               ),
             ),

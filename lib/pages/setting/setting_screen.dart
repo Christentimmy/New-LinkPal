@@ -7,7 +7,7 @@ import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
-import 'package:linkingpal/models/user_model.dart';
+// import 'package:restart_app/restart_app.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -24,45 +24,38 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   RxBool value = false.obs;
-  final _tokenStorage = Get.put(TokenStorage());
+  final _tokenStorage = Get.find<TokenStorage>();
   final _retrieveController = Get.find<RetrieveController>();
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
-  final _webSocketController = Get.put(WebSocketService());
+  final _webSocketController = Get.find<SocketController>();
 
   final RxBool _isloadingDelete = false.obs;
 
   void deleteUser() async {
     _isloadingDelete.value = true;
-    _retrieveController.userModel.value = null;
+
+    _retrieveController.reset();
+    _userController.reset();
+    _postController.reset();
+    _webSocketController.disconnect();
     await _authController.deleteAccount();
     await _tokenStorage.deleteToken();
-    _userController.matchesRequest.clear();
-    _userController.peopleNearBy.clear();
-    _userController.userNotifications.clear();
-    _postController.allPost.clear();
-    _postController.allLikes.clear();
-    _postController.allUserPost.clear();
-    _postController.commentModelsList.clear();
+
     _isloadingDelete.value = false;
   }
 
-  void logOut() async {
-    _tokenStorage.deleteToken();
-    _retrieveController.userModel.value = null;
-    _webSocketController.disconnect();
-    UserModel.empty();
-    _userController.matchesRequest.clear();
-    _userController.matches.clear();
-    _userController.peopleNearBy.clear();
-    _userController.userNotifications.clear();
-    _postController.allPost.clear();
-    _postController.allLikes.clear();
-    _postController.allUserPost.clear();
-    _postController.commentModelsList.clear();
-    Get.offAllNamed(AppRoutes.walkthrough);
-  }
+void logOut() async {
+  _retrieveController.reset();
+  _userController.reset();
+  _postController.reset();
+  _webSocketController.disconnect();
+  await _tokenStorage.deleteToken();
+  // Restart.restartApp();
+  // Get.offAll(()=> const MyApp());
+  Get.offAllNamed(AppRoutes.signin);
+}
 
   @override
   Widget build(BuildContext context) {

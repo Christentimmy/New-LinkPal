@@ -34,7 +34,6 @@ class RetrieveController extends GetxController {
       );
       final responseData = await json.decode(response.body);
       if (response.statusCode == 401) {
-
         Get.toNamed(AppRoutes.verificationChecker, arguments: {
           "onClickToProceed": () {
             Get.offAllNamed(AppRoutes.dashboard);
@@ -69,11 +68,13 @@ class RetrieveController extends GetxController {
             "Authorization": "Bearer $token"
           });
       final decoded = await json.decode(response.body);
+      print(decoded);
       if (response.statusCode != 200) {
         CustomSnackbar.show("Error", decoded["message"].toString());
       }
       final instance = UserModel.fromJson(decoded["data"]);
       externalUserModel.value = instance;
+      externalUserModel.refresh();
       List<dynamic> fromRes = decoded["data"]["post"];
 
       //mylogic
@@ -86,5 +87,11 @@ class RetrieveController extends GetxController {
     } catch (e) {
       debugPrint(e.toString());
     }
+  }
+
+  void reset() {
+    userModel.value = null;
+    externalUserModel.value = null;
+    allPostFiles.clear();
   }
 }

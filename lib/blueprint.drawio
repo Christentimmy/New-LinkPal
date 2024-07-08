@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="p8AzTsGCVnQR4bWlM2C0" name="Page-1">
-        <mxGraphModel dx="527" dy="408" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="595" dy="362" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -35,7 +35,7 @@
                         <mxPoint x="440" y="310" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="12" value="Introduction Video" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+                <mxCell id="12" value="personaldata" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
                     <mxGeometry x="330" y="245" width="70" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="14" value="Dashboard" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
@@ -46,7 +46,7 @@
                         <mxPoint x="330" y="280" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="16" value="PersonalData" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+                <mxCell id="16" value="uploadvideo" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
                     <mxGeometry x="190" y="250" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="25" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="23" target="24" edge="1">

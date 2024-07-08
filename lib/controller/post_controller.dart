@@ -23,7 +23,6 @@ class PostController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print("Working here");
     getAllUserPost();
     getAllPost();
   }
@@ -72,6 +71,7 @@ class PostController extends GetxController {
       http.StreamedResponse response = await request.send();
       var responseBody = await response.stream.bytesToString();
       final decodedResponse = await json.decode(responseBody);
+      print(decodedResponse);
       if (response.statusCode != 201) {
         return CustomSnackbar.show(
           "Error",
@@ -647,5 +647,12 @@ class PostController extends GetxController {
     } finally {
       isloading.value = false;
     }
+  }
+
+  void reset() {
+    allPost.clear();
+    allUserPost.clear();
+    allLikes.clear();
+    commentModelsList.clear();
   }
 }

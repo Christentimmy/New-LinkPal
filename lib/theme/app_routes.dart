@@ -101,7 +101,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.matchesProfileScreen,
-      page: (){
+      page: () {
         final userId = Get.arguments["userId"];
         return MatchesProfileScreen(userId: userId);
       },
@@ -226,12 +226,20 @@ class RouteHandler {
       name: AppRoutes.chat,
       page: () {
         final userId = Get.arguments["userId"];
-        return ChatScreen(userId: userId);
+        final channedlId = Get.arguments["channedlId"];
+        final name = Get.arguments["name"];
+        final index  = Get.arguments["indexInsideChatList"];
+        return ChatScreen(
+          userId: userId,
+          userIndexInsideChatListArray: index,
+          channedlId: channedlId,
+          name: name,
+        );
       },
     ),
     GetPage(
       name: AppRoutes.message,
-      page: () => const MessageScreen(),
+      page: () => MessageScreen(),
     ),
     GetPage(
       name: AppRoutes.homescreen,

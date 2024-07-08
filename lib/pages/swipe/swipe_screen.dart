@@ -58,7 +58,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               widget1(
                 controller: _retrieveController,
                 onTap1: () {
-                  Get.to(() => const MessageScreen());
+                  Get.to(() => MessageScreen());
                 },
                 onTap: () {
                   showModalBottomSheet(
@@ -79,9 +79,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                         child: Center(
                           child: Column(
                             children: [
-                              Lottie.network(
-                                "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                              ),
+                              Lottie.asset("assets/images/empty.json"),
                               const Text("Empty? filter your cards above"),
                             ],
                           ),

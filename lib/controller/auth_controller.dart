@@ -6,6 +6,7 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
+import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -14,29 +15,24 @@ class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
   RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
-  final _tokenStorage = Get.put(TokenStorage());
+  final _tokenStorage = Get.find<TokenStorage>();
 
   Future<void> loginUser({
     required String email,
     required String password,
     required bool isEmail,
   }) async {
-    Stopwatch stopwatch = Stopwatch()..start();
     try {
       final body = json.encode({
         isEmail ? "email" : "mobile_number": email,
         "password": password,
       });
 
-      final requestTime = Stopwatch()..start();
       final response = await http.post(
         Uri.parse("$baseUrl/auth/login"),
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-      print(response.body);
-      print("Network request time: ${requestTime.elapsed}");
-
       if (response.statusCode == 404) {
         return CustomSnackbar.show("Error", "Invalid Credentials");
       }
@@ -44,12 +40,10 @@ class AuthController extends GetxController {
         return CustomSnackbar.show("Error", "Check your credentials again");
       }
 
-      final decodeTime = Stopwatch()..start();
       final responseData = json.decode(response.body);
-      print("JSON decode time: ${decodeTime.elapsed}");
-
+      var token = responseData["token"];
       final userModel = UserModel.fromJson(responseData["data"]);
-      await _tokenStorage.storeToken(responseData["token"]);
+      await _tokenStorage.storeToken(token);
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -69,22 +63,20 @@ class AuthController extends GetxController {
         Get.toNamed(AppRoutes.selectGender);
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
-
-      final controllerTime = Stopwatch()..start();
       final controller = Get.find<RetrieveController>();
       final postController = Get.find<PostController>();
-      controller.getUserDetails();
+      final webController = Get.find<SocketController>();
+
+      // Connect the WebSocket with the new token
+      webController.connect();
+      await controller.getUserDetails();
       postController.getAllPost();
       postController.getAllUserPost();
-      print("Controller operation time: ${controllerTime.elapsed}");
-
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
     } catch (e) {
       debugPrint(e.toString());
-    } finally {
-      print("Total execution time: ${stopwatch.elapsed}");
     }
   }
 
@@ -113,9 +105,8 @@ class AuthController extends GetxController {
         },
         body: json.encode(userObject),
       );
-      var decodedResponseBody = json.decode(responce.body);
-      print(decodedResponseBody);
 
+      var decodedResponseBody = json.decode(responce.body);
       if (responce.statusCode == 409) {
         return CustomSnackbar.show(
           "Error",
@@ -131,11 +122,12 @@ class AuthController extends GetxController {
       if (responce.statusCode != 200) {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
-
-      await _tokenStorage.deleteToken();
-      await _tokenStorage.storeToken(decodedResponseBody["token"]);
+      var token = decodedResponseBody["token"];
+      await _tokenStorage.storeToken(token);
       final controller = Get.find<RetrieveController>();
+      final webController = Get.find<SocketController>();
       await controller.getUserDetails();
+      webController.connect();
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () {
           Get.toNamed(AppRoutes.uploadPicture);
@@ -240,3 +232,9 @@ class AuthController extends GetxController {
     }
   }
 }
+
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjVhOTBjZDFlZGQ5YzM5OWJiNjk4ODYiLCJ1c2VyQWdlbnQiOiJEYXJ0LzMuNCAoZGFydDppbykiLCJpYXQiOjE3MjAwNDYwNDh9.K99R85Y_wY-Jc6IRnZILV3RczarHdCBhHZWxBxUIYIM
+
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjgxYjlkYTU2NDM0ZDZkOGRiYTY5YmYiLCJ1c2VyQWdlbnQiOiJEYXJ0LzMuNCAoZGFydDppbykiLCJpYXQiOjE3MjAwNDYyNTB9.w1qfCAkhboXeL5pGK9cLmL0vzG1WWXoC6Sckad48oRQ

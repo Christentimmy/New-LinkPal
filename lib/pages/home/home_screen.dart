@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
@@ -46,31 +45,6 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              // CustomButton(
-              //   ontap: () {
-              //     final websocketService = Get.put(WebSocketService());
-              //     websocketService.connect();
-              //   },
-              //   child: const Text(
-              //     "connect",
-              //     style: TextStyle(
-              //       color: Colors.white,
-              //     ),
-              //   ),
-              // ),
-              // const SizedBox(height: 20),
-              // CustomButton(
-              //   ontap: () {
-              //     final websocketService = Get.put(WebSocketService());
-              //     websocketService.disconnect();
-              //   },
-              //   child: const Text(
-              //     "disconnect",
-              //     style: TextStyle(
-              //       color: Colors.white,
-              //     ),
-              //   ),
-              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: UserNameWidget(controller: _retrieveController),
@@ -79,9 +53,14 @@ class HomeScreen extends StatelessWidget {
               Obx(
                 () {
                   return _postController.allPost.isEmpty
-                      ? Center(
-                          child: Lottie.network(
-                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                      ? SizedBox(
+                          height: MediaQuery.of(context).size.height / 1.5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Lottie.asset("assets/images/empty.json"),
+                              const Text("Empty"),
+                            ],
                           ),
                         )
                       : Expanded(
@@ -132,39 +111,69 @@ class PostCardDisplay extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           actions: [
-            ElevatedButton(
-              onPressed: () {
+            // ElevatedButton(
+            //   onPressed: () {
+            //     Get.toNamed(AppRoutes.editPost, arguments: {
+            //       "model": postModel,
+            //     });
+            //   },
+            //   style: ElevatedButton.styleFrom(),
+            //   child: const Text(
+            //     "Edit",
+            //     style: TextStyle(
+            //       color: Colors.black,
+            //       fontWeight: FontWeight.w600,
+            //     ),
+            //   ),
+            // ),
+            CustomButton(
+              ontap: () {
                 Get.toNamed(AppRoutes.editPost, arguments: {
                   "model": postModel,
                 });
               },
-              style: ElevatedButton.styleFrom(),
               child: const Text(
                 "Edit",
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            Obx(
-              () => ElevatedButton(
-                onPressed: () async {
-                  _postController.deletePost(postModel.value.id, context);
-                },
-                child: _postController.isloading.value
-                    ? const Loader(
-                        color: Colors.deepPurpleAccent,
-                      )
-                    : const Text(
-                        "Delete",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600,
+            Obx(() => CustomButton(
+                  ontap: () async {
+                    _postController.deletePost(postModel.value.id, context);
+                  },
+                  child: _postController.isloading.value
+                      ? const Loader(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Delete",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-              ),
-            ),
+                )),
+            // Obx(
+            //   () => ElevatedButton(
+            //     onPressed: () async {
+            //       _postController.deletePost(postModel.value.id, context);
+            //     },
+            //     child: _postController.isloading.value
+            //         ? const Loader(
+            //             color: Colors.deepPurpleAccent,
+            //           )
+            //         : const Text(
+            //             "Delete",
+            //             style: TextStyle(
+            //               color: Colors.black,
+            //               fontWeight: FontWeight.w600,
+            //             ),
+            //           ),
+            //   ),
+            // ),
           ],
           title: const Text(
             "Confirmation",
@@ -308,8 +317,6 @@ class PostCardDisplay extends StatelessWidget {
                   left: 10,
                   child: GestureDetector(
                     onTap: () async {
-                      // await _retrieveController
-                      //     .getSpecificUserId(postModel.value.createdBy.id);
                       Get.toNamed(AppRoutes.userProfileScreen, arguments: {
                         "userId": postModel.value.createdBy.id,
                       });
@@ -389,8 +396,8 @@ class PostCardDisplay extends StatelessWidget {
                           color: Colors.redAccent,
                         )
                       : const Icon(
-                          FontAwesomeIcons.solidHeart,
-                          color: Colors.grey,
+                          FontAwesomeIcons.heart,
+                          color: Colors.black,
                         ),
                 ),
                 const SizedBox(width: 4),

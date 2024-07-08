@@ -1,19 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/chat_list_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:lottie/lottie.dart';
 
-class MessageScreen extends StatefulWidget {
-  const MessageScreen({super.key});
+class MessageScreen extends StatelessWidget {
+  MessageScreen({super.key});
 
-  @override
-  State<MessageScreen> createState() => _MessageScreenState();
-}
-
-class _MessageScreenState extends State<MessageScreen> {
-  final _webSocketService = Get.put(WebSocketService());
+  final _webSocketService = Get.find<SocketController>();
 
   @override
   Widget build(BuildContext context) {
@@ -87,28 +84,51 @@ class _MessageScreenState extends State<MessageScreen> {
               const SizedBox(height: 15),
               // const LinearActivePeople(),
               const Divider(),
-              Obx(
-                () => Expanded(
-                    child: ListView.builder(
-                  itemCount: _webSocketService
-                          .chatListModel.value?.lastSentMessage.users.length ??
-                      0,
-                  itemBuilder: (context, index) {
-                    UserChatListModel? ch = _webSocketService
-                        .chatListModel.value?.lastSentMessage.users[index];
-                    return MessageCard(
-                      userChatListModel: ch ?? UserChatListModel.empty(),
-                      ontap: () {
-                        Get.toNamed(AppRoutes.chat, arguments: {
-                          "userId",
-                          ch?.userId ?? "",
-                        });
-                        // Get.to(() => const ChatScreen());
-                      },
-                    );
-                  },
-                )),
-              ),
+              Obx(() {
+                return _webSocketService.chatModelList.isEmpty
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height / 1.5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Lottie.asset("assets/images/empty.json"),
+                            const Text("Empty"),
+                          ],
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _webSocketService.chatModelList.length,
+                          itemBuilder: (context, index) {
+                            ChatListModel ch =
+                                _webSocketService.chatModelList[index];
+                            final List<UserChatListModel> users =
+                                ch.lastSentMessage.users.toList();
+                            int ind = 0;
+                            if (users.isNotEmpty) {
+                              ind = users.indexWhere((element) =>
+                                  element.userId !=
+                                  ch.lastSentMessage.senderId);
+
+                              print("Receiver Id: ${users[ind].userId}");
+                            }
+                            // UserChatListModel chatModel = users[ind];
+                            return MessageCard(
+                              chatListModel: ch,
+                              ontap: () {
+                                Get.toNamed(AppRoutes.chat, arguments: {
+                                  "userId": users[ind].userId,
+                                  "indexInsideChatList": ind,
+                                  "channedlId": ch.channel,
+                                  "name": ch.name,
+                                });
+                                // Get.to(() => const ChatScreen(userId: ,));
+                              },
+                            );
+                          },
+                        ),
+                      );
+              }),
               Container(),
             ],
           ),
@@ -120,11 +140,11 @@ class _MessageScreenState extends State<MessageScreen> {
 
 class MessageCard extends StatelessWidget {
   final VoidCallback ontap;
-  final UserChatListModel userChatListModel;
+  final ChatListModel chatListModel;
   const MessageCard({
     required this.ontap,
     super.key,
-    required this.userChatListModel,
+    required this.chatListModel,
   });
 
   @override
@@ -134,56 +154,65 @@ class MessageCard extends StatelessWidget {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 0),
           onTap: ontap,
-          leading: Stack(
+          // leading: Stack(
+          //   children: [
+          //     Column(
+          //       children: [
+          //         ClipRRect(
+          //           borderRadius: BorderRadius.circular(50),
+          //           child: CachedNetworkImage(
+          //             fit: BoxFit.cover,
+          //             placeholder: (context, url) {
+          //               return Center(
+          //                 child: CircularProgressIndicator(
+          //                   color: Colors.grey.shade100,
+          //                 ),
+          //               );
+          //             },
+          //             errorWidget: (context, url, error) => const Center(
+          //               child: Icon(Icons.error),
+          //             ),
+          //             height: 40,
+          //             width: 40,
+          //             imageUrl:  retrieveController.externalUserModel.value?.image ?? "",
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //     const Positioned(
+          //       bottom: 15,
+          //       right: 1,
+          //       child: CircleAvatar(
+          //         radius: 5,
+          //         backgroundColor: Colors.green,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: CachedNetworkImage(
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.grey.shade100,
-                          ),
-                        );
-                      },
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Icons.error),
-                      ),
-                      height: 40,
-                      width: 40,
-                      imageUrl:
-                          "https://images.unsplash.com/photo-1520979580982-43f0dfe34dc8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NzZ8fGZlbWFsZSUyMHBpY3R1cmUlMjBwb3J0cmFpdHxlbnwwfHwwfHx8MA%3D%3D",
-                    ),
-                  ),
-                ],
-              ),
-              const Positioned(
-                bottom: 15,
-                right: 1,
-                child: CircleAvatar(
-                  radius: 5,
-                  backgroundColor: Colors.green,
+              Text(
+                chatListModel.name,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
               Text(
-                "Mary Daniel",
-                style: TextStyle(fontSize: 18),
-              ),
-              Text(
-                "Where are you from?",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                chatListModel.lastSentMessage.message.length > 30
+                    ? "${chatListModel.lastSentMessage.message.substring(0, 28)}..."
+                    : chatListModel.lastSentMessage.message,
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
               ),
             ],
           ),
-          trailing: const Text("12:20AM"),
+          trailing: Text(
+            DateFormat("dd MMM yyyy").format(
+              chatListModel.lastTimeUpdated,
+            ),
+          ),
         ),
         const Divider(),
       ],

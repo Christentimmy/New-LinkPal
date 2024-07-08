@@ -25,8 +25,7 @@ class MyApp extends StatelessWidget {
         Get.put(InternetandConectivityChecker());
         Get.put(RetrieveController());
         Get.put(PostController());
-        Get.put(WebSocketService());
-
+        Get.put(SocketController());
       }),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
