@@ -18,14 +18,7 @@ class CustomButton extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Theme.of(context).primaryColor,
-          // gradient: const LinearGradient(
-          //   colors: [
-          //     Colors.deepPurpleAccent,
-          //     Colors.redAccent,
-          //     Colors.orangeAccent,
-          //   ],
-          // )
+          color: Theme.of(context).secondaryHeaderColor,
         ),
         child: child,
       ),

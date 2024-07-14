@@ -57,12 +57,14 @@ class AppColor {
   static const planText = Color(0xFF161616);
 }
 
+// Define the light theme
 final ThemeData lightTheme = ThemeData(
+  primaryColor: Colors.black,
   primarySwatch: Colors.blue,
   brightness: Brightness.light,
-  primaryColor: Colors.black,
   bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
   scaffoldBackgroundColor: Colors.white,
+  secondaryHeaderColor: Colors.black,
   appBarTheme: const AppBarTheme(
     backgroundColor: Colors.white,
   ),
@@ -90,16 +92,17 @@ final ThemeData lightTheme = ThemeData(
       fontWeight: FontWeight.w700,
       color: Colors.red,
     ),
-    
   ),
 );
 
+// Define the dark theme
 final ThemeData darkTheme = ThemeData(
-  primarySwatch: Colors.blue,
   primaryColor: Colors.white,
+  primarySwatch: Colors.blue,
   primaryColorDark: Colors.blue,
   brightness: Brightness.dark,
   scaffoldBackgroundColor: Colors.black,
+  secondaryHeaderColor: Colors.white,
   bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
   iconTheme: IconThemeData(
     color: Colors.grey.shade300,

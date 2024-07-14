@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -139,22 +138,25 @@ class PostCardDisplay extends StatelessWidget {
                 ),
               ),
             ),
-            Obx(() => CustomButton(
-                  ontap: () async {
-                    _postController.deletePost(postModel.value.id, context);
-                  },
-                  child: _postController.isloading.value
-                      ? const Loader(
+            const SizedBox(height: 8),
+            Obx(
+              () => CustomButton(
+                ontap: () async {
+                  _postController.deletePost(postModel.value.id, context);
+                },
+                child: _postController.isloading.value
+                    ? const Loader(
+                        color: Colors.white,
+                      )
+                    : const Text(
+                        "Delete",
+                        style: TextStyle(
                           color: Colors.white,
-                        )
-                      : const Text(
-                          "Delete",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          fontWeight: FontWeight.w600,
                         ),
-                )),
+                      ),
+              ),
+            ),
             // Obx(
             //   () => ElevatedButton(
             //     onPressed: () async {
@@ -876,9 +878,7 @@ class UserNameWidget extends StatelessWidget {
               ),
               Text(
                 controller.userModel.value?.name ?? "",
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),

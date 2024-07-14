@@ -24,7 +24,7 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController = Get.put(AuthController());
-   final _themeController = Get.put(ThemeController());
+  final _themeController = Get.put(ThemeController());
   final RxBool _isShowPassword = false.obs;
   final RxBool _isloading = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
@@ -75,7 +75,7 @@ class _SignInState extends State<SignIn> {
                       width: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        image:  DecorationImage(
+                        image: DecorationImage(
                           image: _themeController.isDarkMode.value
                               ? const AssetImage("assets/images/logo22.jpg")
                               : const AssetImage("assets/images/logo23.jpg"),
@@ -185,12 +185,14 @@ class _SignInState extends State<SignIn> {
                                     color: Theme.of(context)
                                         .scaffoldBackgroundColor,
                                   )
-                                : const Text(
+                                : Text(
                                     "Login",
-                                    style: TextStyle(
-                                        color: AppColor.pink,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600),
+                                    style: GoogleFonts.montserrat(
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 17,
+                                    ),
                                   ),
                           ),
                         ),
