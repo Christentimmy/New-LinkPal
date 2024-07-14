@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/timer_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/res/common_button.dart';
@@ -23,6 +25,8 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
   final _timerController = Get.put(TimerController());
   final _retrieveController = Get.find<RetrieveController>();
   final _verificationController = Get.put(VerificationMethods());
+  final _themeController = Get.put(ThemeController());
+
   RxString token = "".obs;
   final RxBool _isVerify = false.obs;
 
@@ -49,12 +53,9 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
-          title: const Text(
+          title: Text(
             "Verification",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
         body: SafeArea(
@@ -70,8 +71,10 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                       width: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        image: const DecorationImage(
-                          image: AssetImage("assets/images/logo23.jpg"),
+                        image: DecorationImage(
+                          image: _themeController.isDarkMode.value
+                              ? const AssetImage("assets/images/logo22.jpg")
+                              : const AssetImage("assets/images/logo23.jpg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -84,12 +87,7 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                     () => Text(
                       textAlign: TextAlign.center,
                       "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.mobileNumber ?? ""}",
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColor.textfieldText,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.2,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                   const SizedBox(
@@ -98,16 +96,16 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                   PinCodeTextField(
                     hintCharacter: "",
                     keyboardType: TextInputType.number,
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColor.textfieldText,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       fontSize: 20,
                     ),
                     length: 4,
                     obscureText: false,
                     controller: _pinController,
                     animationType: AnimationType.fade,
-                    cursorColor: AppColor.themeColor,
+                    cursorColor: Theme.of(context).scaffoldBackgroundColor,
                     pinTheme: PinTheme(
                       errorBorderColor: Colors.red,
                       borderWidth: 0,
@@ -163,12 +161,16 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                         }
                       },
                       child: _verificationController.isloading.value
-                          ? const Loader()
-                          : const Text(
+                          ? Loader(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            )
+                          : Text(
                               "Next",
-                              style: TextStyle(
-                                color: AppColor.white,
+                              style: GoogleFonts.montserrat(
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 fontSize: 18,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                     ),

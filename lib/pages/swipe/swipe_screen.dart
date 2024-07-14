@@ -75,7 +75,7 @@ class _SwipeScreenState extends State<SwipeScreen>
               Obx(() {
                 return _userController.peopleNearBy.isEmpty
                     ? SizedBox(
-                        height: MediaQuery.of(context).size.height / 1.49,
+                        height: MediaQuery.of(context).size.height / 1.55,
                         child: Center(
                           child: Column(
                             children: [
@@ -85,8 +85,7 @@ class _SwipeScreenState extends State<SwipeScreen>
                           ),
                         ),
                       )
-                    : SizedBox(
-                        height: MediaQuery.of(context).size.height / 1.49,
+                    : Expanded(
                         child: AppinioSwiper(
                           loop: true,
                           controller: _controller,
@@ -110,6 +109,14 @@ class _SwipeScreenState extends State<SwipeScreen>
                           cardBuilder: (context, index) {
                             final UserModel userModel =
                                 _userController.peopleNearBy[index];
+
+                            // return AltSwipeCard(
+                            //   userModel: userModel,
+                            //   ontap: () {},
+                            //   retrieveController: _retrieveController,
+                            //   userController: _userController,
+                            //   appinioSwiperController: _controller,
+                            // );
                             return SwipeCard(
                               retrieveController: _retrieveController,
                               userController: _userController,
@@ -128,45 +135,9 @@ class _SwipeScreenState extends State<SwipeScreen>
                           cardCount: _userController.peopleNearBy.length,
                         ),
                       );
-                // : Expanded(
-                //     child: CardSwiper(
-                //       controller: controller,
-                //       cardsCount: _userController.peopleNearBy.length,
-                //       onSwipe: (previousIndex, currentIndex, direction) {
-                //         bool isBool = _swipeController.swipe();
-                //         return isBool;
-                //       },
-                //       allowedSwipeDirection:
-                //           const AllowedSwipeDirection.symmetric(
-                //         horizontal: true,
-                //       ),
-                //       cardBuilder: (
-                //         context,
-                //         index,
-                //         horizontalOffsetPercentage,
-                //         verticalOffsetPercentage,
-                //       ) {
-                //         final UserModel userModel =
-                //             _userController.peopleNearBy[index];
-                //         return SwipeCard(
-                //           retrieveController: _retrieveController,
-                //           userController: _userController,
-                //           ontap: () {
-                //             Get.toNamed(
-                //               AppRoutes.swipedUserCardProfile,
-                //               arguments: {
-                //                 "userId": userModel.id,
-                //                 "isSent": userModel.isMatchRequestSent,
-                //               },
-                //             );
-                //           },
-                //           userModel: userModel,
-                //         );
-                //       },
-                //     ),
-                //   );
               }),
-              const SizedBox(height: 20),
+              const SizedBox(height: 15),
+              // const Spacer(),
               Obx(() {
                 return _userController.peopleNearBy.isEmpty
                     ? const SizedBox()
@@ -183,19 +154,23 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 height: _isSwipeLeft.value ? 70 : 60,
                                 width: _isSwipeLeft.value ? 70 : 60,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      offset: const Offset(2, 2),
-                                      color: Colors.black.withOpacity(0.05),
-                                      spreadRadius: 5,
-                                      blurRadius: 10,
-                                    ),
-                                  ],
-                                ),
+                                    shape: BoxShape.circle,
+                                    color: Theme.of(context).primaryColor,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        offset: const Offset(2, 2),
+                                        color: Colors.black.withOpacity(0.1),
+                                        spreadRadius: 5,
+                                        blurRadius: 10,
+                                      ),
+                                    ]),
                                 alignment: Alignment.center,
-                                child: const Icon(FontAwesomeIcons.x, size: 20),
+                                child: Icon(
+                                  FontAwesomeIcons.x,
+                                  size: 20,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                ),
                               ),
                             ),
                             const Spacer(),
@@ -208,12 +183,12 @@ class _SwipeScreenState extends State<SwipeScreen>
                                 width: _isSwipeRight.value ? 70 : 60,
                                 duration: const Duration(milliseconds: 300),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: Theme.of(context).primaryColor,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
                                       offset: const Offset(2, 2),
-                                      color: Colors.black.withOpacity(0.05),
+                                      color: Colors.black.withOpacity(0.1),
                                       spreadRadius: 5,
                                       blurRadius: 10,
                                     ),
@@ -273,10 +248,6 @@ class _SwipeScreenState extends State<SwipeScreen>
               children: [
                 const Text(
                   "Hello!",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                  ),
                 ),
                 Text(
                   controller.userModel.value?.name ?? "",
@@ -351,6 +322,225 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 }
 
+class AltSwipeCard extends StatelessWidget {
+  AltSwipeCard({
+    super.key,
+    required this.userModel,
+    required this.ontap,
+    required this.retrieveController,
+    required this.userController,
+    required this.appinioSwiperController,
+  });
+
+  final UserModel userModel;
+  final VoidCallback ontap;
+  final RetrieveController retrieveController;
+  final UserController userController;
+  final _locationController = Get.put(LocationController());
+  final AppinioSwiperController appinioSwiperController;
+
+  @override
+  Widget build(BuildContext context) {
+    String distanceApart = userController
+        .calculateDistance(
+          retrieveController.userModel.value!.latitude,
+          retrieveController.userModel.value!.longitude,
+          userModel.latitude,
+          userModel.longitude,
+        )
+        .toStringAsFixed(2);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple,
+        borderRadius: BorderRadius.circular(25),
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(25),
+            child: CachedNetworkImage(
+              imageUrl: userModel.image,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              errorWidget: (context, url, error) {
+                return Container(
+                  color: Colors.black,
+                  child: const Icon(
+                    Icons.error,
+                    color: Colors.red,
+                  ),
+                );
+              },
+              placeholder: (context, url) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.grey,
+                  ),
+                );
+              },
+            ),
+          ),
+          Container(
+            height: double.infinity,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              gradient: const LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black,
+                ],
+                begin: Alignment.center,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10, bottom: 70),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        userModel.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Icon(
+                        Icons.verified,
+                        color: Colors.blue,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.house,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      FutureBuilder(
+                        future: _locationController.displayLocation(
+                          latitude: userModel.latitude,
+                          longitude: userModel.longitude,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Text('Location not available');
+                          } else {
+                            return Text(
+                              snapshot.data!,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        "$distanceApart km",
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    appinioSwiperController.swipeLeft();
+                  },
+                  child: Container(
+                      height: 55,
+                      width: 150,
+                      alignment: Alignment.center,
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: const Color.fromARGB(66, 255, 82, 82),
+                        border: Border.all(
+                          width: 2,
+                          color: Colors.red,
+                        ),
+                      ),
+                      child: const Icon(
+                        FontAwesomeIcons.x,
+                        color: Colors.red,
+                        size: 15,
+                      )),
+                ),
+                const SizedBox(width: 5),
+                GestureDetector(
+                  onTap: () {
+                    appinioSwiperController.swipeRight();
+                  },
+                  child: Container(
+                    height: 55,
+                    width: 150,
+                    alignment: Alignment.center,
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: const Color.fromARGB(68, 104, 58, 183),
+                      border: Border.all(
+                        width: 2,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    child: const Icon(
+                      FontAwesomeIcons.solidHeart,
+                      color: Colors.purple,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SwipeCard extends StatelessWidget {
   SwipeCard({
     super.key,
@@ -384,6 +574,13 @@ class SwipeCard extends StatelessWidget {
           horizontal: 15,
           vertical: 15,
         ),
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: 0.5,
+            color: Theme.of(context).primaryColor,
+          ),
+          borderRadius: BorderRadius.circular(20),
+        ),
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
@@ -413,7 +610,7 @@ class SwipeCard extends StatelessWidget {
               ),
             ),
             Container(
-              height: 150,
+              height: Get.height / 3.635,
               padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),

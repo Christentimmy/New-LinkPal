@@ -1,10 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
@@ -29,12 +27,17 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
   final PageController _pageController = PageController();
-  final _swipeController = Get.put(SwipeController());
+  // final _swipeController = Get.put(SwipeController());
 
   @override
   void initState() {
     super.initState();
-    _retrieveController.getSpecificUserId(widget.userId);
+    retrieve();
+  }
+
+  void retrieve() async {
+    await _retrieveController.getSpecificUserId(widget.userId);
+    _retrieveController.externalUserModel.refresh();
   }
 
   @override
@@ -52,15 +55,11 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.isSent);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "User Profile",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
       body: SafeArea(
@@ -182,7 +181,6 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                     ],
                   ),
                 ),
-
                 // displayuserProfileAndVideo(pageController: _pageController, widget: widget),
                 const SizedBox(height: 10),
                 Row(
@@ -248,133 +246,99 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Get.toNamed(AppRoutes.message);
-                        },
-                        child: Container(
-                          height: 60,
-                          width: 60,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                offset: const Offset(2, 2),
-                                color: Colors.black.withOpacity(0.2),
-                                spreadRadius: 5,
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.message,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      Obx(
-                        () => GestureDetector(
-                          onTap: () async {
-                            if (!widget.isSent) {
-                              widget.isSent = await _swipeController
-                                  .sendMatchRequest(receiverId: widget.userId);
-                            }
-                          },
-                          child: Container(
-                            height: 60,
-                            width: 60,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  offset: const Offset(2, 2),
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 5,
-                                  blurRadius: 10,
-                                ),
-                              ],
-                            ),
-                            child: _swipeController.isloading.value
-                                ? const Loader(color: Colors.deepPurpleAccent)
-                                : Icon(
-                                    FontAwesomeIcons.solidHeart,
-                                    color: widget.isSent
-                                        ? Colors.redAccent
-                                        : Colors.grey,
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                //   child: Row(
+                //     children: [
+                //       GestureDetector(
+                //         onTap: () {
+                //           Get.toNamed(AppRoutes.message);
+                //         },
+                //         child: Container(
+                //           height: 60,
+                //           width: 60,
+                //           alignment: Alignment.center,
+                //           decoration: BoxDecoration(
+                //             shape: BoxShape.circle,
+                //             color: Colors.white,
+                //             boxShadow: [
+                //               BoxShadow(
+                //                 offset: const Offset(2, 2),
+                //                 color: Colors.black.withOpacity(0.2),
+                //                 spreadRadius: 5,
+                //                 blurRadius: 10,
+                //               ),
+                //             ],
+                //           ),
+                //           child: const Icon(
+                //             Icons.message,
+                //             color: Colors.blue,
+                //           ),
+                //         ),
+                //       ),
+                //       const Spacer(),
+                //       Obx(
+                //         () => GestureDetector(
+                //           onTap: () async {
+                //             if (!widget.isSent) {
+                //               widget.isSent = await _swipeController
+                //                   .sendMatchRequest(receiverId: widget.userId);
+                //             }
+                //           },
+                //           child: Container(
+                //             height: 60,
+                //             width: 60,
+                //             alignment: Alignment.center,
+                //             decoration: BoxDecoration(
+                //               color: Colors.white,
+                //               shape: BoxShape.circle,
+                //               boxShadow: [
+                //                 BoxShadow(
+                //                   offset: const Offset(2, 2),
+                //                   color: Colors.black.withOpacity(0.2),
+                //                   spreadRadius: 5,
+                //                   blurRadius: 10,
+                //                 ),
+                //               ],
+                //             ),
+                //             child: _swipeController.isloading.value
+                //                 ? const Loader(color: Colors.deepPurpleAccent)
+                //                 : Icon(
+                //                     FontAwesomeIcons.solidHeart,
+                //                     color: widget.isSent
+                //                         ? Colors.redAccent
+                //                         : Colors.grey,
+                //                   ),
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 const SizedBox(height: 20),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     "Bio",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 const SizedBox(height: 5),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    "Loving and caring guy, gentle and calm, Ready to love and settle for marriage",
-                    style: TextStyle(color: Color.fromARGB(200, 0, 0, 0)),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    "Interested In",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
+                Obx(
+                  () => Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      _retrieveController.externalUserModel.value?.bio ?? "",
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ),
-                Container(
-                  height: 35,
-                  width: 80,
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: const Text(
-                    "Women",
-                    style: TextStyle(
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
+                const SizedBox(height: 25),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     "Activity/Mood",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 Obx(
@@ -392,9 +356,7 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                       _retrieveController.externalUserModel.value?.mood[0]
                               .toString() ??
                           "null",
-                      style: const TextStyle(
-                        color: Colors.deepPurple,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 ),
@@ -403,12 +365,9 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         "Post",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const Spacer(),
                       GestureDetector(

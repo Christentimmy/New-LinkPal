@@ -1,6 +1,7 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
@@ -78,25 +79,98 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               )
             : const SizedBox();
       }),
-      bottomNavigationBar: Obx(
-        () => BottomNavigationBar(
-          unselectedItemColor: Colors.grey,
-          selectedItemColor: Colors.deepOrangeAccent,
-          currentIndex: _currentIndex.value,
-          onTap: (value) {
-            _currentIndex.value = value;
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.swipe), label: "Swipe"),
-            BottomNavigationBarItem(icon: Icon(Icons.add), label: "Post"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.settings), label: "Settings"),
-          ],
+      body: Obx(() => _pages[_currentIndex.value]),
+      bottomNavigationBar: Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+          child: Obx(
+            () => GNav(
+                rippleColor: Colors.grey.shade800,
+                hoverColor: Colors.grey.shade700,
+                selectedIndex: _currentIndex.value,
+                tabBorderRadius: 30,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                gap: 8,
+                onTabChange: (value) {
+                  _currentIndex.value = value;
+                },
+                // color: Theme.of(context).scaffoldBackgroundColor,
+                // activeColor: Theme.of(context).primaryColor,
+                activeColor: Colors.white,
+                tabBackgroundColor: Colors.grey.shade600,
+                padding: const EdgeInsets.all(14),
+                tabs: const [
+                  GButton(
+                    icon: Icons.home,
+                    text: 'Home',
+                  ),
+                  GButton(
+                    icon: Icons.swipe,
+                    text: 'Likes',
+                  ),
+                  GButton(
+                    icon: Icons.add,
+                    text: 'Search',
+                  ),
+                  GButton(
+                    icon: Icons.person,
+                    text: 'Profile',
+                  ),
+                  GButton(
+                    icon: Icons.settings,
+                    text: 'Profile',
+                  ),
+                ]),
+          ),
         ),
       ),
-      body: Obx(() => _pages[_currentIndex.value]),
+      // bottomNavigationBar: Obx(
+      //   () => ClipRRect(
+      //     borderRadius: BorderRadius.circular(25),
+      //     child: BottomNavigationBar(
+      //       // backgroundColor: Theme.of(context).bottomAppBarColor,
+      //       currentIndex: _currentIndex.value,
+      //       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      //       unselectedItemColor: Theme.of(context).iconTheme.color,
+      //       selectedItemColor: Theme.of(context).primaryColorDark,
+      //       showSelectedLabels: false,
+      //       showUnselectedLabels: false,
+      //       type: BottomNavigationBarType.fixed,
+      //       onTap: (value) {
+      //         _currentIndex.value = value;
+      //       },
+      //       items: const [
+      //         BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
+      //         BottomNavigationBarItem(icon: Icon(Icons.swipe), label: ""),
+      //         BottomNavigationBarItem(icon: Icon(Icons.add), label: ""),
+      //         BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+      //         BottomNavigationBarItem(icon: Icon(Icons.settings), label: ""),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     );
   }
 }
+
+// bottomNavigationBar: Obx(
+//   () => BottomNavigationBar(
+//     unselectedItemColor: Colors.grey,
+//     selectedItemColor: Colors.deepOrangeAccent,
+//     currentIndex: _currentIndex.value,
+//     onTap: (value) {
+//       _currentIndex.value = value;
+//     },
+//     items: const [
+//       BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+//       BottomNavigationBarItem(icon: Icon(Icons.swipe), label: "Swipe"),
+//       BottomNavigationBarItem(icon: Icon(Icons.add), label: "Post"),
+//       BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+//       BottomNavigationBarItem(
+//         icon: Icon(Icons.settings),
+//         label: "Settings",
+//       ),
+//     ],
+//   ),
+// ),

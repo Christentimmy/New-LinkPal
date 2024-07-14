@@ -100,16 +100,17 @@ class BottomTextField extends StatelessWidget {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.deepPurpleAccent,
+              color: Theme.of(context).primaryColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: TextFormField(
               maxLines: null,
-              cursorColor: Colors.white,
+              // cursorColor: Colors.white,
+              cursorColor: Theme.of(context).scaffoldBackgroundColor,
               controller: _textController,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 fontSize: 13,
               ),
               decoration: InputDecoration(
@@ -125,9 +126,9 @@ class BottomTextField extends StatelessWidget {
                     FocusManager.instance.primaryFocus?.unfocus();
                     // _webSocketService.streamLatestChat(channelId.value);
                   },
-                  child: const Icon(
+                  child: Icon(
                     Icons.send,
-                    color: Colors.white,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                   ),
                 ),
                 hintText: "Type Here...",
@@ -145,9 +146,9 @@ class BottomTextField extends StatelessWidget {
             ),
           ),
         ),
-        const Icon(
+        Icon(
           Icons.image,
-          color: Colors.deepPurpleAccent,
+          color: Theme.of(context).primaryColor,
           size: 30,
         ),
       ],
@@ -252,11 +253,11 @@ class Header extends StatelessWidget {
                   spreadRadius: 5,
                 )
               ],
-              color: Colors.white,
+              color: Theme.of(context).primaryColor,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back,
-              color: Colors.black,
+              color: Theme.of(context).scaffoldBackgroundColor,
             ),
           ),
         ),
@@ -265,10 +266,7 @@ class Header extends StatelessWidget {
           children: [
             Text(
               widget.name,
-              style: const TextStyle(
-                fontSize: 24,
-                color: Colors.black,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const Text(
               "online",
@@ -427,15 +425,16 @@ class SenderChatCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 5),
                     userChatListModel.seenAt == null
-                          ?  const Icon(
-                      Icons.check,
-                      size: 15,
-                      color: Colors.black,
-                    ) : const Icon(
-                      Icons.done_all,
-                      size: 15,
-                      color: Colors.white,
-                    )
+                        ? const Icon(
+                            Icons.check,
+                            size: 15,
+                            color: Colors.black,
+                          )
+                        : const Icon(
+                            Icons.done_all,
+                            size: 15,
+                            color: Colors.white,
+                          )
                   ],
                 ),
               ],

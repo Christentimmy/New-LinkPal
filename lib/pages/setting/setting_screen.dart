@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
@@ -23,9 +24,10 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  RxBool value = false.obs;
+  final RxBool _isNotificationOn = false.obs;
   final _tokenStorage = Get.find<TokenStorage>();
   final _retrieveController = Get.find<RetrieveController>();
+   final themeController = Get.put(ThemeController());
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
@@ -35,39 +37,34 @@ class _SettingScreenState extends State<SettingScreen> {
 
   void deleteUser() async {
     _isloadingDelete.value = true;
-
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
     _webSocketController.disconnect();
     await _authController.deleteAccount();
     await _tokenStorage.deleteToken();
-
     _isloadingDelete.value = false;
   }
 
-void logOut() async {
-  _retrieveController.reset();
-  _userController.reset();
-  _postController.reset();
-  _webSocketController.disconnect();
-  await _tokenStorage.deleteToken();
-  // Restart.restartApp();
-  // Get.offAll(()=> const MyApp());
-  Get.offAllNamed(AppRoutes.signin);
-}
+  void logOut() async {
+    _retrieveController.reset();
+    _userController.reset();
+    _postController.reset();
+    _webSocketController.disconnect();
+    await _tokenStorage.deleteToken();
+    // Restart.restartApp();
+    // Get.offAll(()=> const MyApp());
+    Get.offAllNamed(AppRoutes.signin);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Settings",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
       body: SafeArea(
@@ -80,18 +77,36 @@ void logOut() async {
                 const SizedBox(height: 10),
                 Row(
                   children: [
-                    const Text(
-                      "Notification",
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
+                    Text(
+                      "Dark Mode",
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const Spacer(),
                     Obx(
                       () => CupertinoSwitch(
-                        value: value.value,
+                        value: themeController.isDarkMode.value,
+                        activeColor: Theme.of(context).primaryColorDark,
                         onChanged: (newValue) {
-                          value.value = newValue;
+                          themeController.toggleTheme();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Text(
+                      "Notification",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const Spacer(),
+                    Obx(
+                      () => CupertinoSwitch(
+                        value: _isNotificationOn.value,
+                        activeColor: Theme.of(context).primaryColorDark,
+                        onChanged: (newValue) {
+                          _isNotificationOn.value = newValue;
                         },
                       ),
                     ),
@@ -102,11 +117,9 @@ void logOut() async {
                     Get.to(() => ChangePasswordScreen());
                   },
                   contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                  leading: const Text(
+                  leading: Text(
                     "Change Password",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 ListTile(
@@ -114,11 +127,9 @@ void logOut() async {
                   onTap: () {
                     Get.to(() => const BlockedUserScreen());
                   },
-                  leading: const Text(
+                  leading: Text(
                     "Block Users",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.01),
@@ -128,22 +139,18 @@ void logOut() async {
                     Get.toNamed(AppRoutes.premium);
                   },
                   contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                  leading: const Text(
+                  leading: Text(
                     "Subscription",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 const Divider(),
                 SizedBox(height: MediaQuery.of(context).size.height / 50),
-                const ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 0),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 0),
                   leading: Text(
                     "Share This App",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 ListTile(
@@ -151,11 +158,9 @@ void logOut() async {
                     Get.to(() => const TermsAndConditionsScreen());
                   },
                   contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-                  leading: const Text(
+                  leading: Text(
                     "Terms and conditions",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 ListTile(
@@ -163,11 +168,9 @@ void logOut() async {
                   onTap: () {
                     Get.to(() => const PrivacyPolicyScreen());
                   },
-                  leading: const Text(
+                  leading: Text(
                     "Privacy Policy",
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -185,13 +188,9 @@ void logOut() async {
                         color: Colors.red,
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Log Out",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
@@ -215,13 +214,9 @@ void logOut() async {
                           ? const Loader(
                               color: Colors.deepOrangeAccent,
                             )
-                          : const Text(
+                          : Text(
                               "Delete Account",
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                     ),
                   ),

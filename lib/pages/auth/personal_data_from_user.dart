@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -251,13 +252,15 @@ class PersonalDataFromUser extends StatelessWidget {
                       }
                     },
                     child: _isloading.value
-                        ? const Loader()
-                        : const Text(
+                        ? Loader(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                          )
+                        : Text(
                             "Continue",
-                            style: TextStyle(
+                            style: GoogleFonts.montserrat(
                               fontSize: 15,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(context).scaffoldBackgroundColor,
                             ),
                           ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/timer_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/res/common_button.dart';
@@ -23,6 +24,7 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
   final _timerController = Get.put(TimerController());
   final _retrieveController = Get.find<RetrieveController>();
   final _verificationController = Get.put(VerificationMethods());
+  final _themeController = Get.put(ThemeController());
   RxString token = "".obs;
   final RxBool _isVerify = false.obs;
 
@@ -65,12 +67,9 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
-          title: const Text(
+          title: Text(
             "Verification",
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
         body: SafeArea(
@@ -82,12 +81,14 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                   const SizedBox(height: 30),
                   Center(
                     child: Container(
-                      height: 100,
-                      width: 100,
+                      height: 80,
+                      width: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        image: const DecorationImage(
-                          image: AssetImage("assets/images/logo23.jpg"),
+                        image: DecorationImage(
+                          image: _themeController.isDarkMode.value
+                              ? const AssetImage("assets/images/logo22.jpg")
+                              : const AssetImage("assets/images/logo23.jpg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -100,12 +101,13 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                     () => Text(
                       textAlign: TextAlign.center,
                       "Enter the 4-digits code sent to ${_retrieveController.userModel.value?.email ?? ""}",
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColor.textfieldText,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.2,
-                      ),
+                      // style: const TextStyle(
+                      //   fontSize: 12,
+                      //   color: AppColor.textfieldText,
+                      //   fontWeight: FontWeight.w500,
+                      //   letterSpacing: 0.2,
+                      // ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                   const SizedBox(
@@ -114,16 +116,16 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                   PinCodeTextField(
                     hintCharacter: "",
                     keyboardType: TextInputType.number,
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColor.textfieldText,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       fontSize: 20,
                     ),
                     length: 4,
                     obscureText: false,
                     controller: _pinController,
                     animationType: AnimationType.fade,
-                    cursorColor: AppColor.themeColor,
+                    cursorColor: Theme.of(context).scaffoldBackgroundColor,
                     pinTheme: PinTheme(
                       errorBorderColor: Colors.red,
                       borderWidth: 0,
@@ -174,11 +176,14 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                         }
                       },
                       child: _verificationController.isloading.value
-                          ? const Loader()
-                          : const Text(
+                          ? Loader(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            )
+                          : Text(
                               "Next",
                               style: TextStyle(
-                                color: AppColor.white,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
                                 fontSize: 18,
                               ),
                             ),

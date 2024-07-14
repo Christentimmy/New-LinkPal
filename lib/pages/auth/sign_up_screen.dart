@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/date_controller.dart';
+import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
 // ignore: must_be_immutable
@@ -21,6 +21,7 @@ class SignUp extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final _authController = Get.put(AuthController());
   final _dateController = Get.put(DateController());
+  final _themeController = Get.put(ThemeController());
   final RxBool _isShowPassword = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
   final RxInt _selectedDay = (-2).obs;
@@ -51,7 +52,6 @@ class SignUp extends StatelessWidget {
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        backgroundColor: AppColor.white,
         appBar: AppBar(
           centerTitle: true,
           title: const Text(
@@ -89,8 +89,10 @@ class SignUp extends StatelessWidget {
                       width: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        image: const DecorationImage(
-                          image: AssetImage("assets/images/logo23.jpg"),
+                        image: DecorationImage(
+                          image: _themeController.isDarkMode.value
+                              ? const AssetImage("assets/images/logo22.jpg")
+                              : const AssetImage("assets/images/logo23.jpg"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -305,11 +307,13 @@ class SignUp extends StatelessWidget {
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },
                               child: _authController.isLoading.value
-                                  ? const Loader()
-                                  : const Text(
+                                  ? Loader(
+                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                  )
+                                  : Text(
                                       "Sign Up",
                                       style: TextStyle(
-                                        color: AppColor.white,
+                                        color: Theme.of(context).scaffoldBackgroundColor,
                                         fontSize: 18,
                                       ),
                                     ),

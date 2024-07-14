@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -23,6 +24,7 @@ class _SignInState extends State<SignIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthController _authController = Get.put(AuthController());
+   final _themeController = Get.put(ThemeController());
   final RxBool _isShowPassword = false.obs;
   final RxBool _isloading = false.obs;
   final Rx<GlobalKey<FormState>> _formKey = GlobalKey<FormState>().obs;
@@ -47,7 +49,6 @@ class _SignInState extends State<SignIn> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: AppColor.white,
         body: Column(
             children: AnimationConfiguration.toStaggeredList(
           duration: const Duration(milliseconds: 750),
@@ -65,8 +66,8 @@ class _SignInState extends State<SignIn> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(
-                    height: 110,
+                  SizedBox(
+                    height: Get.height / 8.0,
                   ),
                   Center(
                     child: Container(
@@ -74,9 +75,12 @@ class _SignInState extends State<SignIn> {
                       width: 80,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        image: const DecorationImage(
-                            image: AssetImage("assets/images/logo23.jpg"),
-                            fit: BoxFit.cover),
+                        image:  DecorationImage(
+                          image: _themeController.isDarkMode.value
+                              ? const AssetImage("assets/images/logo22.jpg")
+                              : const AssetImage("assets/images/logo23.jpg"),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
@@ -107,7 +111,7 @@ class _SignInState extends State<SignIn> {
                   const Center(
                     child: Text("Login into your account"),
                   ),
-                  const SizedBox(height: 25),
+                  SizedBox(height: Get.height / 16),
                   Form(
                     key: _formKey.value,
                     child: Column(
@@ -177,14 +181,16 @@ class _SignInState extends State<SignIn> {
                               FocusManager.instance.primaryFocus?.unfocus();
                             },
                             child: _isloading.value
-                                ? const Loader()
+                                ? Loader(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                  )
                                 : const Text(
                                     "Login",
                                     style: TextStyle(
-                                      color: AppColor.pink,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600
-                                    ),
+                                        color: AppColor.pink,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600),
                                   ),
                           ),
                         ),
@@ -247,12 +253,12 @@ class _SignInState extends State<SignIn> {
                     _emailController.text = "";
                     _passwordController.text = "";
                   },
-                  child: const Text(
+                  child: Text(
                     "Sign Up",
                     style: TextStyle(
                       decoration: TextDecoration.underline,
                       fontSize: 15,
-                      color: Colors.black,
+                      color: Theme.of(context).primaryColor,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

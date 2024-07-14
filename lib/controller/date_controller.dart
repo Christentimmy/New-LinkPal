@@ -67,11 +67,8 @@ class DateController extends GetxController {
                       ),
                       child: Text(
                         (index + 1).toString(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w500,
-                          color: _dayIndex.value == index
-                              ? Colors.white
-                              : Colors.black,
                         ),
                       ),
                     ),
@@ -207,7 +204,7 @@ class DateController extends GetxController {
                         (index + 1950).toString(),
                         style: const TextStyle(
                           fontWeight: FontWeight.w500,
-                          color: Colors.black,
+                          // color: Colors.black,
                         ),
                       ),
                     ),
@@ -223,7 +220,11 @@ class DateController extends GetxController {
 
   DateTime getDate(int selectedDay, int selectedMonth, int selectedYear) {
     // Ensure the date is valid
-    if (selectedDay < 1 || selectedDay > 31 || selectedMonth < 1 || selectedMonth > 12 || selectedYear < 1) {
+    if (selectedDay < 1 ||
+        selectedDay > 31 ||
+        selectedMonth < 1 ||
+        selectedMonth > 12 ||
+        selectedYear < 1) {
       throw ArgumentError('Invalid date');
     }
     return DateTime(selectedYear, selectedMonth, selectedDay);

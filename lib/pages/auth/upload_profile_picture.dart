@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/theme/app_theme.dart';
+import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -31,7 +32,6 @@ class UploadProfilePicture extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -78,7 +78,11 @@ class UploadProfilePicture extends StatelessWidget {
                         color: Colors.grey.shade50,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.cloud_upload_outlined, size: 50),
+                      child: Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 50,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
                     ),
                   )
                 ],
@@ -88,29 +92,25 @@ class UploadProfilePicture extends StatelessWidget {
               height: 40,
             ),
             Obx(
-              () => GestureDetector(
-                onTap: () async {
-                  if (_image.value != null) {
-                    uploadPic();
-                  } else {
-                    CustomSnackbar.show("Error", "select an image");
-                  }
-                },
-                child: Container(
-                  height: 45,
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.black,
-                  ),
+              () => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: CustomButton(
+                  ontap: () {
+                    if (_image.value != null) {
+                      uploadPic();
+                    } else {
+                      CustomSnackbar.show("Error", "select an image");
+                    }
+                  },
                   child: _isloading.value
-                      ? const Loader()
-                      : const Text(
+                      ? Loader(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        )
+                      : Text(
                           "Upload Picture",
-                          style: TextStyle(
-                            color: AppColor.lightgrey,
+                          style: GoogleFonts.montserrat(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            fontWeight: FontWeight.w700,
                             fontSize: 14,
                           ),
                         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_textfield.dart';
@@ -110,17 +111,14 @@ class InterestScreen extends StatelessWidget {
                                       },
                                       child: Obx(
                                         () => Chip(
-                                          avatar: CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Icon(
-                                              _allIntetrest[index][0],
-                                              size: 17,
-                                            ),
+                                          avatar: Icon(
+                                            _allIntetrest[index][0],
+                                            size: 17,
                                           ),
                                           label: Text(
                                             _allIntetrest[index][1],
-                                            style: const TextStyle(
-                                              fontSize: 10,
+                                            style: GoogleFonts.montserrat(
+                                              fontSize: 8,
                                               fontWeight: FontWeight.bold,
                                             ),
                                           ),

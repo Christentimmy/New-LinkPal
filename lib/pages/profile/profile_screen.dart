@@ -36,12 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Profile",
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       body: SafeArea(
@@ -284,13 +281,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Get.toNamed(AppRoutes.interest);
                     },
                     child: Container(
-                      height: 35,
+                      height: 40,
                       constraints: const BoxConstraints(
                         minWidth: 30,
                       ),
                       margin: const EdgeInsets.only(top: 8),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1,
+                          color: Theme.of(context).primaryColorDark,
+                        ),
                         color: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(40),
                       ),
@@ -298,10 +299,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _retrieveController.userModel.value!.mood.isEmpty
                             ? "Null"
                             : _retrieveController.userModel.value!.mood[0],
-                        style: const TextStyle(
-                          color: Colors.deepPurple,
-                          fontSize: 12,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),
                   ),

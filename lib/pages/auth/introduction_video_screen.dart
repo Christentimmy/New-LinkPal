@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -62,7 +62,6 @@ class IntroductionVideoScreen extends StatelessWidget {
         title: const Text("Introduction Video"),
         centerTitle: true,
       ),
-      backgroundColor: AppColor.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         child: SingleChildScrollView(
@@ -80,7 +79,7 @@ class IntroductionVideoScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           width: 2,
-                          color: Colors.black,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
                       child: const Text(
@@ -113,12 +112,12 @@ class IntroductionVideoScreen extends StatelessWidget {
               ),
               CustomButton(
                 ontap: pickUserVideo,
-                child: const Text(
+                child: Text(
                   "Select video",
-                  style: TextStyle(
-                    color: AppColor.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                  style: GoogleFonts.montserrat(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -143,13 +142,12 @@ class IntroductionVideoScreen extends StatelessWidget {
                         ? const Loader(
                             color: Colors.deepOrangeAccent,
                           )
-                        : const Text(
+                        : Text(
                             "Submit",
-                            style: TextStyle(
-                              color: AppColor.themeColor,
+                            style: GoogleFonts.montserrat(
+                              color: Colors.red,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              decorationColor: AppColor.themeColor,
                             ),
                           ),
                   ),

@@ -8,7 +8,6 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
@@ -161,12 +160,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           ),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Create Post",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
       body: SafeArea(
@@ -268,9 +264,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.grey.shade300,
-                          ),
+                              borderRadius: BorderRadius.circular(15),
+                              // color: Colors.grey.shade300,
+                              border: Border.all(
+                                width: 1,
+                                color: Theme.of(context).primaryColor,
+                              )),
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.add,
@@ -405,11 +404,13 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       postContent();
                     },
                     child: _postController.isloading.value
-                        ? const Loader()
-                        : const Text(
+                        ? Loader(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                          )
+                        : Text(
                             "Post Now",
                             style: TextStyle(
-                              color: AppColor.white,
+                              color: Theme.of(context).scaffoldBackgroundColor,
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),

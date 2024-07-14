@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
@@ -53,12 +54,9 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Verification Process",
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
         centerTitle: true,
       ),
@@ -96,7 +94,14 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
               ),
               child: Obx(
                 () => ListTile(
-                  title: const Text("Email Verification"),
+                  title: Text(
+                    "Email Verification",
+                    style: GoogleFonts.montserrat(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
                   trailing:
                       _retrieveController.userModel.value?.isEmailVerified ??
                               false
@@ -129,7 +134,14 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
               ),
               child: Obx(
                 () => ListTile(
-                  title: const Text("Phone Verification"),
+                  title: Text(
+                    "Phone Verification",
+                    style: GoogleFonts.montserrat(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
                   trailing:
                       _retrieveController.userModel.value?.isPhoneVerified ??
                               false
@@ -154,11 +166,15 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                   verifier();
                 },
                 child: _isloading.value
-                    ? const Loader()
-                    : const Text(
+                    ? Loader(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      )
+                    : Text(
                         "Proceed",
-                        style: TextStyle(
-                          color: Colors.white,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 15,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
               ),

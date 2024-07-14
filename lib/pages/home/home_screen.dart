@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -33,8 +34,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      backgroundColor: const Color.fromARGB(50, 158, 158, 158),
       body: SafeArea(
         child: LiquidPullToRefresh(
           key: _refreshIndicatorKey,
@@ -49,7 +48,7 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: UserNameWidget(controller: _retrieveController),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 10),
               Obx(
                 () {
                   return _postController.allPost.isEmpty
@@ -397,18 +396,16 @@ class PostCardDisplay extends StatelessWidget {
                         )
                       : const Icon(
                           FontAwesomeIcons.heart,
-                          color: Colors.black,
                         ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   postModel.value.likes.toString(),
-                  style: const TextStyle(color: Colors.grey),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
-                    print(postModel.value.id);
                     _postController.getComments(postModel.value.id);
                     showModalBottomSheet(
                       isScrollControlled: true,
@@ -430,10 +427,7 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 5),
                 Text(
                   "${postModel.value.comments}",
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -488,7 +482,7 @@ class PostCardDisplay extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                 )),
           ),
-          const Divider(),
+          const SizedBox(height: 30),
         ],
       ),
     );
@@ -522,13 +516,14 @@ class _CommentScreenState extends State<CommentScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 50),
+      margin: EdgeInsets.only(top: Get.height / 3.7),
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      decoration: const BoxDecoration(
-        color: AppColor.white,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        // color: Colors.white,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(20),
         ),
       ),
@@ -541,13 +536,9 @@ class _CommentScreenState extends State<CommentScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Comments",
-                  style: TextStyle(
-                    fontSize: 17,
-                    color: AppColor.textfieldText,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 GestureDetector(
                   onTap: () {
@@ -571,14 +562,9 @@ class _CommentScreenState extends State<CommentScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Divider(
-                          color: AppColor.borderColor.withOpacity(0.2),
-                          thickness: 1,
-                        )
-                      ],
+                    Divider(
+                      color: AppColor.borderColor.withOpacity(0.2),
+                      thickness: 1,
                     ),
                     const SizedBox(
                       height: 15,
@@ -592,9 +578,15 @@ class _CommentScreenState extends State<CommentScreen> {
                                 ),
                               )
                             : widget.postController.commentModelsList.isEmpty
-                                ? Center(
-                                    child: Lottie.network(
-                                      "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                ? SizedBox(
+                                    height: MediaQuery.of(context).size.height /
+                                        1.55,
+                                    child: Center(
+                                      child: Lottie.network(
+                                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                        height: 200,
+                                        width: 200,
+                                      ),
                                     ),
                                   )
                                 : ListView.builder(
@@ -656,10 +648,10 @@ class _CommentScreenState extends State<CommentScreen> {
             ),
             child: TextFormField(
               controller: _commentController,
-              style: const TextStyle(
-                color: AppColor.black,
-                fontWeight: FontWeight.w400,
-                fontSize: 14.0,
+              style: TextStyle(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                fontWeight: FontWeight.w300,
+                fontSize: 12,
               ),
               maxLines: 5,
               minLines: 1,
@@ -669,7 +661,7 @@ class _CommentScreenState extends State<CommentScreen> {
               autovalidateMode: AutovalidateMode.disabled,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: AppColor.fieldColor.withOpacity(0.5),
+                fillColor: Theme.of(context).primaryColor.withOpacity(0.9),
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -878,12 +870,9 @@ class UserNameWidget extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Hello!",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.black54,
-                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               Text(
                 controller.userModel.value?.name ?? "",
@@ -922,26 +911,31 @@ class UserNameWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          Container(
-            height: 40,
-            width: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  offset: const Offset(2, 2),
-                  spreadRadius: 5,
-                  blurRadius: 10,
-                  color: Colors.black.withOpacity(0.1),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.search,
-              color: Colors.blue,
-              size: 18,
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(AppRoutes.message);
+            },
+            child: Container(
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(2, 2),
+                    spreadRadius: 5,
+                    blurRadius: 10,
+                    color: Colors.black.withOpacity(0.1),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.message,
+                color: Colors.blue,
+                size: 18,
+              ),
             ),
           ),
         ],

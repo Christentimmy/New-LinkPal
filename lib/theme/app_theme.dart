@@ -1,10 +1,9 @@
-
-
 // ignore_for_file: use_full_hex_values_for_flutter_colors
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-class AppColor{
+class AppColor {
   static const themeColor = Color(0xFF000000);
   static const pink = Colors.pink;
   static const bgColor = Color(0xFFF4F4F4);
@@ -57,3 +56,74 @@ class AppColor{
   static const redCon = Color(0xFFCC0101);
   static const planText = Color(0xFF161616);
 }
+
+final ThemeData lightTheme = ThemeData(
+  primarySwatch: Colors.blue,
+  brightness: Brightness.light,
+  primaryColor: Colors.black,
+  bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
+  scaffoldBackgroundColor: Colors.white,
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.white,
+  ),
+  iconTheme: const IconThemeData(
+    color: Colors.grey,
+  ),
+  textTheme: TextTheme(
+    bodySmall: GoogleFonts.montserrat(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.black,
+    ),
+    bodyMedium: GoogleFonts.montserrat(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+    ),
+    bodyLarge: GoogleFonts.montserrat(
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      color: Colors.black,
+    ),
+    headlineMedium: GoogleFonts.montserrat(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      color: Colors.red,
+    ),
+    
+  ),
+);
+
+final ThemeData darkTheme = ThemeData(
+  primarySwatch: Colors.blue,
+  primaryColor: Colors.white,
+  primaryColorDark: Colors.blue,
+  brightness: Brightness.dark,
+  scaffoldBackgroundColor: Colors.black,
+  bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
+  iconTheme: IconThemeData(
+    color: Colors.grey.shade300,
+  ),
+  textTheme: TextTheme(
+    bodySmall: GoogleFonts.montserrat(
+      fontSize: 12,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
+    bodyMedium: GoogleFonts.montserrat(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.white,
+    ),
+    bodyLarge: GoogleFonts.montserrat(
+      fontSize: 17,
+      fontWeight: FontWeight.w700,
+      color: Colors.white,
+    ),
+    headlineMedium: GoogleFonts.montserrat(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+      color: Colors.red,
+    ),
+  ),
+);
