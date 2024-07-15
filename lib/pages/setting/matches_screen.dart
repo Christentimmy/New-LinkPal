@@ -32,12 +32,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "My Matches",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+         style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       body: SafeArea(

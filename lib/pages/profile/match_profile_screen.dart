@@ -55,12 +55,9 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "User Profile",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       body: SafeArea(
@@ -196,9 +193,7 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                                 _retrieveController
                                         .externalUserModel.value?.name ??
                                     "",
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                ),
+                                style: Theme.of(context).textTheme.bodyLarge,
                               ),
                             ),
                             const Icon(
@@ -239,11 +234,9 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                                   } else {
                                     return Text(
                                       snapshot.data!,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
                                     );
                                   }
                                 },
@@ -277,63 +270,53 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     "Bio",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 const SizedBox(height: 5),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    "Loving and caring guy, gentle and calm, Ready to love and settle for marriage",
-                    style: TextStyle(color: Color.fromARGB(200, 0, 0, 0)),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    "Interested In",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
+                Obx(
+                  () => Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      _retrieveController.externalUserModel.value?.bio ?? "",
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 ),
-                Container(
-                  height: 35,
-                  width: 80,
-                  margin: const EdgeInsets.only(left: 9, top: 8),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: const Text(
-                    "Women",
-                    style: TextStyle(
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ),
+                const SizedBox(height: 20),
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 8.0),
+                //   child: Text(
+                //     "Interested In",
+                //     style: Theme.of(context).textTheme.bodyLarge,
+                //   ),
+                // ),
+                // Container(
+                //   height: 35,
+                //   width: 80,
+                //   margin: const EdgeInsets.only(left: 9, top: 8),
+                //   alignment: Alignment.center,
+                //   decoration: BoxDecoration(
+                //     color: Colors.blue.withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(40),
+                //   ),
+                //   child: const Text(
+                //     "Women",
+                //     style: TextStyle(
+                //       color: Colors.deepPurple,
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 10),
-                const Padding(
-                  padding: EdgeInsets.only(left: 8.0),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
                     "Activity/Mood",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
                 Obx(
@@ -351,9 +334,6 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                       _retrieveController.externalUserModel.value?.mood[0]
                               .toString() ??
                           "null",
-                      style: const TextStyle(
-                        color: Colors.deepPurple,
-                      ),
                     ),
                   ),
                 ),
