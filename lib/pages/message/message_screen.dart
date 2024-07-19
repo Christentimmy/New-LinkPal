@@ -2,15 +2,44 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/chat_list_model.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:lottie/lottie.dart';
 
-class MessageScreen extends StatelessWidget {
-  MessageScreen({super.key});
+class MessageScreen extends StatefulWidget {
+  const MessageScreen({super.key});
 
-  final _webSocketService = Get.find<SocketController>();
+  @override
+  State<MessageScreen> createState() => _MessageScreenState();
+}
+
+class _MessageScreenState extends State<MessageScreen> {
+  final _webSocketService = Get.find<ChatController>();
+  final _retrieveController = Get.find<RetrieveController>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    getf();
+  }
+
+  void getf() async {
+    // Ensure that user details are fetched before setting up the listener
+    await _retrieveController.getUserDetails().then((_) {
+      if (_webSocketService.socket != null &&
+          _webSocketService.socket.connected) {
+        _webSocketService.getChatList();
+      } else {
+        _webSocketService.connect().then((_) {
+          _webSocketService.getChatList();
+        });
+      }
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +79,9 @@ class MessageScreen extends StatelessWidget {
                     ),
                   ),
                   const Spacer(),
-                  const Text(
+                  Text(
                     "Messages",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const Spacer(),
                   Container(
@@ -116,13 +142,14 @@ class MessageScreen extends StatelessWidget {
                             return MessageCard(
                               chatListModel: ch,
                               ontap: () {
-                                Get.toNamed(AppRoutes.chat, arguments: {
-                                  "userId": users[ind].userId,
-                                  "indexInsideChatList": ind,
-                                  "channedlId": ch.channel,
-                                  "name": ch.name,
-                                });
-                                // Get.to(() => const ChatScreen(userId: ,));
+                                Get.toNamed(
+                                  AppRoutes.chat,
+                                  arguments: {
+                                    "userId": users[ind].userId,
+                                    "channedlId": ch.channel,
+                                    "name": ch.name,
+                                  },
+                                );
                               },
                             );
                           },

@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           Get.put(InternetandConectivityChecker());
           Get.put(RetrieveController());
           Get.put(PostController());
-          Get.put(SocketController());
+          Get.put(ChatController());
         }),
         debugShowCheckedModeBanner: false,
         getPages: RouteHandler.routes,

@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/chat_card_model.dart';
-import 'package:linkingpal/models/chat_list_model.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 // import 'package:lottie/lottie.dart';
 
@@ -13,13 +12,13 @@ class ChatScreen extends StatefulWidget {
   final String userId;
   final String channedlId;
   final String name;
-  final int userIndexInsideChatListArray;
+  // final int userIndexInsideChatListArray;
   const ChatScreen({
     super.key,
     required this.userId,
     required this.channedlId,
     required this.name,
-    required this.userIndexInsideChatListArray,
+    // required this.userIndexInsideChatListArray,
   });
 
   @override
@@ -29,22 +28,33 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _retrieveController = Get.find<RetrieveController>();
-  final _webSocketController = Get.put(SocketController());
+  final _webSocketController = Get.find<ChatController>();
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    _webSocketController.chatsList.clear();
+  }
 
   @override
   void initState() {
     super.initState();
-    if (_webSocketController.socket.connected) {
-      _webSocketController.socket.emit("GET_MESSAGE", {
-        "channel_id": widget.channedlId,
-      });
-    } else {
-      _webSocketController.socket.onConnect((_) {
+    _webSocketController.connect().then((_) {
+      if (_webSocketController.socket.connected) {
         _webSocketController.socket.emit("GET_MESSAGE", {
           "channel_id": widget.channedlId,
         });
-      });
-    }
+        _webSocketController.streamExistingChat(widget.channedlId);
+      } else {
+        _webSocketController.socket.onConnect((_) {
+          _webSocketController.socket.emit("GET_MESSAGE", {
+            "channel_id": widget.channedlId,
+          });
+          _webSocketController.streamExistingChat(widget.channedlId);
+        });
+      }
+    });
   }
 
   @override
@@ -63,9 +73,10 @@ class _ChatScreenState extends State<ChatScreen> {
               //   channelId: widget.channedlId,
               // ),
               ChatList(
-                userIndex: widget.userIndexInsideChatListArray,
+                // userIndex: widget.userIndexInsideChatListArray,
                 webSocketController: _webSocketController,
                 retrieveController: _retrieveController,
+
               ),
               BottomTextField(
                 textController: _textController,
@@ -84,13 +95,13 @@ class BottomTextField extends StatelessWidget {
   const BottomTextField({
     super.key,
     required TextEditingController textController,
-    required SocketController webSocketController,
+    required ChatController webSocketController,
     required this.widget,
   })  : _textController = textController,
         _webSocketController = webSocketController;
 
   final TextEditingController _textController;
-  final SocketController _webSocketController;
+  final ChatController _webSocketController;
   final ChatScreen widget;
 
   @override
@@ -120,7 +131,6 @@ class BottomTextField extends StatelessWidget {
                       _textController.text,
                       widget.channedlId,
                     );
-                    _webSocketController.streamLatestChat(widget.channedlId);
                     _webSocketController.streamExistingChat(widget.channedlId);
                     _textController.clear();
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -157,16 +167,16 @@ class BottomTextField extends StatelessWidget {
 }
 
 class ChatList extends StatelessWidget {
-  final int userIndex;
+  // final int userIndex;
   ChatList({
     super.key,
-    required SocketController webSocketController,
+    required ChatController webSocketController,
     required RetrieveController retrieveController,
-    required this.userIndex,
+    // required this.userIndex,
   })  : _webSocketController = webSocketController,
         _retrieveController = retrieveController;
 
-  final SocketController _webSocketController;
+  final ChatController _webSocketController;
   final RetrieveController _retrieveController;
   final _scrollController = ScrollController().obs;
 
@@ -193,17 +203,18 @@ class ChatList extends StatelessWidget {
                 itemBuilder: (context, index) {
                   ChatCardModel chatCardModel =
                       _webSocketController.chatsList[index];
-                  UserChatListModel userChatListModel =
-                      chatCardModel.users[userIndex];
+                  // UserChatListModel userChatListModel =
+                  //     chatCardModel.users[userIndex];
+
                   return chatCardModel.senderId ==
                           _retrieveController.userModel.value?.id
                       ? SenderChatCard(
                           chatCardModel: chatCardModel,
-                          userChatListModel: userChatListModel,
+                          // userChatListModel: userChatListModel,
                         )
                       : ReceiverChatCard(
                           chatCardModel: chatCardModel,
-                          userChatListModel: userChatListModel,
+                          // userChatListModel: userChatListModel,
                         );
                 },
               ),
@@ -212,7 +223,6 @@ class ChatList extends StatelessWidget {
   }
 
   void _scrollToBottom() {
-    // Ensure the scroll happens after the frame is built
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.value.hasClients) {
         _scrollController.value
@@ -234,6 +244,7 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
           onTap: () {
@@ -262,35 +273,41 @@ class Header extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Column(
-          children: [
-            Text(
-              widget.name,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const Text(
-              "online",
-              style: TextStyle(color: Colors.deepPurpleAccent),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              width: 120,
-              height: 20,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.grey,
-              ),
-              child: const Text(
-                "Today 12:00PM",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
+        Text(
+          widget.name.length > 15
+              ? "${widget.name.substring(0, 14)}..."
+              : widget.name,
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
+        // Column(
+        //   children: [
+        //     Text(
+        //       widget.name,
+        //       style: Theme.of(context).textTheme.bodyLarge,
+        //     ),
+        //     const Text(
+        //       "online",
+        //       style: TextStyle(color: Colors.deepPurpleAccent),
+        //     ),
+        //     const SizedBox(height: 10),
+        //     Container(
+        //       width: 120,
+        //       height: 20,
+        //       alignment: Alignment.center,
+        //       decoration: BoxDecoration(
+        //         borderRadius: BorderRadius.circular(15),
+        //         color: Colors.grey,
+        //       ),
+        //       child: const Text(
+        //         "Today 12:00PM",
+        //         style: TextStyle(
+        //           color: Colors.white,
+        //           fontSize: 13,
+        //         ),
+        //       ),
+        //     ),
+        //   ],
+        // ),
         const Spacer(),
         Container(
           height: 40,
@@ -320,12 +337,12 @@ class Header extends StatelessWidget {
 
 class ReceiverChatCard extends StatelessWidget {
   final ChatCardModel chatCardModel;
-  final UserChatListModel userChatListModel;
+  // final UserChatListModel userChatListModel;
 
   const ReceiverChatCard({
     super.key,
     required this.chatCardModel,
-    required this.userChatListModel,
+    // required this.userChatListModel,
   });
 
   @override
@@ -333,40 +350,41 @@ class ReceiverChatCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Flexible(
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: const BoxDecoration(
-              color: Colors.deepPurpleAccent,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-                bottomRight: Radius.circular(15),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          constraints: BoxConstraints(
+            minHeight: 45,
+            maxWidth: Get.width * 0.7,
+          ),
+          decoration: const BoxDecoration(
+            color: Colors.deepPurpleAccent,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+              bottomRight: Radius.circular(15),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                chatCardModel.message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  chatCardModel.message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+              const SizedBox(height: 5),
+              Text(
+                DateFormat("h:mm a").format(chatCardModel.createdAt.toLocal()),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  DateFormat("h:mm a")
-                      .format(chatCardModel.createdAt.toLocal()),
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
@@ -376,69 +394,73 @@ class ReceiverChatCard extends StatelessWidget {
 
 class SenderChatCard extends StatelessWidget {
   final ChatCardModel chatCardModel;
-  final UserChatListModel userChatListModel;
+  // final UserChatListModel userChatListModel;
 
-  const SenderChatCard(
-      {super.key,
-      required this.chatCardModel,
-      required this.userChatListModel});
+  const SenderChatCard({
+    super.key,
+    required this.chatCardModel,
+    // required this.userChatListModel,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Flexible(
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 90, 66, 131),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(15),
-                topRight: Radius.circular(15),
-                bottomLeft: Radius.circular(15),
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          constraints: BoxConstraints(
+            minHeight: 45,
+            maxWidth: Get.width * 0.7,
+          ),
+          decoration: const BoxDecoration(
+            color: Color.fromARGB(255, 90, 66, 131),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15),
+              topRight: Radius.circular(15),
+              bottomLeft: Radius.circular(15),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                chatCardModel.message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  chatCardModel.message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      DateFormat("h:mm a")
-                          .format(chatCardModel.createdAt.toLocal()),
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
+              const SizedBox(height: 5),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    DateFormat("h:mm a")
+                        .format(chatCardModel.createdAt.toLocal()),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
                     ),
-                    const SizedBox(width: 5),
-                    userChatListModel.seenAt == null
-                        ? const Icon(
-                            Icons.check,
-                            size: 15,
-                            color: Colors.black,
-                          )
-                        : const Icon(
-                            Icons.done_all,
-                            size: 15,
-                            color: Colors.white,
-                          )
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  const SizedBox(width: 5),
+                  // userChatListModel.seenAt == null
+                  //     ?
+                  //     const Icon(
+                  //         Icons.check,
+                  //         size: 15,
+                  //         color: Colors.grey,
+                  //       )
+                  //     : const Icon(
+                  //         Icons.done_all,
+                  //         size: 15,
+                  //         color: Colors.white,
+                  //       )
+                ],
+              ),
+            ],
           ),
         ),
       ],

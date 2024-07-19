@@ -179,7 +179,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
                   () => Row(
                     children: [
                       Text(
-                        _retrieveController.userModel.value?.name ?? "",
+                        _retrieveController.externalUserModel.value?.name ?? "",
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),

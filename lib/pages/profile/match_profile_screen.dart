@@ -252,6 +252,9 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                         Get.toNamed(AppRoutes.chat, arguments: {
                           "userId": widget.userId,
                           "channedlId": channedId.value,
+                          "name":
+                              _retrieveController.externalUserModel.value?.name,
+                          //  "indexInsideChatList":
                         });
                       },
                       child: Container(
@@ -427,25 +430,23 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
   }
 }
 
-
-
- //     GestureDetector(
-                //       onTap: () async {
-                //         String channelId = await _webSocketController
-                //             .getChannelId(widget.userId);
-                //             print(channelId);
-                //         Get.toNamed(AppRoutes.chat);
-                //       },
-                //       child: Container(
-                //         width: 50,
-                //         height: 50,
-                //         decoration: const BoxDecoration(
-                //           shape: BoxShape.circle,
-                //           color: Colors.deepPurpleAccent,
-                //         ),
-                //         child: const Icon(
-                //           Icons.message,
-                //           color: Colors.white,
-                //         ),
-                //       ),
-                //     ),
+//     GestureDetector(
+//       onTap: () async {
+//         String channelId = await _webSocketController
+//             .getChannelId(widget.userId);
+//             print(channelId);
+//         Get.toNamed(AppRoutes.chat);
+//       },
+//       child: Container(
+//         width: 50,
+//         height: 50,
+//         decoration: const BoxDecoration(
+//           shape: BoxShape.circle,
+//           color: Colors.deepPurpleAccent,
+//         ),
+//         child: const Icon(
+//           Icons.message,
+//           color: Colors.white,
+//         ),
+//       ),
+//     ),

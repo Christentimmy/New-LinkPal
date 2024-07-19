@@ -58,8 +58,8 @@ class UserModel {
       mood: json["mood"] ?? [],
       mobileNumber: json["mobile_number"] ?? 0,
       image: json["avatar"] ?? "",
-      latitude: json["latitude"] ?? "",
-      longitude: json["longitude"] ?? "",
+      latitude: json["latitude"] ?? 0.00,
+      longitude: json["longitude"] ?? 0.00,
       gender: json["gender"] ?? "",
     );
   }

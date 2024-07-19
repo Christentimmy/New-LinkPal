@@ -11,11 +11,10 @@ import 'package:lottie/lottie.dart';
 // ignore: must_be_immutable
 class SwipeUsersProfileScreen extends StatefulWidget {
   final String userId;
-  bool isSent;
-  SwipeUsersProfileScreen({
+
+  const SwipeUsersProfileScreen({
     super.key,
     required this.userId,
-    required this.isSent,
   });
 
   @override
@@ -212,36 +211,42 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                       size: 16,
                     ),
                     Obx(
-                      () => FutureBuilder(
-                        future: _locationController.displayLocation(
-                          latitude: _retrieveController
-                                  .externalUserModel.value?.latitude ??
-                              0.00,
-                          longitude: _retrieveController
-                                  .externalUserModel.value?.longitude ??
-                              0.00,
-                        ),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const SizedBox();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (!snapshot.hasData ||
-                              snapshot.data!.isEmpty) {
-                            return const Text('Location not available');
-                          } else {
-                            return Text(
-                              snapshot.data!,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                      () {
+                        final latitude = _retrieveController
+                            .externalUserModel.value?.latitude;
+                        final longitude = _retrieveController
+                            .externalUserModel.value?.longitude;
+
+                        if (latitude == null || longitude == null) {
+                          return Text('Location not available',
+                              style: Theme.of(context).textTheme.bodyMedium);
+                        }
+
+                        return FutureBuilder<String>(
+                          future: _locationController.displayLocation(
+                              latitude: latitude, longitude: longitude),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const SizedBox();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return const Text('Location not available');
+                            } else {
+                              return Text(
+                                snapshot.data!,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -342,24 +347,32 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                   ),
                 ),
                 Obx(
-                  () => Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 35,
-                    ),
-                    margin: const EdgeInsets.only(left: 9, top: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Text(
-                      _retrieveController.externalUserModel.value?.mood[0]
-                              .toString() ??
-                          "null",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
+                  () {
+                    final mood =
+                        _retrieveController.externalUserModel.value?.mood;
+                    return Container(
+                      constraints: const BoxConstraints(
+                        minHeight: 35,
+                      ),
+                      margin: const EdgeInsets.only(left: 9, top: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: mood != null && mood.isNotEmpty
+                          ? Text(
+                              mood[0],
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            )
+                          : Text(
+                              "Null",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                    );
+                  },
                 ),
+
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
@@ -391,52 +404,57 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
                     ],
                   ),
                 ),
+
                 Obx(
-                  () => _retrieveController.allPostFiles.isEmpty
-                      ? Center(
-                          child: Lottie.network(
-                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                          ),
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          itemCount:
-                              _retrieveController.allPostFiles.length >= 3
-                                  ? 3
-                                  : _retrieveController.allPostFiles.length,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 5.0,
-                            mainAxisSpacing: 5.0,
-                            childAspectRatio: 0.5,
-                          ),
-                          itemBuilder: (context, index) {
-                            final imageFiles = _retrieveController.allPostFiles
-                                .where((file) => _isImage(file))
-                                .toList();
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: CachedNetworkImage(
-                                imageUrl: imageFiles[index],
-                                height: double.infinity,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.grey.shade100,
+                  () {
+                    final allFiles = _retrieveController.allPostFiles;
+                    final imageFiles =
+                        allFiles.where((file) => _isImage(file)).toList();
+
+                    // Limit the number of images to a maximum of 3
+                    final displayFiles = imageFiles.take(3).toList();
+
+                    return allFiles.isEmpty
+                        ? Center(
+                            child: Lottie.network(
+                              "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                            ),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            itemCount: displayFiles.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 5.0,
+                              mainAxisSpacing: 5.0,
+                              childAspectRatio: 0.5,
+                            ),
+                            itemBuilder: (context, index) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: displayFiles[index],
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.grey.shade100,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(Icons.error),
                                   ),
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(Icons.error),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          );
+                  },
                 ),
+
                 const SizedBox(height: 20),
               ],
             ),

@@ -13,7 +13,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final _webSocketController = Get.put(SocketController());
+  final _webSocketController = Get.find<ChatController>();
   final _retrieveController = Get.put(RetrieveController());
 
   @override
@@ -32,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       });
       await _retrieveController.getUserDetails();
       await _webSocketController.connect();
+      _webSocketController.getChatList();
     } else {
       Get.offNamed(AppRoutes.walkthrough);
     }

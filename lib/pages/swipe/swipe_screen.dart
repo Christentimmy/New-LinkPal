@@ -793,12 +793,9 @@ class CustomBottomSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 "Filter",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               const Spacer(),
               IconButton(
@@ -812,10 +809,7 @@ class CustomBottomSheet extends StatelessWidget {
           Obx(
             () => Text(
               "Distance: $_distanceValue Km",
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           FlutterSlider(
@@ -830,10 +824,7 @@ class CustomBottomSheet extends StatelessWidget {
           Obx(
             () => Text(
               "Age: ${_minAge.round()} - ${_maxAge.round()}",
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           FlutterSlider(
@@ -863,14 +854,11 @@ class CustomBottomSheet extends StatelessWidget {
             },
           ),
           const SizedBox(height: 5),
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
             child: Text(
               "Interested In",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.black,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
           SizedBox(
@@ -894,8 +882,8 @@ class CustomBottomSheet extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: _genderIndex.value == index
-                            ? Colors.black
-                            : Colors.blue.withOpacity(0.1),
+                            ? Theme.of(context).primaryColor
+                            : Colors.black,
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Text(
@@ -903,8 +891,8 @@ class CustomBottomSheet extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: _genderIndex.value == index
-                              ? Colors.white
-                              : Colors.deepPurple,
+                              ? Colors.deepPurple
+                              : Colors.white,
                         ),
                       ),
                     ),
@@ -913,15 +901,12 @@ class CustomBottomSheet extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 10),
-          const Padding(
-            padding: EdgeInsets.only(left: 8.0),
+          const SizedBox(height: 15),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
             child: Text(
               "Activity/Mood",
-              style: TextStyle(
-                fontSize: 15,
-                color: Colors.black,
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
           SizedBox(
@@ -945,8 +930,8 @@ class CustomBottomSheet extends StatelessWidget {
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: _interest.value == index
-                            ? Colors.black
-                            : Colors.blue.withOpacity(0.1),
+                            ? Theme.of(context).primaryColor
+                            : Colors.black,
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Text(
@@ -954,8 +939,8 @@ class CustomBottomSheet extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           color: _interest.value == index
-                              ? Colors.white
-                              : Colors.deepPurpleAccent,
+                              ? Colors.deepPurpleAccent
+                              : Colors.white,
                         ),
                       ),
                     ),
@@ -979,13 +964,9 @@ class CustomBottomSheet extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Clear Filter",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
                 ),

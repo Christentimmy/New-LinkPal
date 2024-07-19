@@ -116,8 +116,6 @@
 // }
 
 
-
-
 class ChatListModel {
   final String channel;
   final String name;
@@ -235,3 +233,4 @@ class UserChatListModel {
     );
   }
 }
+

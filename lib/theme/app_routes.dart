@@ -162,10 +162,9 @@ class RouteHandler {
       name: AppRoutes.swipedUserCardProfile,
       page: () {
         final String userId = Get.arguments["userId"];
-        final bool isSent = Get.arguments["isSent"];
+
         return SwipeUsersProfileScreen(
           userId: userId,
-          isSent: isSent,
         );
       },
     ),
@@ -228,10 +227,8 @@ class RouteHandler {
         final userId = Get.arguments["userId"];
         final channedlId = Get.arguments["channedlId"];
         final name = Get.arguments["name"];
-        final index  = Get.arguments["indexInsideChatList"];
         return ChatScreen(
           userId: userId,
-          userIndexInsideChatListArray: index,
           channedlId: channedlId,
           name: name,
         );
@@ -239,7 +236,7 @@ class RouteHandler {
     ),
     GetPage(
       name: AppRoutes.message,
-      page: () => MessageScreen(),
+      page: () => const MessageScreen(),
     ),
     GetPage(
       name: AppRoutes.homescreen,

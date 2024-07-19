@@ -100,6 +100,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 activeColor: Colors.white,
                 tabBackgroundColor: Colors.grey.shade600,
                 padding: const EdgeInsets.all(14),
+                textStyle: Theme.of(context).textTheme.bodySmall,
                 tabs: const [
                   GButton(
                     icon: Icons.home,
@@ -107,11 +108,11 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   ),
                   GButton(
                     icon: Icons.swipe,
-                    text: 'Likes',
+                    text: 'Swipe',
                   ),
                   GButton(
                     icon: Icons.add,
-                    text: 'Search',
+                    text: 'Post',
                   ),
                   GButton(
                     icon: Icons.person,
@@ -119,7 +120,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   ),
                   GButton(
                     icon: Icons.settings,
-                    text: 'Profile',
+                    text: 'Setting',
                   ),
                 ]),
           ),

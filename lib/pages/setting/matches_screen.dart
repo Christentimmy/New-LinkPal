@@ -173,7 +173,7 @@ class MatchesCard extends StatelessWidget {
                             return Text('Error: ${snapshot.error}');
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return const Text('Location not available');
+                            return const Text('null');
                           } else {
                             return Text(
                               snapshot.data!,

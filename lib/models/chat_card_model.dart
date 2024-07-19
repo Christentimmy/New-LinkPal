@@ -8,6 +8,7 @@ class ChatCardModel {
   final String senderId;
   final String channelId;
   final DateTime updatedAt;
+  final String messageId;
 
   ChatCardModel({
     required this.createdAt,
@@ -17,6 +18,7 @@ class ChatCardModel {
     required this.senderId,
     required this.channelId,
     required this.updatedAt,
+    required this.messageId,
   });
 
   factory ChatCardModel.fromJson(Map<String, dynamic> json) {
@@ -36,6 +38,7 @@ class ChatCardModel {
       updatedAt: json["updatedAt"] != null
           ? DateTime.parse(json["updated_at"])
           : DateTime.now(),
+          messageId: json["id"] ?? "",
     );
   }
 }

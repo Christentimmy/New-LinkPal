@@ -8,6 +8,7 @@ import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
+import 'package:linkingpal/services/auth_service.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
@@ -16,6 +17,7 @@ class AuthController extends GetxController {
   RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
   final _tokenStorage = Get.find<TokenStorage>();
+  AuthService authService = AuthService();
 
   Future<void> loginUser({
     required String email,
@@ -23,26 +25,14 @@ class AuthController extends GetxController {
     required bool isEmail,
   }) async {
     try {
-      final body = json.encode({
-        isEmail ? "email" : "mobile_number": email,
-        "password": password,
-      });
-
-      final response = await http.post(
-        Uri.parse("$baseUrl/auth/login"),
-        headers: {'Content-Type': 'application/json'},
-        body: body,
+      final response = await authService.loginUser(
+        email: email,
+        password: password,
+        isEmail: isEmail,
       );
-      if (response.statusCode == 404) {
-        return CustomSnackbar.show("Error", "Invalid Credentials");
-      }
-      if (response.statusCode == 401) {
-        return CustomSnackbar.show("Error", "Check your credentials again");
-      }
 
-      final responseData = json.decode(response.body);
-      var token = responseData["token"];
-      final userModel = UserModel.fromJson(responseData["data"]);
+      var token = response["token"];
+      final userModel = UserModel.fromJson(response["data"]);
       await _tokenStorage.storeToken(token);
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
@@ -55,6 +45,7 @@ class AuthController extends GetxController {
           }
         });
       }
+
       if (userModel.video.isEmpty) {
         Get.toNamed(AppRoutes.updateVideo);
         return CustomSnackbar.show("Error", "Video not uploaded");
@@ -65,13 +56,14 @@ class AuthController extends GetxController {
       }
       final controller = Get.find<RetrieveController>();
       final postController = Get.find<PostController>();
-      final webController = Get.find<SocketController>();
+      final webController = Get.find<ChatController>();
 
-      // Connect the WebSocket with the new token
-      webController.connect();
-      await controller.getUserDetails();
+      await webController.connect();
+      controller.getUserDetails();
       postController.getAllPost();
       postController.getAllUserPost();
+      webController.getChatList();
+
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
@@ -125,8 +117,9 @@ class AuthController extends GetxController {
       var token = decodedResponseBody["token"];
       await _tokenStorage.storeToken(token);
       final controller = Get.find<RetrieveController>();
-      final webController = Get.find<SocketController>();
+      final webController = Get.find<ChatController>();
       await controller.getUserDetails();
+
       webController.connect();
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () {

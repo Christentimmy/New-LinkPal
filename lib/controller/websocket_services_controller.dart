@@ -9,7 +9,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 // //! todo <--> solo
 
-class SocketController extends GetxController {
+class ChatController extends GetxController {
   late IO.Socket socket;
   final _retrieveController = Get.find<RetrieveController>();
   RxList chatModelList = [].obs;
@@ -25,9 +25,15 @@ class SocketController extends GetxController {
     // Initialize the socket
     socket = IO.io(
       url,
-      IO.OptionBuilder().setTransports(['websocket']).setExtraHeaders(
-          {'Authorization': 'Bearer $token'}).build(),
+      IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .setExtraHeaders({'Authorization': 'Bearer $token'})
+          .enableAutoConnect()
+          .enableReconnection()
+          .build(),
     );
+
+    socket.connect();
 
     socket.on('connect', (_) {
       debugPrint("Connected to WebSocket server");
@@ -37,14 +43,7 @@ class SocketController extends GetxController {
       debugPrint("User Details: $user");
     });
 
-    print(_retrieveController.userModel.value?.email);
-    socket.on(_retrieveController.userModel.value?.id ?? "0", (e) {
-      debugPrint("Listening to ID: $e");
-      final List dataFromE = e;
-      final mapped = dataFromE.map((f) => ChatListModel.fromJson(f)).toList();
-      chatModelList.value = mapped;
-      chatModelList.refresh();
-    });
+    getChatList();
 
     // Listen for disconnection
     socket.on('disconnect', (_) {
@@ -57,14 +56,25 @@ class SocketController extends GetxController {
     });
   }
 
+  void getChatList() {
+    socket.emit("USER");
+    final userId = _retrieveController.userModel.value?.id ?? "";
+    print("Getting the id before listen: $userId");
+    socket.on(userId, (e) {
+      debugPrint("Listening to ID: $e");
+      final mapped = e.map((f) => ChatListModel.fromJson(f)).toList();
+      chatModelList.value = mapped;
+      chatModelList.refresh();
+    });
+  }
+
   void disconnect() {
-    print(socket.active && socket.connected);
-    if (socket.connected) {
-      chatModelList.clear();
-      socket.disconnect();
-      socket.destroy();
-    }
-    print(socket.connected);
+    socket.off("USER");
+    socket.off(_retrieveController.userModel.value!.id);
+    socket.disconnect();
+    socket.onDisconnect((e){
+      print(e);
+    });
   }
 
   void sendMessage(String message, String channedId) {
@@ -76,8 +86,6 @@ class SocketController extends GetxController {
     socket.emit('SEND_MESSAGE', payload);
   }
 
-
-
   void streamExistingChat(String channelId) {
     socket.on("$channelId-CHAT", (e) {
       print(e);
@@ -88,7 +96,6 @@ class SocketController extends GetxController {
       chatsList.refresh();
     });
   }
-  
 
   void streamLatestChat(String channelId) {
     socket.on(channelId, (e) {
@@ -98,11 +105,16 @@ class SocketController extends GetxController {
     });
   }
 
-  void getOldChats(String channedId) {
-    socket.on("GET_MESSAGE", (data) {
-      print(data);
+  void markRead({
+    required String channedId,
+    required String messageId,
+  }) async {
+    socket.emit("MARK_MESSAGE_READ", {
+      "channel_id": channedId,
+      "message_ids": [messageId],
     });
   }
+
 }
 
 

@@ -8,7 +8,7 @@ import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/controller/websocket_services_controller.dart';
-// import 'package:restart_app/restart_app.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -25,14 +25,13 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   final RxBool _isNotificationOn = false.obs;
-  final _tokenStorage = Get.find<TokenStorage>();
+  // final _tokenStorage = Get.find<TokenStorage>();
   final _retrieveController = Get.find<RetrieveController>();
-   final themeController = Get.put(ThemeController());
+  final themeController = Get.put(ThemeController());
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
-  final _webSocketController = Get.find<SocketController>();
-
+  final _webSocketController = Get.find<ChatController>();
   final RxBool _isloadingDelete = false.obs;
 
   void deleteUser() async {
@@ -41,8 +40,10 @@ class _SettingScreenState extends State<SettingScreen> {
     _userController.reset();
     _postController.reset();
     _webSocketController.disconnect();
+    _webSocketController.chatModelList.clear();
+    _webSocketController.chatsList.clear();
     await _authController.deleteAccount();
-    await _tokenStorage.deleteToken();
+    await TokenStorage().deleteToken();
     _isloadingDelete.value = false;
   }
 
@@ -50,10 +51,10 @@ class _SettingScreenState extends State<SettingScreen> {
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
+    await TokenStorage().deleteToken();
+    _webSocketController.chatModelList.clear();
+    _webSocketController.chatsList.clear();
     _webSocketController.disconnect();
-    await _tokenStorage.deleteToken();
-    // Restart.restartApp();
-    // Get.offAll(()=> const MyApp());
     Get.offAllNamed(AppRoutes.signin);
   }
 
