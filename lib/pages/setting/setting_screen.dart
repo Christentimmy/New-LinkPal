@@ -1,18 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
-import 'package:restart_app/restart_app.dart';
+import 'package:linkingpal/controller/chat_controller.dart';
+// import 'package:restart_app/restart_app.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
 import 'package:linkingpal/pages/setting/terms_screen.dart';
+import 'package:linkingpal/res/display_dialog_box.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 
@@ -25,37 +27,42 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   final RxBool _isNotificationOn = false.obs;
-  // final _tokenStorage = Get.find<TokenStorage>();
   final _retrieveController = Get.find<RetrieveController>();
   final themeController = Get.put(ThemeController());
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
-  final _webSocketController = Get.find<ChatController>();
+  // final _webSocketController = Get.put(ChatController());
+  final _socketController = Get.find<SocketController>();
   final RxBool _isloadingDelete = false.obs;
+  final RxBool _isloadingLogOut = false.obs;
 
   void deleteUser() async {
     _isloadingDelete.value = true;
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
-    _webSocketController.disconnect();
-    _webSocketController.chatModelList.clear();
-    _webSocketController.chatsList.clear();
     await _authController.deleteAccount();
     await TokenStorage().deleteToken();
+    await TokenSecure().deleteToken();
+    _socketController.disconnectSocket();
     _isloadingDelete.value = false;
   }
 
-  void logOut() async {
+  Future<void> logOut() async {
+    _isloadingLogOut.value = true;
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
     await TokenStorage().deleteToken();
-    _webSocketController.chatModelList.clear();
-    _webSocketController.chatsList.clear();
-    _webSocketController.disconnect();
+    await TokenSecure().deleteToken();
+    _socketController.disconnectSocket();
+    _isloadingLogOut.value = false;
+    print("Socket status: ${_socketController.socket?.connected}");
     Get.offAllNamed(AppRoutes.signin);
+    final token = await TokenSecure().getToken();
+    print("Token After delete: $token");
+    print("Created Status: ${SocketController().isConnected}");
   }
 
   @override
@@ -177,7 +184,34 @@ class _SettingScreenState extends State<SettingScreen> {
                 const SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
-                    logOut();
+                    displayDialogBoX(
+                        context: context,
+                        headTitle: "Do you want to log out?",
+                        child1: Obx(
+                          () => _isloadingLogOut.value
+                              ? const Loader(color: Colors.redAccent)
+                              : Text(
+                                  "Yes",
+                                  style: GoogleFonts.montserrat(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                        ),
+                        ontap1: () async {
+                          await logOut();
+                        },
+                        child2: Text(
+                          "No",
+                          style: GoogleFonts.montserrat(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        ontap2: () {
+                          Navigator.pop(context);
+                        });
                   },
                   child: Container(
                     height: 50,
@@ -198,27 +232,48 @@ class _SettingScreenState extends State<SettingScreen> {
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
-                    deleteUser();
-                  },
-                  child: Obx(
-                    () => Container(
-                      height: 50,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          width: 1,
-                          color: Colors.red,
+                    displayDialogBoX(
+                        context: context,
+                        headTitle: "Do you want to Delete Account?",
+                        child1: Obx(
+                          () => _isloadingDelete.value
+                              ? const Loader(color: Colors.redAccent)
+                              : Text(
+                                  "Yes",
+                                  style: GoogleFonts.montserrat(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
+                        ontap1: () async {
+                          await logOut();
+                        },
+                        child2: Text(
+                          "No",
+                          style: GoogleFonts.montserrat(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        ontap2: () {
+                          Navigator.pop(context);
+                        });
+                  },
+                  child: Container(
+                    height: 50,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        width: 1,
+                        color: Colors.red,
                       ),
-                      child: _isloadingDelete.value
-                          ? const Loader(
-                              color: Colors.deepOrangeAccent,
-                            )
-                          : Text(
-                              "Delete Account",
-                              style: Theme.of(context).textTheme.headlineMedium,
-                            ),
+                    ),
+                    child: Text(
+                      "Delete Account",
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),

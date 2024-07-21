@@ -31,4 +31,5 @@ class WebSocketController extends GetxController {
       return "";
     }
   }
+
 }

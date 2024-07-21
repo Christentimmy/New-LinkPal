@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,29 +12,27 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final _webSocketController = Get.find<ChatController>();
   final _retrieveController = Get.put(RetrieveController());
 
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 2), () {
-      navigatior();
+    Future.delayed(const Duration(seconds: 3), () async {
+      await navigatior();
     });
     super.initState();
   }
 
-  void navigatior() async {
-    final toknen = await TokenStorage().getToken();
-    if (toknen != null && toknen.isNotEmpty) {
+  Future<void> navigatior() async {
+    final token = await TokenSecure().getToken();
+    if (token != null && token.isNotEmpty) {
       Get.offNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
-      await _retrieveController.getUserDetails();
-      await _webSocketController.connect();
-      _webSocketController.getChatList();
+      _retrieveController.getUserDetails();
     } else {
-      Get.offNamed(AppRoutes.walkthrough);
+       Get.offNamed(AppRoutes.walkthrough);
     }
+   
   }
 
   @override

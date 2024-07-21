@@ -213,34 +213,45 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                               size: 16,
                             ),
                             Obx(
-                              () => FutureBuilder(
-                                future: _locationController.displayLocation(
-                                  latitude: _retrieveController
-                                          .externalUserModel.value?.latitude ??
-                                      0.00,
-                                  longitude: _retrieveController
-                                          .externalUserModel.value?.longitude ??
-                                      0.00,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const SizedBox();
-                                  } else if (snapshot.hasError) {
-                                    return Text('Error: ${snapshot.error}');
-                                  } else if (!snapshot.hasData ||
-                                      snapshot.data!.isEmpty) {
-                                    return const Text('Location not available');
-                                  } else {
-                                    return Text(
-                                      snapshot.data!,
+                              () {
+                                final latitude = _retrieveController
+                                    .externalUserModel.value?.latitude;
+                                final longitude = _retrieveController
+                                    .externalUserModel.value?.longitude;
+
+                                if (latitude == null || longitude == null) {
+                                  return Text('Location not available',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium,
-                                    );
-                                  }
-                                },
-                              ),
+                                          .bodyMedium);
+                                }
+
+                                return FutureBuilder<String>(
+                                  future: _locationController.displayLocation(
+                                      latitude: latitude, longitude: longitude),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const SizedBox();
+                                    } else if (snapshot.hasError) {
+                                      return Text('Error: ${snapshot.error}');
+                                    } else if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return const Text(
+                                          'Location not available');
+                                    } else {
+                                      return Text(
+                                        snapshot.data!,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
                             ),
                           ],
                         ),

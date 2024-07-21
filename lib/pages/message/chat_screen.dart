@@ -3,7 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
+import 'package:linkingpal/controller/chat_controller.dart';
 import 'package:linkingpal/models/chat_card_model.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 // import 'package:lottie/lottie.dart';
@@ -28,8 +28,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _retrieveController = Get.find<RetrieveController>();
-  final _webSocketController = Get.find<ChatController>();
-
+  final _webSocketController = Get.find<SocketController>();
 
   @override
   void dispose() {
@@ -40,21 +39,19 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _webSocketController.connect().then((_) {
-      if (_webSocketController.socket.connected) {
-        _webSocketController.socket.emit("GET_MESSAGE", {
+    if (_webSocketController.socket!.connected) {
+      _webSocketController.socket?.emit("GET_MESSAGE", {
+        "channel_id": widget.channedlId,
+      });
+      _webSocketController.streamExistingChat(widget.channedlId);
+    } else {
+      _webSocketController.socket?.onConnect((_) {
+        _webSocketController.socket?.emit("GET_MESSAGE", {
           "channel_id": widget.channedlId,
         });
         _webSocketController.streamExistingChat(widget.channedlId);
-      } else {
-        _webSocketController.socket.onConnect((_) {
-          _webSocketController.socket.emit("GET_MESSAGE", {
-            "channel_id": widget.channedlId,
-          });
-          _webSocketController.streamExistingChat(widget.channedlId);
-        });
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -76,7 +73,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 // userIndex: widget.userIndexInsideChatListArray,
                 webSocketController: _webSocketController,
                 retrieveController: _retrieveController,
-
               ),
               BottomTextField(
                 textController: _textController,
@@ -95,13 +91,13 @@ class BottomTextField extends StatelessWidget {
   const BottomTextField({
     super.key,
     required TextEditingController textController,
-    required ChatController webSocketController,
+    required SocketController webSocketController,
     required this.widget,
   })  : _textController = textController,
         _webSocketController = webSocketController;
 
   final TextEditingController _textController;
-  final ChatController _webSocketController;
+  final SocketController _webSocketController;
   final ChatScreen widget;
 
   @override
@@ -170,13 +166,13 @@ class ChatList extends StatelessWidget {
   // final int userIndex;
   ChatList({
     super.key,
-    required ChatController webSocketController,
+    required SocketController webSocketController,
     required RetrieveController retrieveController,
     // required this.userIndex,
   })  : _webSocketController = webSocketController,
         _retrieveController = retrieveController;
 
-  final ChatController _webSocketController;
+  final SocketController _webSocketController;
   final RetrieveController _retrieveController;
   final _scrollController = ScrollController().obs;
 

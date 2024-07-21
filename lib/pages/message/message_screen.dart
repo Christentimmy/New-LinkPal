@@ -2,10 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
+import 'package:linkingpal/controller/chat_controller.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/chat_list_model.dart';
+import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -16,30 +18,7 @@ class MessageScreen extends StatefulWidget {
 }
 
 class _MessageScreenState extends State<MessageScreen> {
-  final _webSocketService = Get.find<ChatController>();
-  final _retrieveController = Get.find<RetrieveController>();
-
-  @override
-  void initState() {
-    super.initState();
-
-    getf();
-  }
-
-  void getf() async {
-    // Ensure that user details are fetched before setting up the listener
-    await _retrieveController.getUserDetails().then((_) {
-      if (_webSocketService.socket != null &&
-          _webSocketService.socket.connected) {
-        _webSocketService.getChatList();
-      } else {
-        _webSocketService.connect().then((_) {
-          _webSocketService.getChatList();
-        });
-      }
-    });
-  }
-
+  final _webSocketService = Get.find<SocketController>();
 
   @override
   Widget build(BuildContext context) {
@@ -110,56 +89,88 @@ class _MessageScreenState extends State<MessageScreen> {
               const SizedBox(height: 15),
               // const LinearActivePeople(),
               const Divider(),
-              Obx(() {
-                return _webSocketService.chatModelList.isEmpty
-                    ? SizedBox(
-                        height: MediaQuery.of(context).size.height / 1.5,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Lottie.asset("assets/images/empty.json"),
-                            const Text("Empty"),
-                          ],
-                        ),
-                      )
-                    : Expanded(
-                        child: ListView.builder(
-                          itemCount: _webSocketService.chatModelList.length,
-                          itemBuilder: (context, index) {
-                            ChatListModel ch =
-                                _webSocketService.chatModelList[index];
-                            final List<UserChatListModel> users =
-                                ch.lastSentMessage.users.toList();
-                            int ind = 0;
-                            if (users.isNotEmpty) {
-                              ind = users.indexWhere((element) =>
-                                  element.userId !=
-                                  ch.lastSentMessage.senderId);
-
-                              print("Receiver Id: ${users[ind].userId}");
-                            }
-                            // UserChatListModel chatModel = users[ind];
-                            return MessageCard(
-                              chatListModel: ch,
-                              ontap: () {
-                                Get.toNamed(
-                                  AppRoutes.chat,
-                                  arguments: {
-                                    "userId": users[ind].userId,
-                                    "channedlId": ch.channel,
-                                    "name": ch.name,
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      );
-              }),
-              Container(),
+              Obx(
+                () => _webSocketService.chatModelList.isEmpty
+                    ? _buildEmptyState()
+                    : _buildChatList(),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height / 1.5,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset("assets/images/empty.json"),
+          const Text("Empty"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocketErrorState() {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height / 1.5,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("Socket Connection Error",
+              style: Theme.of(context).textTheme.bodyLarge),
+          Obx(
+            () => CustomButton(
+              ontap: () {
+                _webSocketService.initializeSocket();
+              },
+              child: _webSocketService.isloading.value
+                  ? const Loader()
+                  : Text(
+                      "Retry",
+                      style: TextStyle(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _webSocketService.chatModelList.length,
+        itemBuilder: (context, index) {
+          ChatListModel ch = _webSocketService.chatModelList[index];
+          final List<UserChatListModel> users =
+              ch.lastSentMessage.users.toList();
+          int ind = users.indexWhere(
+              (element) => element.userId != ch.lastSentMessage.senderId);
+
+          if (users.isNotEmpty && ind != -1) {
+            print("Receiver Id: ${users[ind].userId}");
+          }
+
+          return MessageCard(
+            chatListModel: ch,
+            ontap: () {
+              Get.toNamed(
+                AppRoutes.chat,
+                arguments: {
+                  "userId": users[ind].userId,
+                  "channedlId": ch.channel,
+                  "name": ch.name,
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }

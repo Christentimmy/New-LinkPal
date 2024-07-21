@@ -6,7 +6,6 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/verification_checker_methods.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
 import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/services/auth_service.dart';
 import 'package:linkingpal/theme/app_routes.dart';
@@ -16,8 +15,8 @@ class AuthController extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
   RxBool isLoading = false.obs;
   final _verificationController = Get.put(VerificationMethods());
-  final _tokenStorage = Get.find<TokenStorage>();
   AuthService authService = AuthService();
+  final _tokenSecure = TokenSecure();
 
   Future<void> loginUser({
     required String email,
@@ -31,9 +30,16 @@ class AuthController extends GetxController {
         isEmail: isEmail,
       );
 
+      final tokenn = await _tokenSecure.getToken();
+      print("Token before login: $tokenn");
+
       var token = response["token"];
+      await TokenSecure().storeToken(token);
       final userModel = UserModel.fromJson(response["data"]);
-      await _tokenStorage.storeToken(token);
+      await TokenStorage().storeToken(token);
+
+      final aftokenn = await _tokenSecure.getToken();
+      print("Token After login: $aftokenn");
 
       if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
         CustomSnackbar.show("Error", "Account not verified");
@@ -54,15 +60,13 @@ class AuthController extends GetxController {
         Get.toNamed(AppRoutes.selectGender);
         return CustomSnackbar.show("Error", "Fill out your gender");
       }
-      final controller = Get.find<RetrieveController>();
-      final postController = Get.find<PostController>();
-      final webController = Get.find<ChatController>();
 
-      await webController.connect();
-      controller.getUserDetails();
+      final retrieveController = Get.find<RetrieveController>();
+      final postController = Get.find<PostController>();
+
+      await retrieveController.getUserDetails();
       postController.getAllPost();
       postController.getAllUserPost();
-      webController.getChatList();
 
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
@@ -115,12 +119,10 @@ class AuthController extends GetxController {
         return CustomSnackbar.show('Error', "An Error occured, try again");
       }
       var token = decodedResponseBody["token"];
-      await _tokenStorage.storeToken(token);
+      await TokenStorage().storeToken(token);
       final controller = Get.find<RetrieveController>();
-      final webController = Get.find<ChatController>();
       await controller.getUserDetails();
 
-      webController.connect();
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () {
           Get.toNamed(AppRoutes.uploadPicture);

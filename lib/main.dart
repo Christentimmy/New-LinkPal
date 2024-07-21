@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/chat_controller.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/controller/theme_controller.dart';
-import 'package:linkingpal/controller/websocket_services_controller.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -33,7 +34,6 @@ class MyApp extends StatelessWidget {
           Get.put(InternetandConectivityChecker());
           Get.put(RetrieveController());
           Get.put(PostController());
-          Get.put(ChatController());
         }),
         debugShowCheckedModeBanner: false,
         getPages: RouteHandler.routes,

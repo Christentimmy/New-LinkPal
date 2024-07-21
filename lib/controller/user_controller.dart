@@ -455,6 +455,7 @@ class UserController extends GetxController {
         },
       );
       final decodedResponse = json.decode(response.body);
+      print(decodedResponse);
       if (response.statusCode != 200) {
         return CustomSnackbar.show("Error", decodedResponse["message"]);
       }
@@ -471,7 +472,10 @@ class UserController extends GetxController {
       List excludeCurrentUSer = mappedData
           .where((x) => x.id != _retrieveController.userModel.value!.id)
           .toList();
+      matches.clear();
+      print("Excluded user length: ${excludeCurrentUSer.length}");
       matches.value = excludeCurrentUSer;
+      print("Matches length: ${matches.length}");
       matches.refresh();
     } catch (e) {
       debugPrint(e.toString());

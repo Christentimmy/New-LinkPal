@@ -90,8 +90,9 @@ class RetrieveController extends GetxController {
   }
 
   void reset() {
-    userModel.value = null;
-    externalUserModel.value = null;
+    userModel.value = UserModel.empty();
+    externalUserModel.value = UserModel.empty();
     allPostFiles.clear();
+    UserModel.empty();
   }
 }

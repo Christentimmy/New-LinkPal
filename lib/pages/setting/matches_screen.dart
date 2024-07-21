@@ -23,8 +23,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
   @override
   void initState() {
-    _userController.myMatches();
     super.initState();
+    getMatches();
+  }
+
+  void getMatches() async {
+    await _userController.myMatches();
   }
 
   @override
@@ -34,7 +38,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
         centerTitle: true,
         title: Text(
           "My Matches",
-         style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyMedium,
         ),
       ),
       body: SafeArea(

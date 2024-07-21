@@ -70,6 +70,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       FocusManager.instance.primaryFocus?.unfocus();
     } else {
       CustomSnackbar.show("Error", "Fill the text and fill");
+      _postController.isloading.value = false;
     }
   }
 

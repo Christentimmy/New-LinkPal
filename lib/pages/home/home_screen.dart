@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:linkingpal/controller/chat_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/home/people_who_reacted.dart';
-import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/res/display_dialog_box.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,16 +21,33 @@ import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _postController = Get.put(PostController());
+  final _socketController = Get.put(SocketController());
+
   final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey =
       GlobalKey<LiquidPullToRefreshState>();
 
   Future<void> _handleRefresh() async {
     await _postController.getAllPost();
+  }
+
+  @override
+  void initState() {
+    establish();
+    super.initState();
+  }
+
+  void establish() {
+    _socketController.initializeSocket();
   }
 
   @override
@@ -101,105 +121,6 @@ class PostCardDisplay extends StatelessWidget {
     final imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
     final extension = file.split('.').last.toLowerCase();
     return imageExtensions.contains(extension);
-  }
-
-  Future<dynamic> displayDialogBoX(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          actions: [
-            // ElevatedButton(
-            //   onPressed: () {
-            //     Get.toNamed(AppRoutes.editPost, arguments: {
-            //       "model": postModel,
-            //     });
-            //   },
-            //   style: ElevatedButton.styleFrom(),
-            //   child: const Text(
-            //     "Edit",
-            //     style: TextStyle(
-            //       color: Colors.black,
-            //       fontWeight: FontWeight.w600,
-            //     ),
-            //   ),
-            // ),
-            CustomButton(
-              ontap: () {
-                Get.toNamed(AppRoutes.editPost, arguments: {
-                  "model": postModel,
-                });
-              },
-              child: const Text(
-                "Edit",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Obx(
-              () => CustomButton(
-                ontap: () async {
-                  _postController.deletePost(postModel.value.id, context);
-                },
-                child: _postController.isloading.value
-                    ? const Loader(
-                        color: Colors.white,
-                      )
-                    : const Text(
-                        "Delete",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-            // Obx(
-            //   () => ElevatedButton(
-            //     onPressed: () async {
-            //       _postController.deletePost(postModel.value.id, context);
-            //     },
-            //     child: _postController.isloading.value
-            //         ? const Loader(
-            //             color: Colors.deepPurpleAccent,
-            //           )
-            //         : const Text(
-            //             "Delete",
-            //             style: TextStyle(
-            //               color: Colors.black,
-            //               fontWeight: FontWeight.w600,
-            //             ),
-            //           ),
-            //   ),
-            // ),
-          ],
-          title: const Text(
-            "Confirmation",
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 5),
-              Text(
-                "Do you want to edit or delete this post?",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -294,7 +215,41 @@ class PostCardDisplay extends StatelessWidget {
                             postModel.value.createdBy.name
                         ? GestureDetector(
                             onTap: () async {
-                              displayDialogBoX(context);
+                              displayDialogBoX(
+                                  context: context,
+                                  headTitle:
+                                      "Do you want to edit or delete this post?",
+                                  child1: Text(
+                                    "Edit",
+                                    style: GoogleFonts.montserrat(
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  ontap1: () {
+                                    Get.toNamed(AppRoutes.editPost, arguments: {
+                                      "model": postModel,
+                                    });
+                                  },
+                                  child2: _postController.isloading.value
+                                      ? const Loader(
+                                          color: Colors.white,
+                                        )
+                                      : Text(
+                                          "Delete",
+                                          style: GoogleFonts.montserrat(
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                  ontap2: () async {
+                                    await _postController.deletePost(
+                                      postModel.value.id,
+                                      context,
+                                    );
+                                  });
                             },
                             child: Container(
                               height: 30,
@@ -860,11 +815,7 @@ class UserNameWidget extends StatelessWidget {
               ),
               imageUrl: controller.userModel.value?.image ?? "",
               progressIndicatorBuilder: (context, url, progress) {
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.grey.shade300,
-                  ),
-                );
+                return const Loader();
               },
             ),
           ),
