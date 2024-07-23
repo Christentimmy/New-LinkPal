@@ -42,11 +42,12 @@ class UpdateVideoScreen extends StatelessWidget {
     }
   }
 
-  void submitVideo() async {
+  void submitVideo(BuildContext context) async {
     _isloading.value = true;
     await _userController.uploadVideo(
       video: _videoFile.value!,
       isSignUp: false,
+      context: context,
     );
     _isloading.value = false;
   }
@@ -126,9 +127,9 @@ class UpdateVideoScreen extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   if (_videoFile.value != null) {
-                    submitVideo();
+                    submitVideo(context);
                   } else {
-                    CustomSnackbar.show("Error", "Select a video");
+                    CustomSnackbar.showErrorSnackBar("Select a video", context);
                   }
                 },
                 child: Obx(

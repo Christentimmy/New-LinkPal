@@ -9,20 +9,15 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 
 class RetrieveController extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
-  @override
-  void onInit() {
-    getUserDetails();
-    super.onInit();
-  }
 
   Rx<UserModel?> userModel = Rx<UserModel?>(null);
   Rx<UserModel?> externalUserModel = Rx<UserModel?>(null);
   RxList<String> allPostFiles = <String>[].obs;
 
-  Future<void> getUserDetails() async {
+  Future<void> getUserDetails(BuildContext context) async {
     final String? token = await TokenStorage().getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Invalid token, login again");
+      CustomSnackbar.showErrorSnackBar("Invalid token, login again", context);
       return Get.toNamed(AppRoutes.signin);
     }
     try {
@@ -39,13 +34,13 @@ class RetrieveController extends GetxController {
             Get.offAllNamed(AppRoutes.dashboard);
           }
         });
-        return CustomSnackbar.show(
-          "Error",
+        return CustomSnackbar.showErrorSnackBar(
           "Please verify your mobile number to continue",
+          context,
         );
       }
       if (response.statusCode != 200) {
-        return CustomSnackbar.show("Error", responseData["message"]);
+        return CustomSnackbar.showErrorSnackBar(responseData["message"].toString(), context);
       }
       final instance = UserModel.fromJson(responseData["data"]);
       userModel.value = instance;
@@ -54,10 +49,10 @@ class RetrieveController extends GetxController {
     }
   }
 
-  Future<void> getSpecificUserId(String userId) async {
+  Future<void> getSpecificUserId(String userId, BuildContext context) async {
     final String? token = await TokenStorage().getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Invalid token, login again");
+      CustomSnackbar.showErrorSnackBar("Invalid token, login again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -70,7 +65,7 @@ class RetrieveController extends GetxController {
       final decoded = await json.decode(response.body);
       print(decoded);
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decoded["message"].toString());
+        CustomSnackbar.showErrorSnackBar(decoded["message"].toString(), context);
       }
       final instance = UserModel.fromJson(decoded["data"]);
       externalUserModel.value = instance;

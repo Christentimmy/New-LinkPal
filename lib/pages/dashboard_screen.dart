@@ -1,9 +1,12 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
+
 import 'package:linkingpal/controller/token_storage_controller.dart';
+
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
@@ -23,8 +26,9 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
       Get.find<InternetandConectivityChecker>();
   final tokenStorage = Get.put(TokenStorage());
 
+
   final RxList _pages = [
-    HomeScreen(),
+    const HomeScreen(),
     const SwipeScreen(),
     const CreatePostScreen(),
     const ProfileScreen(),
@@ -100,7 +104,11 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                 activeColor: Colors.white,
                 tabBackgroundColor: Colors.grey.shade600,
                 padding: const EdgeInsets.all(14),
-                textStyle: Theme.of(context).textTheme.bodySmall,
+                textStyle: GoogleFonts.montserrat(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
                 tabs: const [
                   GButton(
                     icon: Icons.home,

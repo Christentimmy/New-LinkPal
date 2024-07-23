@@ -6,12 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/chat_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/home/people_who_reacted.dart';
+import 'package:like_button/like_button.dart';
 import 'package:linkingpal/res/display_dialog_box.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/theme/app_theme.dart';
@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
       GlobalKey<LiquidPullToRefreshState>();
 
   Future<void> _handleRefresh() async {
-    await _postController.getAllPost();
+    await _postController.getAllPost(context: context);
   }
 
   @override
@@ -70,29 +70,37 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
               Obx(
                 () {
-                  return _postController.allPost.isEmpty
+                  return _postController.isloading.value
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height / 1.5,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Lottie.asset("assets/images/empty.json"),
-                              const Text("Empty"),
-                            ],
+                          child: const Loader(
+                            color: Colors.deepOrangeAccent,
                           ),
                         )
-                      : Expanded(
-                          child: ListView.builder(
-                            itemCount: _postController.allPost.length,
-                            itemBuilder: (context, index) {
-                              final post = _postController.allPost[index].obs;
-                              return PostCardDisplay(
-                                postModel: post,
-                                retrieveController: _retrieveController,
-                              );
-                            },
-                          ),
-                        );
+                      : _postController.allPost.isEmpty
+                          ? SizedBox(
+                              height: MediaQuery.of(context).size.height / 1.5,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Lottie.asset("assets/images/empty.json"),
+                                  const Text("Empty"),
+                                ],
+                              ),
+                            )
+                          : Expanded(
+                              child: ListView.builder(
+                                itemCount: _postController.allPost.length,
+                                itemBuilder: (context, index) {
+                                  final post =
+                                      _postController.allPost[index].obs;
+                                  return PostCardDisplay(
+                                    postModel: post,
+                                    retrieveController: _retrieveController,
+                                  );
+                                },
+                              ),
+                            );
                 },
               ),
             ],
@@ -232,23 +240,25 @@ class PostCardDisplay extends StatelessWidget {
                                       "model": postModel,
                                     });
                                   },
-                                  child2: _postController.isloading.value
-                                      ? const Loader(
-                                          color: Colors.white,
-                                        )
-                                      : Text(
-                                          "Delete",
-                                          style: GoogleFonts.montserrat(
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            fontWeight: FontWeight.w600,
+                                  child2: Obx(
+                                    () => _postController.isDeleteLoading.value
+                                        ? const Loader(
+                                            color: Colors.deepOrangeAccent,
+                                          )
+                                        : Text(
+                                            "Delete",
+                                            style: GoogleFonts.montserrat(
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
+                                  ),
                                   ontap2: () async {
                                     await _postController.deletePost(
                                       postModel.value.id,
-                                      context,
                                     );
+                                    Get.back();
                                   });
                             },
                             child: Container(
@@ -333,28 +343,65 @@ class PostCardDisplay extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               children: [
-                GestureDetector(
-                  onLongPress: () {
-                    Get.to(() => ReactedScreen(postModel: postModel.value));
-                  },
-                  onTap: () {
-                    if (postModel.value.isLikeByUser) {
-                      _postController.disLikeAPost(
-                        postModel.value.id,
-                      );
-                    } else {
-                      _postController.likeAPost(postModel.value.id);
-                    }
-                  },
-                  child: postModel.value.isLikeByUser
-                      ? const Icon(
-                          FontAwesomeIcons.solidHeart,
-                          color: Colors.redAccent,
-                        )
-                      : const Icon(
-                          FontAwesomeIcons.heart,
-                        ),
+                Obx(
+                  () => GestureDetector(
+                    onLongPress: () {
+                      Get.to(() => ReactedScreen(postModel: postModel.value));
+                    },
+                    child: LikeButton(
+                      isLiked: postModel.value.isLikeByUser,
+                      onTap: (isLiked) async {
+                        if (isLiked) {
+                          _postController.disLikeAPost(
+                              postModel.value.id, context);
+                        } else {
+                          _postController.likeAPost(
+                              postModel.value.id, context);
+                        }
+                        return !isLiked;
+                      },
+                      // circleColor: const CircleColor(
+                      //   start: Colors.redAccent,
+                      //   end: Colors.redAccent,
+                      // ),
+                      // bubblesColor: const BubblesColor(
+                      //   dotPrimaryColor: Colors.redAccent,
+                      //   dotSecondaryColor: Colors.redAccent,
+                      // ),
+                      likeBuilder: (bool isLiked) {
+                        return Icon(
+                          isLiked
+                              ? FontAwesomeIcons.solidHeart
+                              : FontAwesomeIcons.heart,
+                          color: isLiked ? Colors.redAccent : Colors.grey,
+                        );
+                      },
+                    ),
+                  ),
                 ),
+                // GestureDetector(
+                //   onLongPress: () {
+                //     Get.to(() => ReactedScreen(postModel: postModel.value));
+                //   },
+                //   onTap: () {
+                //     if (postModel.value.isLikeByUser) {
+                //       _postController.disLikeAPost(
+                //         postModel.value.id,
+                //         context,
+                //       );
+                //     } else {
+                //       _postController.likeAPost(postModel.value.id, context);
+                //     }
+                //   },
+                //   child: postModel.value.isLikeByUser
+                //       ? const Icon(
+                //           FontAwesomeIcons.solidHeart,
+                //           color: Colors.redAccent,
+                //         )
+                //       : const Icon(
+                //           FontAwesomeIcons.heart,
+                //         ),
+                // ),
                 const SizedBox(width: 4),
                 Text(
                   postModel.value.likes.toString(),
@@ -363,7 +410,7 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
-                    _postController.getComments(postModel.value.id);
+                    _postController.getComments(postModel.value.id, context);
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,
@@ -558,7 +605,7 @@ class _CommentScreenState extends State<CommentScreen> {
 
                                       return widget.retrieveController.userModel
                                                   .value!.id ==
-                                              commentsMod!.createdBy.id
+                                              commentsMod.createdBy.id
                                           ? Dismissible(
                                               key: ValueKey(
                                                 commentsMod.id,
@@ -571,6 +618,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                                     .deleteComment(
                                                   commentId: commentsMod.id,
                                                   postId: widget.postModel.id,
+                                                  context: context,
                                                 );
                                               },
                                               child: CommentCard(
@@ -607,7 +655,7 @@ class _CommentScreenState extends State<CommentScreen> {
               controller: _commentController,
               style: TextStyle(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                fontWeight: FontWeight.w300,
+                fontWeight: FontWeight.w800,
                 fontSize: 12,
               ),
               maxLines: 5,
@@ -627,6 +675,7 @@ class _CommentScreenState extends State<CommentScreen> {
                         widget.postController.commentOnPost(
                           widget.postModel.id,
                           _commentController,
+                          context,
                         );
                         FocusManager.instance.primaryFocus?.unfocus();
                       },
@@ -699,94 +748,101 @@ class _CommentCardState extends State<CommentCard> {
       constraints: const BoxConstraints(
         minHeight: 60,
       ),
-      child: GestureDetector(
-        onTap: () {
-          Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
-            "userId": widget.commentModel.createdBy.id,
-          });
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            CircleAvatar(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
+                "userId": widget.commentModel.createdBy.id,
+              });
+            },
+            child: CircleAvatar(
               radius: 17,
               backgroundImage: NetworkImage(
                 widget.commentModel.createdBy.avatar,
               ),
             ),
-            const SizedBox(width: 10),
-            Container(
-              width: MediaQuery.of(context).size.width / 1.6,
-              constraints: const BoxConstraints(
-                minHeight: 50,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+          ),
+          const SizedBox(width: 10),
+          Container(
+            width: MediaQuery.of(context).size.width / 1.6,
+            constraints: const BoxConstraints(
+              minHeight: 50,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.toNamed(AppRoutes.swipedUserCardProfile, arguments: {
+                      "userId": widget.commentModel.createdBy.id,
+                    });
+                  },
+                  child: Text(
                     widget.commentModel.createdBy.name,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  Text(
-                    widget.commentModel.comment,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  // const SizedBox(height: 5),
-                  // const Text(
-                  //   "Reply",
-                  //   style: TextStyle(
-                  //     fontSize: 12,
-                  //     color: Colors.grey,
-                  //     fontStyle: FontStyle.italic,
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (widget.commentModel.isLikeByUser) {
-                      widget.postController
-                          .dislikeComement(widget.commentModel.id);
-                      setState(() {});
-                    } else {
-                      widget.postController
-                          .likeComement(widget.commentModel.id);
-                      setState(() {});
-                    }
-                  },
-                  child: widget.commentModel.isLikeByUser
-                      ? const Icon(
-                          Icons.favorite,
-                          color: Colors.redAccent,
-                          size: 18,
-                        )
-                      : const Icon(
-                          Icons.favorite,
-                          color: Colors.grey,
-                          size: 18,
-                        ),
                 ),
                 Text(
-                  widget.commentModel.likes.toString(),
+                  widget.commentModel.comment,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                // const SizedBox(height: 5),
+                // const Text(
+                //   "Reply",
+                //   style: TextStyle(
+                //     fontSize: 12,
+                //     color: Colors.grey,
+                //     fontStyle: FontStyle.italic,
+                //   ),
+                // ),
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+          const Spacer(),
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (widget.commentModel.isLikeByUser) {
+                    widget.postController
+                        .dislikeComement(widget.commentModel.id, context);
+                    setState(() {});
+                  } else {
+                    widget.postController
+                        .likeComement(widget.commentModel.id, context);
+                    setState(() {});
+                  }
+                },
+                child: widget.commentModel.isLikeByUser
+                    ? const Icon(
+                        Icons.favorite,
+                        color: Colors.redAccent,
+                        size: 18,
+                      )
+                    : const Icon(
+                        Icons.favorite,
+                        color: Colors.grey,
+                        size: 18,
+                      ),
+              ),
+              Text(
+                widget.commentModel.likes.toString(),
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          )
+        ],
       ),
     );
   }

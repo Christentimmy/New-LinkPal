@@ -23,16 +23,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> navigatior() async {
-    final token = await TokenSecure().getToken();
+    final token = await TokenStorage().getToken();
     if (token != null && token.isNotEmpty) {
       Get.offNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
-      _retrieveController.getUserDetails();
+      _retrieveController.getUserDetails(context);
     } else {
-       Get.offNamed(AppRoutes.walkthrough);
+      Get.offNamed(AppRoutes.walkthrough);
     }
-   
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:linkingpal/widgets/snack_bar.dart';
 
@@ -10,6 +11,7 @@ class AuthService {
     required String email,
     required String password,
     required bool isEmail,
+    required BuildContext context,
   }) async {
     final body = json.encode({
       isEmail ? "email" : "mobile_number": email,
@@ -23,7 +25,7 @@ class AuthService {
     );
 
     if (response.statusCode == 404 || response.statusCode == 401) {
-      CustomSnackbar.show("Error", "Invalid Credentials");
+      CustomSnackbar.showErrorSnackBar("Invalid Credentials", context);
       throw Exception("Invalid credentials");
     }
 

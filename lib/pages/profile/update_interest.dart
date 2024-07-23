@@ -38,13 +38,14 @@ class UpdateInterestScreen extends StatelessWidget {
   final RxString _choosenValue = "".obs;
   final RxBool _isloading = false.obs;
 
-  void uploadInterest() async {
+  void uploadInterest(BuildContext context) async {
     _isloading.value = true;
     await _userController.uploadInterest(
       interests: [
         _choosenValue.value,
       ],
       isSignUp: false,
+      context: context,
     );
     _isloading.value = false;
   }
@@ -59,9 +60,9 @@ class UpdateInterestScreen extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (_choosenValue.value.isNotEmpty) {
-              uploadInterest();
+              uploadInterest(context);
             } else {
-              CustomSnackbar.show("Error", "Pick one interest");
+              CustomSnackbar.showErrorSnackBar("Pick one interest", context);
             }
           },
           child: const Icon(Icons.check),

@@ -1,9 +1,11 @@
 import 'package:another_xlider/another_xlider.dart';
 import 'package:another_xlider/models/handler.dart';
+import 'package:another_xlider/models/trackbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:linkingpal/controller/filter_controller.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/swipe_controller.dart';
@@ -25,10 +27,9 @@ class SwipeScreen extends StatefulWidget {
 class _SwipeScreenState extends State<SwipeScreen>
     with SingleTickerProviderStateMixin {
   final _retrieveController = Get.find<RetrieveController>();
-  final _userController = Get.put(UserController());
+  final _userController = Get.find<UserController>();
   final AppinioSwiperController _controller = AppinioSwiperController();
   final _swipeController = Get.put(SwipeController());
-
   final RxBool _isSwipeRight = false.obs;
   final RxBool _isSwipeLeft = false.obs;
 
@@ -39,12 +40,14 @@ class _SwipeScreenState extends State<SwipeScreen>
   }
 
   void getCards() async {
-    await _userController.getNearByUSer(
-      age: "90",
-      mood: _retrieveController.userModel.value?.mood[0].toString() ?? "",
-      distance: "800",
-      interest: "all",
-    );
+    if (!_userController.isPeopleNearbyFetched.value) {
+      await _userController.getNearByUSer(
+        age: "90",
+        mood: _retrieveController.userModel.value?.mood[0].toString() ?? "",
+        distance: "800",
+        interest: "all",
+      );
+    }
   }
 
   @override
@@ -58,11 +61,12 @@ class _SwipeScreenState extends State<SwipeScreen>
               widget1(
                 controller: _retrieveController,
                 onTap1: () {
-                  Get.to(() => MessageScreen());
+                  Get.to(() => const MessageScreen());
                 },
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
+                    isScrollControlled: true,
                     builder: (context) {
                       return CustomBottomSheet(
                         controller: _userController,
@@ -72,70 +76,77 @@ class _SwipeScreenState extends State<SwipeScreen>
                   );
                 },
               ),
+
+              // altBuilder(context),
+
               Obx(() {
-                return _userController.peopleNearBy.isEmpty
+                return _userController.isloading.value
                     ? SizedBox(
                         height: MediaQuery.of(context).size.height / 1.55,
-                        child: Center(
-                          child: Column(
-                            children: [
-                              Lottie.asset("assets/images/empty.json"),
-                              const Text("Empty? filter your cards above"),
-                            ],
+                        child: const Center(
+                          child: Loader(
+                            color: Colors.deepOrangeAccent,
                           ),
                         ),
                       )
-                    : Expanded(
-                        child: AppinioSwiper(
-                          loop: true,
-                          controller: _controller,
-                          onSwipeBegin: (previousIndex, targetIndex, activity) {
-                            final UserModel userModel =
-                                _userController.peopleNearBy[previousIndex];
-                            final String receiverId = userModel.id;
-                            if (activity.direction == AxisDirection.right) {
-                              _isSwipeRight.value = true;
-                              _swipeController.swipe(receiverId: receiverId);
-                            } else {
-                              _isSwipeLeft.value = true;
-                            }
-                            Future.delayed(const Duration(seconds: 1), () {
-                              _isSwipeLeft.value = false;
-                              _isSwipeRight.value = false;
-                            });
-                          },
-                          swipeOptions:
-                              const SwipeOptions.symmetric(horizontal: true),
-                          cardBuilder: (context, index) {
-                            final UserModel userModel =
-                                _userController.peopleNearBy[index];
-
-                            // return AltSwipeCard(
-                            //   userModel: userModel,
-                            //   ontap: () {},
-                            //   retrieveController: _retrieveController,
-                            //   userController: _userController,
-                            //   appinioSwiperController: _controller,
-                            // );
-                            return SwipeCard(
-                              retrieveController: _retrieveController,
-                              userController: _userController,
-                              ontap: () {
-                                Get.toNamed(
-                                  AppRoutes.swipedUserCardProfile,
-                                  arguments: {
-                                    "userId": userModel.id,
-                                    "isSent": userModel.isMatchRequestSent,
+                    : _userController.peopleNearBy.isEmpty
+                        ? SizedBox(
+                            height: MediaQuery.of(context).size.height / 1.55,
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Lottie.asset("assets/images/empty.json"),
+                                  const Text("Empty? filter your cards above"),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: AppinioSwiper(
+                              loop: true,
+                              controller: _controller,
+                              onSwipeBegin:
+                                  (previousIndex, targetIndex, activity) {
+                                final UserModel userModel =
+                                    _userController.peopleNearBy[previousIndex];
+                                final String receiverId = userModel.id;
+                                if (activity.direction == AxisDirection.right) {
+                                  _isSwipeRight.value = true;
+                                  _swipeController.swipe(
+                                      receiverId: receiverId, context: context);
+                                } else {
+                                  _isSwipeLeft.value = true;
+                                }
+                                Future.delayed(const Duration(seconds: 1), () {
+                                  _isSwipeLeft.value = false;
+                                  _isSwipeRight.value = false;
+                                });
+                              },
+                              swipeOptions: const SwipeOptions.symmetric(
+                                  horizontal: true),
+                              cardBuilder: (context, index) {
+                                final UserModel userModel =
+                                    _userController.peopleNearBy[index];
+                                return SwipeCard(
+                                  retrieveController: _retrieveController,
+                                  userController: _userController,
+                                  ontap: () {
+                                    Get.toNamed(
+                                      AppRoutes.swipedUserCardProfile,
+                                      arguments: {
+                                        "userId": userModel.id,
+                                        "isSent": userModel.isMatchRequestSent,
+                                      },
+                                    );
                                   },
+                                  userModel: userModel,
                                 );
                               },
-                              userModel: userModel,
-                            );
-                          },
-                          cardCount: _userController.peopleNearBy.length,
-                        ),
-                      );
+                              cardCount: _userController.peopleNearBy.length,
+                            ),
+                          );
               }),
+
               const SizedBox(height: 15),
               // const Spacer(),
               Obx(() {
@@ -209,6 +220,97 @@ class _SwipeScreenState extends State<SwipeScreen>
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Obx altBuilder(BuildContext context) {
+    return Obx(
+      () => FutureBuilder(
+        future: _userController.getNearByUSer(
+          age: "90",
+          mood: _retrieveController.userModel.value?.mood[0].toString() ?? "",
+          distance: "800",
+          interest: "all",
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height / 1.55,
+              child: const Center(
+                child: Loader(
+                  color: Colors.deepOrangeAccent,
+                ),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height / 1.55,
+              child: Text(
+                snapshot.error.toString(),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            SizedBox(
+              height: MediaQuery.of(context).size.height / 1.55,
+              child: Center(
+                child: Column(
+                  children: [
+                    Lottie.asset("assets/images/empty.json"),
+                    const Text("Empty? filter your cards above"),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return Expanded(
+              child: AppinioSwiper(
+                loop: true,
+                controller: _controller,
+                onSwipeBegin: (previousIndex, targetIndex, activity) {
+                  // final UserModel userModel =
+                  //     _userController.peopleNearBy[previousIndex];
+                  final UserModel userModel = snapshot.data?[previousIndex];
+                  final String receiverId = userModel.id;
+                  if (activity.direction == AxisDirection.right) {
+                    _isSwipeRight.value = true;
+                    _swipeController.swipe(
+                        receiverId: receiverId, context: context);
+                  } else {
+                    _isSwipeLeft.value = true;
+                  }
+                  Future.delayed(const Duration(seconds: 1), () {
+                    _isSwipeLeft.value = false;
+                    _isSwipeRight.value = false;
+                  });
+                },
+                swipeOptions: const SwipeOptions.symmetric(horizontal: true),
+                cardBuilder: (context, index) {
+                  // final UserModel userModel =
+                  //     _userController.peopleNearBy[index];
+                  final UserModel userModel = snapshot.data?[index];
+                  return SwipeCard(
+                    retrieveController: _retrieveController,
+                    userController: _userController,
+                    ontap: () {
+                      Get.toNamed(
+                        AppRoutes.swipedUserCardProfile,
+                        arguments: {
+                          "userId": userModel.id,
+                          "isSent": userModel.isMatchRequestSent,
+                        },
+                      );
+                    },
+                    userModel: userModel,
+                  );
+                },
+                // cardCount: _userController.peopleNearBy.length,
+                cardCount: snapshot.data!.length,
+              ),
+            );
+          }
+          return const SizedBox();
+        },
       ),
     );
   }
@@ -711,15 +813,16 @@ class SwipeCard extends StatelessWidget {
 class CustomBottomSheet extends StatelessWidget {
   final UserController controller;
   final RetrieveController retrieveController;
+
   CustomBottomSheet({
     super.key,
     required this.controller,
     required this.retrieveController,
   });
 
-  final RxBool _isloading = false.obs;
-
-  final List _allIntetrest = [
+  final FilterController filterController = Get.put(FilterController());
+  final RxBool _isLoading = false.obs;
+  final List _allInterest = [
     "Game",
     "Clubbing",
     "Having breakfast",
@@ -742,7 +845,6 @@ class CustomBottomSheet extends StatelessWidget {
     "Playing board games or video games",
     "Traveling buddy",
   ];
-
   final List<String> _genders = [
     "Male",
     "Female",
@@ -750,28 +852,25 @@ class CustomBottomSheet extends StatelessWidget {
     "All",
   ];
 
-  final RxDouble _distanceValue = 0.0.obs;
-  final RxDouble _minAge = 18.0.obs;
-  final RxDouble _maxAge = 30.0.obs;
-  final RxInt _genderIndex = (-1).obs;
-  final RxInt _interest = (-1).obs;
-
   String selectedInterest = "";
   String selectedMood = "";
 
-  void filterCards() async {
-    _isloading.value = true;
+  void filterCards(BuildContext context) async {
+    _isLoading.value = true;
     controller.peopleNearBy.clear();
     await controller.getNearByUSer(
-      age: _maxAge.value.toString(),
+      age: filterController.maxAge.value.toString(),
       mood: selectedMood,
-      distance: _distanceValue.value.toString(),
+      distance: filterController.distanceValue.value.toString(),
       interest: selectedInterest,
     );
-    _isloading.value = false;
+    await Future.delayed(const Duration(milliseconds: 500));
+    _isLoading.value = false;
+    Get.back();
   }
 
   void clearFilter(BuildContext context) async {
+    filterController.resetFilters();
     Navigator.pop(context);
     await controller.getNearByUSer(
       age: "80",
@@ -783,226 +882,562 @@ class CustomBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: 10,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.63,
+      minChildSize: 0.6,
+      maxChildSize: 0.9,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 10,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Filter",
-                style: Theme.of(context).textTheme.bodyLarge,
+              Row(
+                children: [
+                  Text(
+                    "Filter",
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Get.back();
+                    },
+                  )
+                ],
               ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Get.back();
+              Obx(
+                () => Text(
+                  "Distance: ${filterController.distanceValue.value} Km",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              FlutterSlider(
+                values: [filterController.distanceValue.value],
+                rangeSlider: false,
+                max: 1500,
+                min: 0,
+                trackBar: FlutterSliderTrackBar(
+                  activeTrackBarHeight: 3,
+                  inactiveTrackBarHeight: 3,
+                  activeTrackBar: BoxDecoration(
+                    color: Theme.of(context).sliderTheme.activeTrackColor,
+                  ),
+                  inactiveTrackBar: BoxDecoration(
+                    color: Theme.of(context).sliderTheme.inactiveTrackColor,
+                  ),
+                ),
+                onDragging: (handlerIndex, lowerValue, upperValue) {
+                  filterController.distanceValue.value = lowerValue;
                 },
-              )
-            ],
-          ),
-          Obx(
-            () => Text(
-              "Distance: $_distanceValue Km",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          FlutterSlider(
-            values: const [0, 0],
-            rangeSlider: false,
-            max: 800,
-            min: 0,
-            onDragging: (handlerIndex, lowerValue, upperValue) {
-              _distanceValue.value = lowerValue - upperValue;
-            },
-          ),
-          Obx(
-            () => Text(
-              "Age: ${_minAge.round()} - ${_maxAge.round()}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          FlutterSlider(
-            values: [_minAge.value, _maxAge.value],
-            rangeSlider: true,
-            max: 80,
-            rightHandler: FlutterSliderHandler(
-              child: Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue,
+              ),
+              Obx(
+                () => Text(
+                  "Age: ${filterController.minAge.value.round()} - ${filterController.maxAge.value.round()}",
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ),
-            ),
-            handler: FlutterSliderHandler(
-              child: Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue,
-                ),
-              ),
-            ),
-            min: _minAge.value,
-            onDragging: (handlerIndex, lowerValue, upperValue) {
-              _minAge.value = lowerValue;
-              _maxAge.value = upperValue;
-            },
-          ),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              "Interested In",
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          SizedBox(
-            height: 35,
-            child: ListView.builder(
-              itemCount: _genders.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    _genderIndex.value = index;
-                    selectedInterest = _genders[index];
-                  },
-                  child: Obx(
-                    () => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 5,
-                      ),
-                      margin: const EdgeInsets.only(left: 9, top: 8),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _genderIndex.value == index
-                            ? Theme.of(context).primaryColor
-                            : Colors.black,
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Text(
-                        _genders[index],
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _genderIndex.value == index
-                              ? Colors.deepPurple
-                              : Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 15),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              "Activity/Mood",
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-          ),
-          SizedBox(
-            height: 35,
-            child: ListView.builder(
-              itemCount: _allIntetrest.length,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    _interest.value = index;
-                    selectedMood = _allIntetrest[index];
-                  },
-                  child: Obx(
-                    () => Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
-                      ),
-                      margin: const EdgeInsets.only(left: 9, top: 5),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: _interest.value == index
-                            ? Theme.of(context).primaryColor
-                            : Colors.black,
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                      child: Text(
-                        _allIntetrest[index],
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: _interest.value == index
-                              ? Colors.deepPurpleAccent
-                              : Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    clearFilter(context);
-                  },
+              FlutterSlider(
+                values: [
+                  filterController.minAge.value,
+                  filterController.maxAge.value
+                ],
+                rangeSlider: true,
+                max: 80,
+                rightHandler: FlutterSliderHandler(
                   child: Container(
-                    height: 45,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      "Clear Filter",
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
                     ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    filterCards();
-                    Get.back();
-                  },
+                handler: FlutterSliderHandler(
                   child: Container(
-                    height: 45,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.black,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.blue,
                     ),
-                    child: _isloading.value
-                        ? const Loader()
-                        : const Text(
-                            "Apply Now",
+                  ),
+                ),
+                trackBar: FlutterSliderTrackBar(
+                  activeTrackBarHeight: 3,
+                  inactiveTrackBarHeight: 3,
+                  activeTrackBar: BoxDecoration(
+                    color: Theme.of(context).sliderTheme.activeTrackColor,
+                  ),
+                  inactiveTrackBar: BoxDecoration(
+                    color: Theme.of(context).sliderTheme.inactiveTrackColor,
+                  ),
+                ),
+                min: 18.0,
+                onDragging: (handlerIndex, lowerValue, upperValue) {
+                  filterController.minAge.value = lowerValue;
+                  filterController.maxAge.value = upperValue;
+                },
+              ),
+              const SizedBox(height: 5),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  "Interested In",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              SizedBox(
+                height: 35,
+                child: ListView.builder(
+                  itemCount: _genders.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        filterController.genderIndex.value = index;
+                        selectedInterest = _genders[index];
+                      },
+                      child: Obx(
+                        () => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 5,
+                          ),
+                          margin: const EdgeInsets.only(left: 9, top: 8),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: filterController.genderIndex.value == index
+                                ? Theme.of(context).primaryColor
+                                : Colors.black,
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          child: Text(
+                            _genders[index],
                             style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              fontSize: 12,
+                              color: filterController.genderIndex.value == index
+                                  ? Colors.deepPurple
+                                  : Colors.white,
                             ),
                           ),
-                  ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
+              const SizedBox(height: 25),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  "Activity/Mood",
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
+              const SizedBox(height: 5),
+              SizedBox(
+                height: 35,
+                child: ListView.builder(
+                  itemCount: _allInterest.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        filterController.interestIndex.value = index;
+                        selectedMood = _allInterest[index];
+                      },
+                      child: Obx(
+                        () => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 2,
+                          ),
+                          margin: const EdgeInsets.only(left: 9, top: 5),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: filterController.interestIndex.value == index
+                                ? Theme.of(context).primaryColor
+                                : Colors.black,
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          child: Text(
+                            _allInterest[index],
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  filterController.interestIndex.value == index
+                                      ? Colors.deepPurpleAccent
+                                      : Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        clearFilter(context);
+                      },
+                      child: Container(
+                        height: 45,
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          "Clear Filter",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        filterCards(context);
+                      },
+                      child: Container(
+                        height: 45,
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.black,
+                        ),
+                        child: Obx(
+                          () => _isLoading.value
+                              ? const Loader()
+                              : const Text(
+                                  "Apply Now",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
             ],
           ),
-          const SizedBox(height: 10),
-        ],
-      ),
+        );
+      },
     );
   }
 }
+
+// // ignore: must_be_immutable
+// class CustomBottomSheet extends StatelessWidget {
+//   final UserController controller;
+//   final RetrieveController retrieveController;
+//   CustomBottomSheet({
+//     super.key,
+//     required this.controller,
+//     required this.retrieveController,
+//   });
+
+//   final RxBool _isloading = false.obs;
+
+//   final List _allIntetrest = [
+//     "Game",
+//     "Clubbing",
+//     "Having breakfast",
+//     "Going out for lunch",
+//     "Having dinner together",
+//     "Going for drinks",
+//     "Working out at the gym",
+//     "Attending church/mosque",
+//     "Going on holiday trips",
+//     "Getting spa treatments",
+//     "Shopping together",
+//     "Watching Netflix and chilling",
+//     "Being event or party partners",
+//     "Cooking and chilling",
+//     "Smoking together",
+//     "Studying together",
+//     "Playing sports",
+//     "Going to concerts",
+//     "Hiking or outdoor activities",
+//     "Playing board games or video games",
+//     "Traveling buddy",
+//   ];
+
+//   final List<String> _genders = [
+//     "Male",
+//     "Female",
+//     "Others",
+//     "All",
+//   ];
+
+//   final RxDouble _distanceValue = 0.0.obs;
+//   final RxDouble _minAge = 18.0.obs;
+//   final RxDouble _maxAge = 30.0.obs;
+//   final RxInt _genderIndex = (-1).obs;
+//   final RxInt _interest = (-1).obs;
+
+//   String selectedInterest = "";
+//   String selectedMood = "";
+
+//   void filterCards(BuildContext context) async {
+//     _isloading.value = true;
+//     controller.peopleNearBy.clear();
+//     await controller.getNearByUSer(
+//       context: context,
+//       age: _maxAge.value.toString(),
+//       mood: selectedMood,
+//       distance: _distanceValue.value.toString(),
+//       interest: selectedInterest,
+//     );
+//     _isloading.value = false;
+//   }
+
+//   void clearFilter(BuildContext context) async {
+//     Navigator.pop(context);
+//     await controller.getNearByUSer(
+//       context: context,
+//       age: "80",
+//       mood: retrieveController.userModel.value!.mood[0].toString(),
+//       distance: "10",
+//       interest: retrieveController.userModel.value!.gender,
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(
+//         horizontal: 15,
+//         vertical: 10,
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             children: [
+//               Text(
+//                 "Filter",
+//                 style: Theme.of(context).textTheme.bodyLarge,
+//               ),
+//               const Spacer(),
+//               IconButton(
+//                 icon: const Icon(Icons.close),
+//                 onPressed: () {
+//                   Get.back();
+//                 },
+//               )
+//             ],
+//           ),
+//           Obx(
+//             () => Text(
+//               "Distance: $_distanceValue Km",
+//               style: Theme.of(context).textTheme.bodyMedium,
+//             ),
+//           ),
+//           FlutterSlider(
+//             values: const [0, 0],
+//             rangeSlider: false,
+//             max: 800,
+//             min: 0,
+//             onDragging: (handlerIndex, lowerValue, upperValue) {
+//               _distanceValue.value = lowerValue - upperValue;
+//             },
+//           ),
+//           Obx(
+//             () => Text(
+//               "Age: ${_minAge.round()} - ${_maxAge.round()}",
+//               style: Theme.of(context).textTheme.bodyMedium,
+//             ),
+//           ),
+//           FlutterSlider(
+//             values: [_minAge.value, _maxAge.value],
+//             rangeSlider: true,
+//             max: 80,
+//             rightHandler: FlutterSliderHandler(
+//               child: Container(
+//                 decoration: const BoxDecoration(
+//                   shape: BoxShape.circle,
+//                   color: Colors.blue,
+//                 ),
+//               ),
+//             ),
+//             handler: FlutterSliderHandler(
+//               child: Container(
+//                 decoration: const BoxDecoration(
+//                   shape: BoxShape.circle,
+//                   color: Colors.blue,
+//                 ),
+//               ),
+//             ),
+//             min: _minAge.value,
+//             onDragging: (handlerIndex, lowerValue, upperValue) {
+//               _minAge.value = lowerValue;
+//               _maxAge.value = upperValue;
+//             },
+//           ),
+//           const SizedBox(height: 5),
+//           Padding(
+//             padding: const EdgeInsets.only(left: 8.0),
+//             child: Text(
+//               "Interested In",
+//               style: Theme.of(context).textTheme.bodyLarge,
+//             ),
+//           ),
+//           SizedBox(
+//             height: 35,
+//             child: ListView.builder(
+//               itemCount: _genders.length,
+//               scrollDirection: Axis.horizontal,
+//               itemBuilder: (context, index) {
+//                 return GestureDetector(
+//                   onTap: () {
+//                     _genderIndex.value = index;
+//                     selectedInterest = _genders[index];
+//                   },
+//                   child: Obx(
+//                     () => Container(
+//                       padding: const EdgeInsets.symmetric(
+//                         horizontal: 15,
+//                         vertical: 5,
+//                       ),
+//                       margin: const EdgeInsets.only(left: 9, top: 8),
+//                       alignment: Alignment.center,
+//                       decoration: BoxDecoration(
+//                         color: _genderIndex.value == index
+//                             ? Theme.of(context).primaryColor
+//                             : Colors.black,
+//                         borderRadius: BorderRadius.circular(40),
+//                       ),
+//                       child: Text(
+//                         _genders[index],
+//                         style: TextStyle(
+//                           fontSize: 12,
+//                           color: _genderIndex.value == index
+//                               ? Colors.deepPurple
+//                               : Colors.white,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+//           const SizedBox(height: 15),
+//           Padding(
+//             padding: const EdgeInsets.only(left: 8.0),
+//             child: Text(
+//               "Activity/Mood",
+//               style: Theme.of(context).textTheme.bodyLarge,
+//             ),
+//           ),
+//           SizedBox(
+//             height: 35,
+//             child: ListView.builder(
+//               itemCount: _allIntetrest.length,
+//               scrollDirection: Axis.horizontal,
+//               itemBuilder: (context, index) {
+//                 return GestureDetector(
+//                   onTap: () {
+//                     _interest.value = index;
+//                     selectedMood = _allIntetrest[index];
+//                   },
+//                   child: Obx(
+//                     () => Container(
+//                       padding: const EdgeInsets.symmetric(
+//                         horizontal: 10,
+//                         vertical: 2,
+//                       ),
+//                       margin: const EdgeInsets.only(left: 9, top: 5),
+//                       alignment: Alignment.center,
+//                       decoration: BoxDecoration(
+//                         color: _interest.value == index
+//                             ? Theme.of(context).primaryColor
+//                             : Colors.black,
+//                         borderRadius: BorderRadius.circular(40),
+//                       ),
+//                       child: Text(
+//                         _allIntetrest[index],
+//                         style: TextStyle(
+//                           fontSize: 12,
+//                           color: _interest.value == index
+//                               ? Colors.deepPurpleAccent
+//                               : Colors.white,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+//           const Spacer(),
+//           Row(
+//             children: [
+//               Expanded(
+//                 child: GestureDetector(
+//                   onTap: () {
+//                     clearFilter(context);
+//                   },
+//                   child: Container(
+//                     height: 45,
+//                     margin: const EdgeInsets.symmetric(horizontal: 5),
+//                     alignment: Alignment.center,
+//                     decoration: BoxDecoration(
+//                       borderRadius: BorderRadius.circular(10),
+//                     ),
+//                     child: Text(
+//                       "Clear Filter",
+//                       style: Theme.of(context).textTheme.bodyMedium,
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               Expanded(
+//                 child: GestureDetector(
+//                   onTap: () {
+//                     filterCards(context);
+//                     Get.back();
+//                   },
+//                   child: Container(
+//                     height: 45,
+//                     margin: const EdgeInsets.symmetric(horizontal: 5),
+//                     alignment: Alignment.center,
+//                     decoration: BoxDecoration(
+//                       borderRadius: BorderRadius.circular(10),
+//                       color: Colors.black,
+//                     ),
+//                     child: _isloading.value
+//                         ? const Loader()
+//                         : const Text(
+//                             "Apply Now",
+//                             style: TextStyle(
+//                               fontSize: 14,
+//                               fontWeight: FontWeight.w600,
+//                               color: Colors.white,
+//                             ),
+//                           ),
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 10),
+//         ],
+//       ),
+//     );
+//   }
+// }

@@ -92,7 +92,7 @@ class _WalkThroughState extends State<WalkThrough> {
                             Text(
                               _introPages[index][2],
                               style: const TextStyle(
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                                 color: AppColor.themeColor,
                                 fontSize: 25.0,
                               ),
@@ -107,7 +107,7 @@ class _WalkThroughState extends State<WalkThrough> {
                                 _introPages[index][1],
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w500,
                                   letterSpacing: 0.2,
                                   color: AppColor.textColor,
                                   fontSize: 15.0,

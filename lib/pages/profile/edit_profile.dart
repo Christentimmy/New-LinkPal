@@ -55,7 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void getLocAndUpload() async {
     _islocationloading.value = true;
-    await _locationController.getCurrentCityandUpload();
+    await _locationController.getCurrentCityandUpload(context: context);
     Get.offAllNamed(AppRoutes.dashboard);
     _islocationloading.value = false;
   }
@@ -217,7 +217,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       if (_fullNameController.text.isEmpty &&
                           _image.value == null &&
                           _bioController.text.isEmpty) {
-                        return CustomSnackbar.show("Error", "Fields unchanged");
+                        return CustomSnackbar.showErrorSnackBar("Fields unchanged", context);
                       } else {
                         globalUpdate(
                           image: _image.value,
@@ -266,9 +266,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           name: name,
           bio: bio,
           isSignUp: false,
+          context: context,
         );
       }
-      CustomSnackbar.show("Success", "Details update successfully");
+      CustomSnackbar.showSuccessSnackBar(
+          "Details update successfully", context);
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
@@ -285,7 +287,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -312,21 +314,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       var decodedResponse = json.decode(responseBody);
       debugPrint(decodedResponse.toString());
       if (response.statusCode == 403) {
-        return CustomSnackbar.show(
-          "Error",
+        return CustomSnackbar.showErrorSnackBar(
           "Please verify your email address and mobile number",
+          context,
         );
       }
       if (response.statusCode != 200) {
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "An error occured, try again",
+          context,
         );
       }
 
       final RetrieveController retrieveController =
           Get.find<RetrieveController>();
-      await retrieveController.getUserDetails();
+      await retrieveController.getUserDetails(context);
     } catch (e) {
       debugPrint(e.toString());
     }

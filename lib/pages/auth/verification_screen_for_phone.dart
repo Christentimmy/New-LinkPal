@@ -38,6 +38,7 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
 
   void sendPhone() async {
     token.value = await _verificationController.sendOtpPhone(
+      context: context,
       phoneNumber:
           _retrieveController.userModel.value?.mobileNumber.toString() ?? "",
     );
@@ -125,11 +126,13 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                     onCompleted: (value) async {
                       _isVerify.value = await _verificationController.verifyOTP(
                         otp: value,
+                        context: context,
                         token: token.value,
                       );
+
                       if (_isVerify.value) {
                         final controller = Get.put(RetrieveController());
-                        await controller.getUserDetails();
+                        await controller.getUserDetails(context);
                         Navigator.pop(context);
                       }
                     },
@@ -156,7 +159,7 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                       ontap: () async {
                         if (_isVerify.value) {
                           final controller = Get.put(RetrieveController());
-                          await controller.getUserDetails();
+                          await controller.getUserDetails(context);
                           Navigator.pop(context);
                         }
                       },
@@ -191,6 +194,7 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                                             .userModel.value?.mobileNumber
                                             .toString() ??
                                         "",
+                                        context: context,
                                   );
                                 },
                                 child: const Text(

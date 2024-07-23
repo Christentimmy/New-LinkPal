@@ -22,7 +22,7 @@ class _MatchesRequestScreenState extends State<MatchesRequestScreen> {
 
   @override
   void initState() {
-    _userController.matchesRequestFromOthers();
+    _userController.matchesRequestFromOthers(context: context);
     super.initState();
   }
 
@@ -101,10 +101,11 @@ class MatchesRequestCard extends StatelessWidget {
   final UserController _userController;
   final RxBool _isloading = false.obs;
 
-  Future<void> sendMatchRequest() async {
+  Future<void> sendMatchRequest(BuildContext context) async {
     _isloading.value = true;
     _isFriendAccpeted.value = await _userController.acceptMatchRequest(
       senderId: users.id,
+      context: context,
     );
     print(_isFriendAccpeted.value);
     _isloading.value = false;
@@ -129,7 +130,7 @@ class MatchesRequestCard extends StatelessWidget {
             width: double.infinity,
           ),
         ),
-
+    
         // Dark gradient overlay at bottom
         Positioned.fill(
           child: Align(
@@ -202,12 +203,12 @@ class MatchesRequestCard extends StatelessWidget {
             ),
           ),
         ),
-
+    
         Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
             onTap: () {
-              sendMatchRequest();
+              sendMatchRequest(context);
             },
             child: Obx(
               () => Container(

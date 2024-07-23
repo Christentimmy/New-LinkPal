@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/filter_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/theme_controller.dart';
@@ -33,7 +34,7 @@ class _SettingScreenState extends State<SettingScreen> {
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
   // final _webSocketController = Get.put(ChatController());
-  final _socketController = Get.find<SocketController>();
+  final _socketController = Get.put(SocketController());
   final RxBool _isloadingDelete = false.obs;
   final RxBool _isloadingLogOut = false.obs;
 
@@ -42,9 +43,8 @@ class _SettingScreenState extends State<SettingScreen> {
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
-    await _authController.deleteAccount();
+    await _authController.deleteAccount(context);
     await TokenStorage().deleteToken();
-    await TokenSecure().deleteToken();
     _socketController.disconnectSocket();
     _isloadingDelete.value = false;
   }
@@ -55,14 +55,11 @@ class _SettingScreenState extends State<SettingScreen> {
     _userController.reset();
     _postController.reset();
     await TokenStorage().deleteToken();
-    await TokenSecure().deleteToken();
     _socketController.disconnectSocket();
     _isloadingLogOut.value = false;
+    FilterController().resetFilters();
     print("Socket status: ${_socketController.socket?.connected}");
     Get.offAllNamed(AppRoutes.signin);
-    final token = await TokenSecure().getToken();
-    print("Token After delete: $token");
-    print("Created Status: ${SocketController().isConnected}");
   }
 
   @override

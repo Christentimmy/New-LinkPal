@@ -35,7 +35,7 @@ class _SwipeUsersProfileScreenState extends State<SwipeUsersProfileScreen> {
   }
 
   void retrieve() async {
-    await _retrieveController.getSpecificUserId(widget.userId);
+    await _retrieveController.getSpecificUserId(widget.userId, context);
     _retrieveController.externalUserModel.refresh();
   }
 

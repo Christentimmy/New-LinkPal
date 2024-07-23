@@ -29,22 +29,22 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
   @override
   void initState() {
     super.initState();
-    _retrieveController.getUserDetails();
+    _retrieveController.getUserDetails(context);
   }
 
   void verifier() async {
     _isloading.value = true;
     final controller = Get.put(RetrieveController());
-    await controller.getUserDetails();
+    await controller.getUserDetails(context);
     if (!controller.userModel.value!.isEmailVerified &&
         !controller.userModel.value!.isPhoneVerified) {
-      return CustomSnackbar.show(
-        "Error",
+      return CustomSnackbar.showErrorSnackBar(
         "Kindly verify your necessary details",
+        context,
       );
     } else {
       widget.onClickedToProceed();
-      await _locController.getCurrentCityandUpload();
+      await _locController.getCurrentCityandUpload(context: context);
     }
 
     _isloading.value = false;

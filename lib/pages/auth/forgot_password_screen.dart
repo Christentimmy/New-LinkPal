@@ -13,10 +13,11 @@ class ForgotPasswordScreen extends StatelessWidget {
   final _authController = Get.put(AuthController());
   final RxBool _isloading = false.obs;
 
-  void forgotPassword() async {
+  void forgotPassword(BuildContext context) async {
     _isloading.value = true;
     _authController.forgotPassword(
       email: _emailController.text.trim(),
+      context: context,
     );
     _isloading.value = false;
   }
@@ -54,7 +55,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Obx(
                   () => CustomButton(
                     ontap: () {
-                      forgotPassword();
+                      forgotPassword(context);
                       FocusManager.instance.primaryFocus?.unfocus();
                     },
                     child: _isloading.value

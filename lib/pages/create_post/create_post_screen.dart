@@ -69,7 +69,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       );
       FocusManager.instance.primaryFocus?.unfocus();
     } else {
-      CustomSnackbar.show("Error", "Fill the text and fill");
+      CustomSnackbar.showErrorSnackBar("Fill the text cannot be empty", context);
       _postController.isloading.value = false;
     }
   }

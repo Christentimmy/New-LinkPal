@@ -42,9 +42,10 @@ class SelectGenderScreen extends StatelessWidget {
 
   final _userController = Get.put(UserController());
   RxString selectedGender = "".obs;
-  void updateGender() async {
+  void updateGender(BuildContext  context) async {
     _isloading.value = true;
     await _userController.updateUserDetails(
+      context: context,
       gender: selectedGender.value.toLowerCase(),
       isSignUp: false,
     );
@@ -123,7 +124,7 @@ class SelectGenderScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: CustomButton(
               ontap: () {
-                updateGender();
+                updateGender(context);
               },
               child: _isloading.value
                   ? const Loader()

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/post_controller.dart';
+import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -41,15 +42,19 @@ class InterestScreen extends StatelessWidget {
   final RxString _choosenValue = "".obs;
   final RxBool _isloading = false.obs;
 
-  void uploadInterest() async {
+  void uploadInterest(BuildContext context) async {
     _isloading.value = true;
     await _userController.uploadInterest(
+      context: context,
       interests: [
         _choosenValue.value,
       ],
       isSignUp: true,
     );
-    await _postController.getAllPost();
+
+    // ignore: use_build_context_synchronously
+    await _postController.getAllPost(context: context);
+    await RetrieveController().getUserDetails(context);
     _isloading.value = false;
   }
 
@@ -63,9 +68,9 @@ class InterestScreen extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             if (_choosenValue.value.isNotEmpty) {
-              uploadInterest();
+              uploadInterest(context);
             } else {
-              CustomSnackbar.show("Error", "Pick one interest");
+              CustomSnackbar.showErrorSnackBar("Pick one interest", context);
             }
           },
           child: const Icon(Icons.check),

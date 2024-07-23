@@ -28,7 +28,7 @@ class SignUp extends StatelessWidget {
   final RxInt _selectedMonth = (-2).obs;
   final RxInt _selectedYear = (-2).obs;
 
-  void signUpUser() async {
+  void signUpUser(BuildContext context) async {
     _authController.isLoading.value = true;
     DateTime convertToDate = _dateController.getDate(
       _selectedDay.value,
@@ -36,6 +36,7 @@ class SignUp extends StatelessWidget {
       _selectedYear.value,
     );
     await _authController.signUpUSer(
+      context: context,
       name: _fullNameController.text.trim(),
       email: _emailController.text.trim(),
       mobileNumber: _phoneNumberController.text.trim(),
@@ -302,7 +303,7 @@ class SignUp extends StatelessWidget {
                                     _selectedDay.value != -2 &&
                                     _selectedMonth.value != -2 &&
                                     _selectedYear.value != -2) {
-                                  signUpUser();
+                                  signUpUser(context);
                                 }
                                 FocusManager.instance.primaryFocus?.unfocus();
                               },

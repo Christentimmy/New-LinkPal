@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
@@ -40,16 +42,16 @@ class SwipeController extends GetxController {
     }
   }
 
-  bool swipe({required String receiverId}) {
+  bool swipe({required String receiverId, required BuildContext context}) {
     if (swipeCount.value <= 10) {
       swipeCount.value++;
       _saveSwipeData();
-      sendMatchRequest(receiverId: receiverId);
+      sendMatchRequest(receiverId: receiverId, context: context);
       return true;
     } else {
-      CustomSnackbar.show(
-        "Limit Reached",
+      CustomSnackbar.showErrorSnackBar(
         "You have reached your daily swipe limit",
+        context,
       );
       Get.toNamed(AppRoutes.premium);
       return false;
@@ -64,6 +66,7 @@ class SwipeController extends GetxController {
 
   Future<bool> sendMatchRequest({
     required String receiverId,
+    required BuildContext context,
   }) async {
     isloading.value = true;
     try {
@@ -81,11 +84,11 @@ class SwipeController extends GetxController {
       );
       final decodedResponse = json.decode(response.body);
       if (response.statusCode == 400) {
-        CustomSnackbar.show("Sucess", decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(decodedResponse["message"].toString(), context);
         return true;
       }
       if (response.statusCode != 201) {
-        CustomSnackbar.show("Error", decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(decodedResponse["message"].toString(), context);
         return false;
       }
 

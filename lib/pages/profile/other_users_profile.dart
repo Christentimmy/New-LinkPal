@@ -27,7 +27,7 @@ class _UsersProfileScreenState extends State<UsersProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _retrieveController.getSpecificUserId(widget.userId);
+    _retrieveController.getSpecificUserId(widget.userId, context);
   }
 
   @override

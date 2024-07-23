@@ -38,7 +38,20 @@ class ChatCardModel {
       updatedAt: json["updatedAt"] != null
           ? DateTime.parse(json["updated_at"])
           : DateTime.now(),
-          messageId: json["id"] ?? "",
+      messageId: json["id"] ?? "",
+    );
+  }
+
+  factory ChatCardModel.empty() {
+    return ChatCardModel(
+      createdAt: DateTime.now(),
+      users: [],
+      message: "",
+      files: [],
+      senderId: "",
+      channelId: '',
+      updatedAt: DateTime.now(),
+      messageId: "",
     );
   }
 }

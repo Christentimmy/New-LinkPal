@@ -1,7 +1,6 @@
 // ignore_for_file: use_full_hex_values_for_flutter_colors
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppColor {
   static const themeColor = Color(0xFF000000);
@@ -62,6 +61,7 @@ final ThemeData lightTheme = ThemeData(
   primaryColor: Colors.black,
   primarySwatch: Colors.blue,
   brightness: Brightness.light,
+  fontFamily: "Montserrat",
   bottomAppBarTheme: const BottomAppBarTheme(color: Colors.white),
   scaffoldBackgroundColor: Colors.white,
   secondaryHeaderColor: Colors.black,
@@ -71,27 +71,32 @@ final ThemeData lightTheme = ThemeData(
   iconTheme: const IconThemeData(
     color: Colors.grey,
   ),
-  textTheme: TextTheme(
-    bodySmall: GoogleFonts.montserrat(
+  textTheme: const TextTheme(
+    bodySmall: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w500,
       color: Colors.black,
     ),
-    bodyMedium: GoogleFonts.montserrat(
+    bodyMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w600,
       color: Colors.black,
     ),
-    bodyLarge: GoogleFonts.montserrat(
+    bodyLarge: TextStyle(
       fontSize: 17,
       fontWeight: FontWeight.w700,
       color: Colors.black,
     ),
-    headlineMedium: GoogleFonts.montserrat(
+    headlineMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w700,
       color: Colors.red,
     ),
+  ),
+  sliderTheme: SliderThemeData(
+    activeTrackColor: Colors.blue, // Set the active track color for light theme
+    inactiveTrackColor: Colors.blue
+        .withOpacity(0.3), // Set the inactive track color for light theme
   ),
 );
 
@@ -101,32 +106,38 @@ final ThemeData darkTheme = ThemeData(
   primarySwatch: Colors.blue,
   primaryColorDark: Colors.blue,
   brightness: Brightness.dark,
+  fontFamily: "Montserrat",
   scaffoldBackgroundColor: Colors.black,
   secondaryHeaderColor: Colors.white,
   bottomAppBarTheme: const BottomAppBarTheme(color: Colors.black),
   iconTheme: IconThemeData(
     color: Colors.grey.shade300,
   ),
-  textTheme: TextTheme(
-    bodySmall: GoogleFonts.montserrat(
+  textTheme: const TextTheme(
+    bodySmall: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
-    bodyMedium: GoogleFonts.montserrat(
+    bodyMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w600,
       color: Colors.white,
     ),
-    bodyLarge: GoogleFonts.montserrat(
+    bodyLarge: TextStyle(
       fontSize: 17,
       fontWeight: FontWeight.w700,
       color: Colors.white,
     ),
-    headlineMedium: GoogleFonts.montserrat(
+    headlineMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.w700,
       color: Colors.red,
     ),
+  ),
+  sliderTheme: SliderThemeData(
+    activeTrackColor: Colors.blue, // Set the active track color for light theme
+    inactiveTrackColor: Colors.blue
+        .withOpacity(0.3), // Set the inactive track color for light theme
   ),
 );

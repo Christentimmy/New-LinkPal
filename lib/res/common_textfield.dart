@@ -30,7 +30,10 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: const TextStyle(fontSize: 14),
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
       validator: passwordValidator ??
           (value) {
             if (value!.isEmpty) {
@@ -46,6 +49,7 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelStyle: const TextStyle(
           fontSize: 13,
+          fontWeight: FontWeight.w700,
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
@@ -55,7 +59,10 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: Icon(icon, size: 18),
         suffixIcon: IconButton(
           onPressed: suffixTap,
-          icon: Icon(suffixICon, size: 18,),
+          icon: Icon(
+            suffixICon,
+            size: 18,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -66,9 +73,9 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(
+          borderSide:  BorderSide(
             width: 1,
-            color: Colors.pinkAccent,
+            color: Theme.of(context).primaryColor,
           ),
         ),
         errorBorder: OutlineInputBorder(
@@ -118,7 +125,10 @@ class CustomBioTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
-      style: const TextStyle(fontSize: 14),
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+      ),
       validator: passwordValidator ??
           (value) {
             if (value!.isEmpty) {
@@ -138,6 +148,7 @@ class CustomBioTextField extends StatelessWidget {
         labelText: "$hintText(Optional)",
         labelStyle: const TextStyle(
           fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
         prefixIcon: Icon(icon),
         suffixIcon: IconButton(
@@ -153,9 +164,9 @@ class CustomBioTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(
+          borderSide:  BorderSide(
             width: 1,
-            color: Colors.pinkAccent,
+             color: Theme.of(context).primaryColor,
           ),
         ),
         errorBorder: OutlineInputBorder(

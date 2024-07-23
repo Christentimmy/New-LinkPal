@@ -3,11 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/chat_controller.dart';
-import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/models/chat_list_model.dart';
-import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/theme/app_routes.dart';
-import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:lottie/lottie.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -19,6 +16,18 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final _webSocketService = Get.find<SocketController>();
+
+  @override
+  void initState() {
+    // myMethod();
+    super.initState();
+  }
+
+  void myMethod() async {
+    for (var i = 0; i < _webSocketService.chatHistory.length; i++) {
+      print(i);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,34 +123,6 @@ class _MessageScreenState extends State<MessageScreen> {
     );
   }
 
-  Widget _buildSocketErrorState() {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height / 1.5,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Socket Connection Error",
-              style: Theme.of(context).textTheme.bodyLarge),
-          Obx(
-            () => CustomButton(
-              ontap: () {
-                _webSocketService.initializeSocket();
-              },
-              child: _webSocketService.isloading.value
-                  ? const Loader()
-                  : Text(
-                      "Retry",
-                      style: TextStyle(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildChatList() {
     return Expanded(
       child: ListView.builder(
@@ -156,7 +137,6 @@ class _MessageScreenState extends State<MessageScreen> {
           if (users.isNotEmpty && ind != -1) {
             print("Receiver Id: ${users[ind].userId}");
           }
-
           return MessageCard(
             chatListModel: ch,
             ontap: () {
@@ -168,6 +148,10 @@ class _MessageScreenState extends State<MessageScreen> {
                   "name": ch.name,
                 },
               );
+              _webSocketService.socket?.emit("GET_MESSAGE", {
+                "channel_id": ch.channel,
+              });
+              _webSocketService.streamExistingChat(ch.channel);
             },
           );
         },

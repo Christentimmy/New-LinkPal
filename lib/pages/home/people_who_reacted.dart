@@ -17,12 +17,18 @@ class ReactedScreen extends StatefulWidget {
 }
 
 class _ReactedScreenState extends State<ReactedScreen> {
-  final _postController = Get.put(PostController());
+  final _postController = Get.find<PostController>();
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () {
+      getAllLikes();
+    });
     super.initState();
-    _postController.getSinglePost(widget.postModel.id);
+  }
+
+  void getAllLikes() async {
+    await _postController.getSinglePost(widget.postModel.id, context);
   }
 
   @override
@@ -33,69 +39,70 @@ class _ReactedScreenState extends State<ReactedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => _postController.isloading.value
-          ? const LinearProgressIndicator()
-          : Scaffold(
-              appBar: AppBar(
-                title: const Text(
-                  "Likes",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              body: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    children: [
-                      const Divider(),
-                      Obx(
-                        () => _postController.allLikes.isEmpty
-                            ? Center(
-                                child: Lottie.network(
-                                  "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                                ),
-                              )
-                            : Expanded(
-                                child: ListView.builder(
-                                  itemCount: _postController.allLikes.length,
-                                  itemBuilder: (context, index) {
-                                    final likeData =
-                                        _postController.allLikes[index];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Get.toNamed(AppRoutes.userProfileScreen,
-                                            arguments: {
-                                              "userId": likeData.createdBy.id,
-                                            });
-                                      },
-                                      child: DisplayLikesCard(
-                                        likeData: likeData,
-                                      ),
-                                    );
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Likes",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 10,
+          ),
+          child: Column(
+            children: [
+              const Divider(),
+              Obx(
+                () => _postController.isloading.value
+                    ? const LinearProgressIndicator(
+                        color: Colors.deepOrangeAccent,
+                      )
+                    : _postController.allLikes.isEmpty
+                        ? Center(
+                            child: Lottie.network(
+                              "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                            ),
+                          )
+                        : Expanded(
+                            child: ListView.builder(
+                              itemCount: _postController.allLikes.length,
+                              itemBuilder: (context, index) {
+                                final likeData =
+                                    _postController.allLikes[index];
+                                return DisplayLikesCard(
+                                  likeData: likeData,
+                                  ontap: () {
+                                    Get.toNamed(
+                                        AppRoutes.swipedUserCardProfile,
+                                        arguments: {
+                                          "userId": likeData.createdBy.id,
+                                        });
                                   },
-                                ),
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
+                                );
+                              },
+                            ),
+                          ),
               ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 class DisplayLikesCard extends StatelessWidget {
+  final VoidCallback ontap;
   const DisplayLikesCard({
     super.key,
     required this.likeData,
+    required this.ontap,
   });
 
   final LikesModel likeData;
@@ -105,6 +112,7 @@ class DisplayLikesCard extends StatelessWidget {
     return Column(
       children: [
         ListTile(
+          onTap: ontap,
           contentPadding: const EdgeInsets.symmetric(horizontal: 0),
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(20),

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -25,8 +25,9 @@ class LocationController extends GetxController {
     }
   }
 
-  Future<void> getCurrentCityandUpload() async {
-    final stopWatch = Stopwatch()..start();
+  Future<void> getCurrentCityandUpload({
+    required BuildContext context,
+  }) async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -38,17 +39,15 @@ class LocationController extends GetxController {
       _userController.uploadLocation(
         lang: position.latitude,
         long: position.longitude,
+        context: context,
       );
-      CustomSnackbar.show(
-        "Success",
+      CustomSnackbar.showSuccessSnackBar(
         "Location Uploaded Successfully",
+        context,
       );
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.show("Error", "An unexpected error occurred");
-    } finally {
-      stopWatch.stop();
-      debugPrint("Execution Time: ${stopWatch.elapsed}");
+      CustomSnackbar.showErrorSnackBar("An unexpected error occurred", context);
     }
   }
 }

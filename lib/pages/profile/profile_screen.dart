@@ -6,7 +6,6 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
-import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
@@ -359,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     GestureDetector(
                       onTap: () async {
                         Get.toNamed(AppRoutes.allpost);
-                        await _postController.getAllUserPost();
+                        await _postController.getAllUserPost(context: context);
                       },
                       child: const Text(
                         "View all",
@@ -373,61 +372,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 Obx(
                   () {
-                    if (_postController.allUserPost.isEmpty) {
-                      return Center(
-                        child: Lottie.network(
-                          "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                        ),
-                      );
-                    } else {
-                      return SizedBox(
-                        height: 200,
-                        child: ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _postController.allUserPost.length >= 2
-                                ? 2
-                                : _postController.allUserPost.length,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              final postData =
-                                  _postController.allUserPost[index];
-                              final imageFiles =
-                                  postData.files.where(_isImage).toList();
+                    final allFiles = _postController.allUserPost;
 
-                              return Row(
-                                children: imageFiles.map((file) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 2,
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: CachedNetworkImage(
-                                        imageUrl: file,
-                                        height: 200,
-                                        width:
-                                            MediaQuery.of(context).size.width /
-                                                2.3,
-                                        fit: BoxFit.cover,
-                                        alignment: Alignment.center,
-                                        errorWidget: (context, url, error) =>
-                                            const Center(
-                                          child: Icon(Icons.error),
-                                        ),
-                                        placeholder: (context, url) =>
-                                            const Center(
-                                          child: Loader(
-                                            color: Colors.deepOrangeAccent,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              );
-                            }),
-                      );
+                    List displayFiles = [];
+                    for (var element in allFiles) {
+                      final imageList = element.files.where((e) => _isImage(e)).toList();
+                      displayFiles.addAll(imageList);
                     }
+                   final images  = displayFiles.take(2).toList();
+                    return images.isEmpty
+                        ? Center(
+                            child: Lottie.network(
+                              "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                            ),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            itemCount: images.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 5.0,
+                              mainAxisSpacing: 5.0,
+                              childAspectRatio: 0.6,
+                            ),
+                            itemBuilder: (context, index) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: images[index],
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.grey.shade100,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(Icons.error),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
                   },
                 ),
                 const SizedBox(height: 10),

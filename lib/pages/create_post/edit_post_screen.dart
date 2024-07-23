@@ -94,10 +94,11 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       _postController.editPost(
                         postId: widget.postModel.id,
                         textEdited: _textController.text,
+                        context: context,
                       );
                       FocusManager.instance.primaryFocus?.unfocus();
                     } else {
-                      CustomSnackbar.show("Error", "Fill the text");
+                      CustomSnackbar.showErrorSnackBar("Fill the text", context);
                     }
                   },
                   child: _postController.isloading.value

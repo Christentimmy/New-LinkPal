@@ -5,15 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/chat_controller.dart';
 import 'package:linkingpal/models/chat_card_model.dart';
-import 'package:socket_io_client/socket_io_client.dart';
-// import 'package:lottie/lottie.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends StatelessWidget {
   final String userId;
   final String channedlId;
   final String name;
   // final int userIndexInsideChatListArray;
-  const ChatScreen({
+  ChatScreen({
     super.key,
     required this.userId,
     required this.channedlId,
@@ -21,38 +19,9 @@ class ChatScreen extends StatefulWidget {
     // required this.userIndexInsideChatListArray,
   });
 
-  @override
-  State<ChatScreen> createState() => _ChatScreenState();
-}
-
-class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _retrieveController = Get.find<RetrieveController>();
   final _webSocketController = Get.find<SocketController>();
-
-  @override
-  void dispose() {
-    super.dispose();
-    _webSocketController.chatsList.clear();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (_webSocketController.socket!.connected) {
-      _webSocketController.socket?.emit("GET_MESSAGE", {
-        "channel_id": widget.channedlId,
-      });
-      _webSocketController.streamExistingChat(widget.channedlId);
-    } else {
-      _webSocketController.socket?.onConnect((_) {
-        _webSocketController.socket?.emit("GET_MESSAGE", {
-          "channel_id": widget.channedlId,
-        });
-        _webSocketController.streamExistingChat(widget.channedlId);
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,22 +31,17 @@ class _ChatScreenState extends State<ChatScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              Header(widget: widget),
+              Header(name: name),
               const SizedBox(height: 20),
-              // ChatListScreen(
-              //   webSocketController: _webSocketController,
-              //   retrieveController: _retrieveController,
-              //   channelId: widget.channedlId,
-              // ),
               ChatList(
-                // userIndex: widget.userIndexInsideChatListArray,
                 webSocketController: _webSocketController,
                 retrieveController: _retrieveController,
+                channelId: channedlId,
               ),
               BottomTextField(
                 textController: _textController,
                 webSocketController: _webSocketController,
-                widget: widget,
+                channelId: channedlId,
               ),
             ],
           ),
@@ -88,17 +52,16 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class BottomTextField extends StatelessWidget {
+  final TextEditingController textController;
+  final SocketController webSocketController;
+  final String channelId;
+
   const BottomTextField({
     super.key,
-    required TextEditingController textController,
-    required SocketController webSocketController,
-    required this.widget,
-  })  : _textController = textController,
-        _webSocketController = webSocketController;
-
-  final TextEditingController _textController;
-  final SocketController _webSocketController;
-  final ChatScreen widget;
+    required this.channelId,
+    required this.textController,
+    required this.webSocketController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +77,7 @@ class BottomTextField extends StatelessWidget {
               maxLines: null,
               // cursorColor: Colors.white,
               cursorColor: Theme.of(context).scaffoldBackgroundColor,
-              controller: _textController,
+              controller: textController,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -123,12 +86,12 @@ class BottomTextField extends StatelessWidget {
               decoration: InputDecoration(
                 suffixIcon: GestureDetector(
                   onTap: () {
-                    _webSocketController.sendMessage(
-                      _textController.text,
-                      widget.channedlId,
+                    webSocketController.sendMessage(
+                      textController.text,
+                      channelId,
                     );
-                    _webSocketController.streamExistingChat(widget.channedlId);
-                    _textController.clear();
+                    // webSocketController.streamExistingChat(channelId);
+                    textController.clear();
                     FocusManager.instance.primaryFocus?.unfocus();
                     // _webSocketService.streamLatestChat(channelId.value);
                   },
@@ -163,11 +126,13 @@ class BottomTextField extends StatelessWidget {
 }
 
 class ChatList extends StatelessWidget {
+  final String channelId;
   // final int userIndex;
   ChatList({
     super.key,
     required SocketController webSocketController,
     required RetrieveController retrieveController,
+    required this.channelId,
     // required this.userIndex,
   })  : _webSocketController = webSocketController,
         _retrieveController = retrieveController;
@@ -182,40 +147,41 @@ class ChatList extends StatelessWidget {
       _scrollToBottom();
     });
 
-    return Obx(
-      () => _webSocketController.chatsList.isEmpty
-          ? const Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Empty"),
-                ],
-              ),
-            )
-          : Expanded(
-              child: ListView.builder(
-                controller: _scrollController.value,
-                itemCount: _webSocketController.chatsList.length,
-                itemBuilder: (context, index) {
-                  ChatCardModel chatCardModel =
-                      _webSocketController.chatsList[index];
-                  // UserChatListModel userChatListModel =
-                  //     chatCardModel.users[userIndex];
+    return Obx(() {
+      if (_webSocketController.chatsList.isEmpty) {
+        return const Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Empty"),
+            ],
+          ),
+        );
+      }
 
-                  return chatCardModel.senderId ==
-                          _retrieveController.userModel.value?.id
-                      ? SenderChatCard(
-                          chatCardModel: chatCardModel,
-                          // userChatListModel: userChatListModel,
-                        )
-                      : ReceiverChatCard(
-                          chatCardModel: chatCardModel,
-                          // userChatListModel: userChatListModel,
-                        );
-                },
-              ),
-            ),
-    );
+      return Expanded(
+        child: ListView.builder(
+          controller: _scrollController.value,
+          itemCount: _webSocketController.chatsList.length,
+          itemBuilder: (context, index) {
+            ChatCardModel chatCardModel = _webSocketController.chatsList[index];
+            // UserChatListModel userChatListModel =
+            //     chatCardModel.users[userIndex];
+
+            return chatCardModel.senderId ==
+                    _retrieveController.userModel.value?.id
+                ? SenderChatCard(
+                    chatCardModel: chatCardModel,
+                    // userChatListModel: userChatListModel,
+                  )
+                : ReceiverChatCard(
+                    chatCardModel: chatCardModel,
+                    // userChatListModel: userChatListModel,
+                  );
+          },
+        ),
+      );
+    });
   }
 
   void _scrollToBottom() {
@@ -229,12 +195,11 @@ class ChatList extends StatelessWidget {
 }
 
 class Header extends StatelessWidget {
+  final String name;
   const Header({
     super.key,
-    required this.widget,
+    required this.name,
   });
-
-  final ChatScreen widget;
 
   @override
   Widget build(BuildContext context) {
@@ -270,9 +235,7 @@ class Header extends StatelessWidget {
         ),
         const Spacer(),
         Text(
-          widget.name.length > 15
-              ? "${widget.name.substring(0, 14)}..."
-              : widget.name,
+          name.length > 15 ? "${name.substring(0, 14)}..." : name,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         // Column(

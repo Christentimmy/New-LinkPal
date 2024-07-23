@@ -23,9 +23,9 @@ class UploadProfilePicture extends StatelessWidget {
     }
   }
 
-  void uploadPic() async {
+  void uploadPic(BuildContext context) async {
     _isloading.value = true;
-    await _userController.uploadPicture(image: _image.value!);
+    await _userController.uploadPicture(image: _image.value!, context: context);
     _isloading.value = false;
   }
 
@@ -97,9 +97,9 @@ class UploadProfilePicture extends StatelessWidget {
                 child: CustomButton(
                   ontap: () {
                     if (_image.value != null) {
-                      uploadPic();
+                      uploadPic(context);
                     } else {
-                      CustomSnackbar.show("Error", "select an image");
+                      CustomSnackbar.showErrorSnackBar("select an image", context);
                     }
                   },
                   child: _isloading.value

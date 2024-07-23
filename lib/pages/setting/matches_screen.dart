@@ -28,7 +28,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
   }
 
   void getMatches() async {
-    await _userController.myMatches();
+    await _userController.myMatches(context: context);
   }
 
   @override
@@ -71,7 +71,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                                 Get.toNamed(AppRoutes.matchesProfileScreen,
                                     arguments: {
                                       "userId": users.id,
-                                      "name": users.name,
+                                      // "name": users.name,
                                     });
                               },
                               child: MatchesCard(

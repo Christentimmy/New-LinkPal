@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -41,6 +44,7 @@ class VerificationMethods extends GetxController {
 
   Future<String> sendOTPEmail({
     required String email,
+    required BuildContext context,
   }) async {
     try {
       final response = await http.post(
@@ -55,23 +59,23 @@ class VerificationMethods extends GetxController {
       var decodedResponce = await json.decode(response.body);
 
       if (response.statusCode == 400) {
-        CustomSnackbar.show(
-          "Error",
-          decodedResponce["message"],
+        CustomSnackbar.showErrorSnackBar(
+          decodedResponce["message"].toString(),
+          context,
         );
         return "";
       }
       if (response.statusCode == 401) {
-        CustomSnackbar.show("Error", "User Not Found");
+        CustomSnackbar.showErrorSnackBar("User Not Found", context);
         return "";
       }
 
       String token = decodedResponce["token"];
 
       var extract = extractFourDigitCode(decodedResponce["message"]);
-      CustomSnackbar.show(
-        "Success",
+      CustomSnackbar.showSuccessSnackBar(
         "An OTP has been sent $extract",
+        context,
       );
       return token;
     } catch (e) {
@@ -80,7 +84,10 @@ class VerificationMethods extends GetxController {
     }
   }
 
-  Future<String> sendOtpPhone({required String phoneNumber}) async {
+  Future<String> sendOtpPhone({
+    required String phoneNumber,
+    required BuildContext context,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse("$baseUrl/send-otp"),
@@ -93,23 +100,23 @@ class VerificationMethods extends GetxController {
       );
       var decodedResponce = await json.decode(response.body);
       if (response.statusCode == 400) {
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           decodedResponce["message"],
+          context,
         );
         return "";
       }
       if (response.statusCode == 401) {
-        CustomSnackbar.show("Error", "User Not Found");
+        CustomSnackbar.showErrorSnackBar("User Not Found", context);
         return "";
       }
 
       String token = decodedResponce["token"];
 
       var extract = extractFourDigitCode(decodedResponce["message"]);
-      CustomSnackbar.show(
-        "Success",
+      CustomSnackbar.showSuccessSnackBar(
         "An OTP has been sent $extract",
+        context,
       );
       return token;
     } catch (e) {
@@ -121,6 +128,7 @@ class VerificationMethods extends GetxController {
   Future<bool> verifyOTP({
     required String otp,
     required String token,
+    required BuildContext context,
   }) async {
     isloading.value = true;
     try {
@@ -135,31 +143,31 @@ class VerificationMethods extends GetxController {
       debugPrint(response.body);
       if (response.statusCode == 400) {
         isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "Error occurred whilst verifying your OTP",
+          context,
         );
         return false;
       }
       if (response.statusCode == 401) {
         isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "Wrong otp detected",
+          context,
         );
         return false;
       }
       if (response.statusCode == 403) {
         isloading.value = false;
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "OTP expired. Please request a new one",
+          context,
         );
         return false;
       }
-      CustomSnackbar.show(
-        "Success",
+      CustomSnackbar.showSuccessSnackBar(
         "OTP verification successful",
+        context,
       );
       isloading.value = false;
       return true;

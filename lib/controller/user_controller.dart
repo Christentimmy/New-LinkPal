@@ -1,7 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -21,16 +23,19 @@ class UserController extends GetxController {
   RxList peopleNearBy = [].obs;
   RxList matchesRequest = [].obs;
   RxList matches = [].obs;
+  RxBool isloading = false.obs;
+  RxBool isPeopleNearbyFetched = false.obs;
 
   Future<void> uploadVideo({
     required File video,
     required bool isSignUp,
+    required BuildContext context,
   }) async {
     final tokenStorage = Get.put(TokenStorage());
 
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
     var uri = Uri.parse("$baseUrl/user/video");
@@ -49,9 +54,9 @@ class UserController extends GetxController {
       var decodedResponse = json.decode(responseBody);
       String message = decodedResponse["message"];
       if (response.statusCode == 403) {
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "Please verify your email address and mobile number",
+          context,
         );
         return Get.toNamed(AppRoutes.verificationChecker, arguments: {
           "onClickToProceed": () {
@@ -60,7 +65,7 @@ class UserController extends GetxController {
         });
       }
       if (response.statusCode != 200) {
-        return CustomSnackbar.show("Error", message);
+        return CustomSnackbar.showErrorSnackBar(message, context);
       }
 
       if (isSignUp) {
@@ -74,15 +79,16 @@ class UserController extends GetxController {
       debugPrint(e.toString());
     } finally {
       final retrieveController = Get.find<RetrieveController>();
-      await retrieveController.getUserDetails();
+      await retrieveController.getUserDetails(context);
     }
   }
 
-  Future<void> uploadPicture({required XFile image}) async {
+  Future<void> uploadPicture(
+      {required XFile image, required BuildContext context}) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -109,20 +115,20 @@ class UserController extends GetxController {
       var decodedResponse = json.decode(responseBody);
       debugPrint(decodedResponse.toString());
       if (response.statusCode == 403) {
-        return CustomSnackbar.show(
-          "Error",
+        return CustomSnackbar.showErrorSnackBar(
           "Please verify your email address and mobile number",
+          context,
         );
       }
       if (response.statusCode != 200) {
-        CustomSnackbar.show(
-          "Error",
+        CustomSnackbar.showErrorSnackBar(
           "An error occured, try again",
+          context,
         );
       }
-      CustomSnackbar.show(
-        "Success",
+      CustomSnackbar.showSuccessSnackBar(
         "Profile Image Uploaded Successfully",
+        context,
       );
       Get.toNamed(AppRoutes.introductionVideo);
       // Get.toNamed(AppRoutes.personalDataFromUser);
@@ -134,12 +140,13 @@ class UserController extends GetxController {
   Future<void> uploadLocation({
     required double lang,
     required double long,
+    required BuildContext context,
   }) async {
     final tokenStorage = Get.put(TokenStorage());
 
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -157,9 +164,9 @@ class UserController extends GetxController {
       );
       final decodedBody = json.decode(response.body);
       if (response.statusCode != 200) {
-        return CustomSnackbar.show(
-          "Error",
-          decodedBody["message"],
+        return CustomSnackbar.showErrorSnackBar(
+          decodedBody["message"].toString(),
+          context,
         );
       }
     } catch (e) {
@@ -170,11 +177,12 @@ class UserController extends GetxController {
   Future<void> uploadInterest({
     required List<String> interests,
     required bool isSignUp,
+    required BuildContext context,
   }) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -191,18 +199,21 @@ class UserController extends GetxController {
       );
       var decodedResponse = json.decode(response.body);
       if (response.statusCode == 400) {
-        CustomSnackbar.show('Error', decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"].toString(), context);
         return;
       }
 
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"].toString(), context);
         return;
       }
       final retrieveController = Get.put(RetrieveController());
-      await retrieveController.getUserDetails();
+      await retrieveController.getUserDetails(context);
 
-      CustomSnackbar.show("Success", 'You have selected your interest');
+      CustomSnackbar.showSuccessSnackBar(
+          'You have selected your interest', context);
       if (isSignUp) {
         Get.offAllNamed(AppRoutes.dashboard, arguments: {
           "startScreen": 1,
@@ -222,10 +233,11 @@ class UserController extends GetxController {
     String? bio,
     String? gender,
     required bool isSignUp,
+    required BuildContext context,
   }) async {
     final String? token = await TokenStorage().getToken();
     if (token == null) {
-      CustomSnackbar.show("Error", "Invalid token, login again");
+      CustomSnackbar.showErrorSnackBar("Invalid token, login again", context);
       return Get.toNamed(AppRoutes.dashboard);
     }
     try {
@@ -242,15 +254,15 @@ class UserController extends GetxController {
         }),
       );
       if (response.statusCode == 401) {
-        return CustomSnackbar.show("Error", "Unauthorized");
+        return CustomSnackbar.showErrorSnackBar("Unauthorized", context);
       }
       if (response.statusCode == 400) {
-        return CustomSnackbar.show("Error", "Bad Request");
+        return CustomSnackbar.showErrorSnackBar("Bad Request", context);
       }
 
       final RetrieveController retrieveController =
           Get.find<RetrieveController>();
-      await retrieveController.getUserDetails();
+      await retrieveController.getUserDetails(context);
       if (isSignUp) {
         Get.toNamed(AppRoutes.interest);
       } else {
@@ -279,11 +291,11 @@ class UserController extends GetxController {
     return age;
   }
 
-  Future<void> getAllNotification() async {
+  Future<void> getAllNotification(BuildContext context) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -297,7 +309,8 @@ class UserController extends GetxController {
       );
       final decoded = await json.decode(response.body);
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decoded["message"].toString());
+        CustomSnackbar.showErrorSnackBar(
+            decoded["message"].toString(), context);
       }
 
       userNotifications.value = decoded["data"];
@@ -306,11 +319,11 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> getSingleNotification(String notId) async {
+  Future<void> getSingleNotification(String notId, BuildContext context) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -328,18 +341,19 @@ class UserController extends GetxController {
       );
       final decoded = await json.decode(response.body);
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decoded["message"].toString());
+        CustomSnackbar.showErrorSnackBar(
+            decoded["message"].toString(), context);
       }
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  Future<void> markNotication(String notId) async {
+  Future<void> markNotication(String notId, BuildContext context) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
+      CustomSnackbar.showErrorSnackBar("Login Again", context);
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -357,24 +371,28 @@ class UserController extends GetxController {
       );
       final decoded = await json.decode(response.body);
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", decoded["message"].toString());
+        CustomSnackbar.showErrorSnackBar(
+            decoded["message"].toString(), context);
       }
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
-  Future<void> getNearByUSer({
+  Future<List> getNearByUSer({
     required String age,
     required String mood,
     required String distance,
     required String interest,
   }) async {
+    print("Callllllllllllllllllllllllllllllllllllledddddddddddddddddd");
+    isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.show("Error", "Login Again");
-      return Get.toNamed(AppRoutes.signin);
+      // CustomSnackbar.showErrorSnackBar("Login Again", context);
+      Get.offAllNamed(AppRoutes.signin);
+      return [];
     }
     try {
       final uri = Uri.parse(
@@ -394,9 +412,8 @@ class UserController extends GetxController {
       );
       final responseData = json.decode(response.body);
       if (response.statusCode != 200) {
-        CustomSnackbar.show("Error", responseData["message"].toString());
+        Get.snackbar("Error", responseData["message"].toString());
       }
-
       List<dynamic> dataFromResponse = responseData["data"];
       List<UserModel> mapList =
           dataFromResponse.map((e) => UserModel.fromJson(e)).toList();
@@ -406,12 +423,17 @@ class UserController extends GetxController {
           .toList();
       peopleNearBy.clear();
       peopleNearBy.value = filteredList;
+      isPeopleNearbyFetched.value = true;
+      return filteredList;
     } catch (e) {
       debugPrint(e.toString());
+      return [];
+    } finally {
+      isloading.value = false;
     }
   }
 
-  Future<void> matchesRequestFromOthers() async {
+  Future<void> matchesRequestFromOthers({required BuildContext context}) async {
     try {
       final tokenStorage = Get.put(TokenStorage());
       String? token = await tokenStorage.getToken();
@@ -422,7 +444,8 @@ class UserController extends GetxController {
       });
       final decodedResponse = json.decode(response.body);
       if (response.statusCode != 200) {
-        return CustomSnackbar.show("Error", decodedResponse["message"]);
+        return CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"], context);
       }
       final List data = decodedResponse["data"];
       List filterMap = data
@@ -443,7 +466,7 @@ class UserController extends GetxController {
     }
   }
 
-  Future<void> myMatches() async {
+  Future<void> myMatches({required BuildContext context}) async {
     try {
       final tokenStorage = Get.put(TokenStorage());
       String? token = await tokenStorage.getToken();
@@ -457,7 +480,8 @@ class UserController extends GetxController {
       final decodedResponse = json.decode(response.body);
       print(decodedResponse);
       if (response.statusCode != 200) {
-        return CustomSnackbar.show("Error", decodedResponse["message"]);
+        return CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"].toString(), context);
       }
       final List data = decodedResponse["data"];
       final filterMap = data
@@ -484,6 +508,7 @@ class UserController extends GetxController {
 
   Future<bool> acceptMatchRequest({
     required String senderId,
+    required BuildContext context,
   }) async {
     try {
       final tokenStorage = Get.put(TokenStorage());
@@ -498,12 +523,14 @@ class UserController extends GetxController {
       }
       final decodedResponse = json.decode(response.body);
       if (decodedResponse["message"] == "Already accepted") {
-        CustomSnackbar.show("Error", decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"].toString(), context);
         return true;
       }
 
       if (response.statusCode == 400) {
-        CustomSnackbar.show("Error", decodedResponse["message"]);
+        CustomSnackbar.showErrorSnackBar(
+            decodedResponse["message"].toString(), context);
         return false;
       }
       return false;

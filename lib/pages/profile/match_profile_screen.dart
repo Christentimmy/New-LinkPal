@@ -34,8 +34,8 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
   }
 
   Future<void> _getDetails() async {
-    await _retrieveController.getSpecificUserId(widget.userId);
-    channedId.value = await _webSocketController.getChannelId(widget.userId);
+    await _retrieveController.getSpecificUserId(widget.userId, context);
+    channedId.value = await _webSocketController.getChannelId(widget.userId, context);
   }
 
   @override
@@ -385,52 +385,52 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                     ],
                   ),
                 ),
-                Obx(
-                  () => _retrieveController.allPostFiles.isEmpty
-                      ? Center(
-                          child: Lottie.network(
-                            "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                          ),
-                        )
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          itemCount:
-                              _retrieveController.allPostFiles.length >= 3
-                                  ? 3
-                                  : _retrieveController.allPostFiles.length,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 5.0,
-                            mainAxisSpacing: 5.0,
-                            childAspectRatio: 0.5,
-                          ),
-                          itemBuilder: (context, index) {
-                            final imageFiles = _retrieveController.allPostFiles
-                                .where((file) => _isImage(file))
-                                .toList();
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: CachedNetworkImage(
-                                imageUrl: imageFiles[index],
-                                height: double.infinity,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.grey.shade100,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Center(
-                                  child: Icon(Icons.error),
-                                ),
+                Obx(() {
+                  if (_retrieveController.allPostFiles.isEmpty) {
+                    return Center(
+                      child: Lottie.network(
+                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                      ),
+                    );
+                  } else {
+                    final allPost = _retrieveController.allPostFiles;
+                    final images =
+                        allPost.where((file) => _isImage(file)).toList();
+                    final displayImages = images.take(3).toList();
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      itemCount: displayImages.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 5.0,
+                        mainAxisSpacing: 5.0,
+                        childAspectRatio: 0.5,
+                      ),
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: CachedNetworkImage(
+                            imageUrl: displayImages[index],
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.grey.shade100,
                               ),
-                            );
-                          },
-                        ),
-                ),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(Icons.error),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  
+                }),
                 const SizedBox(height: 20),
               ],
             ),

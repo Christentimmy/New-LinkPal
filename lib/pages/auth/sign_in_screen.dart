@@ -36,6 +36,7 @@ class _SignInState extends State<SignIn> {
       email: _emailController.text,
       password: _passwordController.text,
       isEmail: isEmail,
+      context: context,
     );
     _isloading.value = false;
   }
@@ -173,9 +174,10 @@ class _SignInState extends State<SignIn> {
                               if (_formKey.value.currentState!.validate()) {
                                 loginUser();
                               } else {
-                                CustomSnackbar.show(
-                                  "Error",
+                                CustomSnackbar.showErrorSnackBar(
+                               
                                   "Filled up the fields",
+                                  context
                                 );
                               }
                               FocusManager.instance.primaryFocus?.unfocus();
