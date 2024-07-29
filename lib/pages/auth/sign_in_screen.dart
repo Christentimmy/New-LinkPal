@@ -170,14 +170,12 @@ class _SignInState extends State<SignIn> {
                         ),
                         Obx(
                           () => CustomButton(
-                            ontap: () {
+                            ontap: _isloading.value ? null  : () {
                               if (_formKey.value.currentState!.validate()) {
                                 loginUser();
                               } else {
                                 CustomSnackbar.showErrorSnackBar(
-                               
                                   "Filled up the fields",
-                                  context
                                 );
                               }
                               FocusManager.instance.primaryFocus?.unfocus();

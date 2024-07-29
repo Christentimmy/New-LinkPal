@@ -1,24 +1,65 @@
 [
     {
-        "created_at": "2024-07-06T11:29:46.000Z",
-        "users": [
-            {
-                "user_id": "664a73056f50b6375dc82238",
-                "seen_at": "2024-07-06T12:15:39.469Z",
-                "deleted_at": null,
-                "_id": "6689356b02c590748c5e401c"
-            },
-            {
-                "user_id": "665a953b1edd9c399bb69b39",
-                "seen_at": null,
-                "deleted_at": null,
-                "_id": "6689356b02c590748c5e401d"
-            }
-        ],
-        "message": "Like right now",
-        "files": [],
-        "sender_id": "664a73056f50b6375dc82238",
-        "channel": "66832243e4f191e82d0acc95",
-        "updated_at": null
+        "channel": "66a294a5a0ecd0aba5242a68",
+        "name": "Hanger Zoē",
+        "last_sent_message": {
+            "_id": "66a2998da0ecd0aba5242bc7",
+            "created_at": "2024-07-25T16:53:10.981Z",
+            "updated_at": "null",
+            "channel": "66a294a5a0ecd0aba5242a68",
+            "users": [
+                {
+                    "user_id": "665a889d1edd9c399bb6972f",
+                    "seen_at": "2024-07-25T18:29:33.605Z",
+                    "deleted_at": "null",
+                    "_id": "66a2998da0ecd0aba5242bc8"
+                },
+                {
+                    "user_id": "66a28ec9a0ecd0aba5242044",
+                    "seen_at": "null",
+                    "deleted_at": "null",
+                    "_id": "66a2998da0ecd0aba5242bc9"
+                }
+            ],
+            "message": "Hi",
+            "files": [],
+            "sender_id": "665a889d1edd9c399bb6972f",
+            "__v": 0
+        },
+        "un_read": 1,
+        "last_time_updated": "2024-07-25T16:53:10.981Z",
+        "can_send_message": "true"
+    },
+    
+    {
+        "channel": "6697e2c7c5bc3c668c2e4ebb",
+        "name": "Charlote hocale mannella",
+        "last_sent_message": {
+            "_id": "66a165f03f10b6d0f47dd5a5",
+            "created_at": "2024-07-24T19:58:47.202Z",
+            "updated_at": null,
+            "channel": "6697e2c7c5bc3c668c2e4ebb",
+            "users": [
+                {
+                    "user_id": "664a73056f50b6375dc82238",
+                    "seen_at": "2024-07-24T20:37:04.282Z",
+                    "deleted_at": null,
+                    "_id": "66a165f03f10b6d0f47dd5a6"
+                },
+                {
+                    "user_id": "6697df9ac5bc3c668c2e4c33",
+                    "seen_at": null,
+                    "deleted_at": null,
+                    "_id": "66a165f03f10b6d0f47dd5a7"
+                }
+            ],
+            "message": "no response?",
+            "files": [],
+            "sender_id": "664a73056f50b6375dc82238",
+            "__v": 0
+        },
+        "un_read": 0,
+        "last_time_updated": "2024-07-24T19:58:47.202Z",
+        "can_send_message": "true"
     }
 ]

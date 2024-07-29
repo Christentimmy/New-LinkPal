@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,6 @@ import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -34,10 +34,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _fullNameController = TextEditingController(
-      text: _retrieveController.userModel.value!.name,
+      text: _retrieveController.userModel.value?.name ?? "",
     );
     _bioController = TextEditingController(
-      text: _retrieveController.userModel.value!.bio,
+      text: _retrieveController.userModel.value?.bio ?? "",
     );
     _image.value == null;
   }
@@ -55,7 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void getLocAndUpload() async {
     _islocationloading.value = true;
-    await _locationController.getCurrentCityandUpload(context: context);
+    await _locationController.getCurrentCityandUpload();
     Get.offAllNamed(AppRoutes.dashboard);
     _islocationloading.value = false;
   }
@@ -84,36 +84,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   alignment: Alignment.center,
                   child: Stack(
                     children: [
-                      Obx(
-                        () => Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: Colors.grey,
+                      Obx(() {
+                        if (_image.value == null) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(70),
+                            child: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                                  _retrieveController.userModel.value?.image ??
+                                      "",
+                              placeholder: (context, url) =>
+                                  const Loader(color: Colors.deepOrangeAccent),
+                              width: 150,
+                              height: 150,
                             ),
-                            image: _image.value != null
-                                ? DecorationImage(
-                                    image: FileImage(
-                                      File(_image.value!.path),
-                                    ),
-                                    fit: BoxFit.cover,
-                                  )
-                                : DecorationImage(
-                                    image: NetworkImage(
-                                      _retrieveController
-                                              .userModel.value?.image ??
-                                          "",
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                            shape: BoxShape.circle,
-                            color: AppColor.lightgrey,
-                          ),
-                          alignment: Alignment.center,
-                        ),
-                      ),
+                          );
+                        } else {
+                          return Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                width: 2,
+                                color: Colors.grey,
+                              ),
+                              image: DecorationImage(
+                                image: FileImage(
+                                  File(_image.value!.path),
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                          );
+                        }
+                      }),
                       Positioned(
                         right: 5,
                         bottom: 5,
@@ -123,16 +129,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           decoration: BoxDecoration(
                             border: Border.all(
                               width: 1,
-                              color: Colors.black,
+                              color: Theme.of(context).primaryColor,
                             ),
                             shape: BoxShape.circle,
-                            color: Colors.grey.shade300,
+                            color: Colors.grey.withOpacity(0.8),
                           ),
                           child: IconButton(
                             onPressed: () {
                               _pickImageForUser();
                             },
-                            icon: const Icon(Icons.camera_alt),
+                            icon: Icon(
+                              Icons.camera_alt,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                            ),
                           ),
                         ),
                       )
@@ -173,14 +182,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: _islocationloading.value
                           ? const Center(
                               child: CircularProgressIndicator(
-                              color: Colors.deepOrangeAccent,
-                            ))
-                          : const Text(
-                              "Update location",
-                              style: TextStyle(
-                                color: AppColor.black,
-                                fontSize: 14,
+                                color: Colors.deepOrangeAccent,
                               ),
+                            )
+                          : Text(
+                              "Update location",
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
                     ),
                   ),
@@ -201,12 +208,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         color: Colors.deepOrangeAccent,
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Update Video",
-                      style: TextStyle(
-                        color: AppColor.black,
-                        fontSize: 14,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium,
                     ),
                   ),
                 ),
@@ -217,7 +221,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       if (_fullNameController.text.isEmpty &&
                           _image.value == null &&
                           _bioController.text.isEmpty) {
-                        return CustomSnackbar.showErrorSnackBar("Fields unchanged", context);
+                        return CustomSnackbar.showErrorSnackBar(
+                            "Fields unchanged");
                       } else {
                         globalUpdate(
                           image: _image.value,
@@ -228,13 +233,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       }
                     },
                     child: _isloading.value
-                        ? const Loader()
-                        : const Text(
+                        ? const Loader(
+                            color: Colors.deepOrangeAccent,
+                          )
+                        : Text(
                             "Update",
                             style: TextStyle(
-                              color: AppColor.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
                             ),
                           ),
                   ),
@@ -266,11 +273,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           name: name,
           bio: bio,
           isSignUp: false,
-          context: context,
         );
       }
-      CustomSnackbar.showSuccessSnackBar(
-          "Details update successfully", context);
+
+      final retrieveController = Get.put(RetrieveController());
+      await retrieveController.getUserDetails();
+      CustomSnackbar.showSuccessSnackBar("Details update successfully");
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
@@ -287,7 +295,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -316,19 +324,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (response.statusCode == 403) {
         return CustomSnackbar.showErrorSnackBar(
           "Please verify your email address and mobile number",
-          context,
         );
       }
       if (response.statusCode != 200) {
         CustomSnackbar.showErrorSnackBar(
           "An error occured, try again",
-          context,
         );
       }
-
-      final RetrieveController retrieveController =
-          Get.find<RetrieveController>();
-      await retrieveController.getUserDetails(context);
     } catch (e) {
       debugPrint(e.toString());
     }

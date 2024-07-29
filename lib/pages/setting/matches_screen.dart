@@ -24,11 +24,13 @@ class _MatchesScreenState extends State<MatchesScreen> {
   @override
   void initState() {
     super.initState();
-    getMatches();
+    Future.delayed(Duration.zero, () {
+      getMatches();
+    });
   }
 
   void getMatches() async {
-    await _userController.myMatches(context: context);
+    await _userController.myMatches();
   }
 
   @override
@@ -49,39 +51,56 @@ class _MatchesScreenState extends State<MatchesScreen> {
             children: [
               const SizedBox(height: 10),
               Obx(
-                () => _userController.matches.isEmpty
-                    ? Center(
-                        child: Lottie.network(animationLink),
-                      )
-                    : Expanded(
-                        child: GridView.builder(
-                          itemCount: _userController.matches.length,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 2.0,
-                            mainAxisSpacing: 5.0,
-                            childAspectRatio: 0.65,
-                          ),
-                          itemBuilder: (context, index) {
-                            final UserModel users =
-                                _userController.matches[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Get.toNamed(AppRoutes.matchesProfileScreen,
-                                    arguments: {
-                                      "userId": users.id,
-                                      // "name": users.name,
-                                    });
-                              },
-                              child: MatchesCard(
-                                users: users,
-                                locationController: _locationController,
-                              ),
-                            );
-                          },
+                () => _userController.isloading.value
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height / 1.55,
+                        child: const Center(
+                          child: Loader(color: Colors.deepOrangeAccent),
                         ),
-                      ),
+                      )
+                    : _userController.matches.isEmpty
+                        ? SizedBox(
+                            height: MediaQuery.of(context).size.height / 1.55,
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Lottie.asset("assets/images/empty.json"),
+                                  const Text("No matches"),
+                                ],
+                              ),
+                            ),
+                          )
+                        : Expanded(
+                            child: GridView.builder(
+                              itemCount: _userController.matches.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10.0,
+                                mainAxisSpacing: 5.0,
+                                childAspectRatio: 0.65,
+                              ),
+                              itemBuilder: (context, index) {
+                                final UserModel users =
+                                    _userController.matches[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    
+                                    Get.toNamed(AppRoutes.matchesProfileScreen,
+                                        arguments: {
+                                          "userId": users.id,
+                                          // "name": users.name,
+                                        });
+                                  },
+                                  child: MatchesCard(
+                                    users: users,
+                                    locationController: _locationController,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
               ),
             ],
           ),
@@ -148,7 +167,9 @@ class MatchesCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    users.name,
+                    users.name.length > 20
+                          ? "${users.name.substring(0, 18)}.."
+                          : users.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -166,8 +187,8 @@ class MatchesCard extends StatelessWidget {
                       const SizedBox(width: 5),
                       FutureBuilder(
                         future: locationController.displayLocation(
-                          latitude: users.latitude ?? 0.0,
-                          longitude: users.longitude ?? 0.0,
+                          latitude: users.latitude,
+                          longitude: users.longitude,
                         ),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -179,8 +200,9 @@ class MatchesCard extends StatelessWidget {
                               snapshot.data!.isEmpty) {
                             return const Text('null');
                           } else {
+                            String? data = snapshot.data;
                             return Text(
-                              snapshot.data!,
+                              data!.length > 14 ? "${data.substring(0, 13)}.." : data,
                               style: const TextStyle(
                                 color: Colors.white,
                               ),

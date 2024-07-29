@@ -1,28 +1,32 @@
+import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:permission_handler/permission_handler.dart';
+class NotificationController extends GetxController {
+  RxBool isNotificationGranted = false.obs;
 
-class NotificationHelper {
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
-  static Future<void> initialize() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-
-    await _notificationsPlugin.initialize(initializationSettings);
+  @override
+  void onInit() {
+    requestPermission();
+    super.onInit();
   }
 
-  static Future<void> requestPermission() async {
-    PermissionStatus status = await Permission.notification.request();
+  Future<void> setNotificationState(bool boolean) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool("notification", boolean);
+  }
 
-    if (status.isGranted) {
-      print("Notification permission granted");
-    } else {
-      print("Notification permission denied");
+  Future<void> toggleNotification()async{
+    if(!isNotificationGranted.value){
+      requestPermission();
     }
+    isNotificationGranted.value = !isNotificationGranted.value;
+    setNotificationState(isNotificationGranted.value);
+  }
+
+  void requestPermission() async {
+    final boob = await OneSignal.Notifications.requestPermission(true);
+    isNotificationGranted.value = boob;
+    await setNotificationState(boob);
   }
 }

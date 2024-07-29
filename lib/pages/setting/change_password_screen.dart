@@ -22,7 +22,7 @@ class ChangePasswordScreen extends StatelessWidget {
 
   void changePassword(BuildContext context) async {
     _isloading.value = true;
-    _authController.changePassword(password: _confrimPasswordController.text, context: context);
+    _authController.changePassword(password: _confrimPasswordController.text);
     _isloading.value = false;
   }
 
@@ -89,7 +89,7 @@ class ChangePasswordScreen extends StatelessWidget {
                             changePassword(context);
                       } else {
                         CustomSnackbar.showErrorSnackBar(
-                            'Fill all fields and ensure password match', context);
+                            'Fill all fields and ensure password match');
                       }
                     },
                     child: _isloading.value

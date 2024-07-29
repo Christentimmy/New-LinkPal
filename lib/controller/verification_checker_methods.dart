@@ -12,39 +12,8 @@ class VerificationMethods extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
   RxBool isloading = false.obs;
 
-  // Future<void> verifyEmail({
-  //   required String email,
-  //   required BuildContext context,
-  // }) async {
-  //   String tempToken = await sendOTPEmail(email: email);
-  //   Get.toNamed(AppRoutes.verification, arguments: {
-  //     "token": tempToken,
-  //     "isEmailType": true,
-  //     "action": () async {
-  //       await _retrieveController.getUserDetails();
-  //       Navigator.pop(context);
-  //     },
-  //   });
-  // }
-
-  // Future<void> verifyPhone({
-  //   required String phoneNumber,
-  //   required BuildContext context,
-  // }) async {
-  //   String tempToken = await sendOtpPhone(phoneNumber: phoneNumber);
-  //   Get.toNamed(AppRoutes.verification, arguments: {
-  //     "action": () async {
-  //       await _retrieveController.getUserDetails();
-  //       Navigator.pop(context);
-  //     },
-  //     "token": tempToken,
-  //     "isEmailType": false,
-  //   });
-  // }
-
   Future<String> sendOTPEmail({
     required String email,
-    required BuildContext context,
   }) async {
     try {
       final response = await http.post(
@@ -61,12 +30,11 @@ class VerificationMethods extends GetxController {
       if (response.statusCode == 400) {
         CustomSnackbar.showErrorSnackBar(
           decodedResponce["message"].toString(),
-          context,
         );
         return "";
       }
       if (response.statusCode == 401) {
-        CustomSnackbar.showErrorSnackBar("User Not Found", context);
+        CustomSnackbar.showErrorSnackBar("User Not Found");
         return "";
       }
 
@@ -75,7 +43,6 @@ class VerificationMethods extends GetxController {
       var extract = extractFourDigitCode(decodedResponce["message"]);
       CustomSnackbar.showSuccessSnackBar(
         "An OTP has been sent $extract",
-        context,
       );
       return token;
     } catch (e) {
@@ -86,7 +53,6 @@ class VerificationMethods extends GetxController {
 
   Future<String> sendOtpPhone({
     required String phoneNumber,
-    required BuildContext context,
   }) async {
     try {
       final response = await http.post(
@@ -102,12 +68,11 @@ class VerificationMethods extends GetxController {
       if (response.statusCode == 400) {
         CustomSnackbar.showErrorSnackBar(
           decodedResponce["message"],
-          context,
         );
         return "";
       }
       if (response.statusCode == 401) {
-        CustomSnackbar.showErrorSnackBar("User Not Found", context);
+        CustomSnackbar.showErrorSnackBar("User Not Found");
         return "";
       }
 
@@ -116,7 +81,6 @@ class VerificationMethods extends GetxController {
       var extract = extractFourDigitCode(decodedResponce["message"]);
       CustomSnackbar.showSuccessSnackBar(
         "An OTP has been sent $extract",
-        context,
       );
       return token;
     } catch (e) {
@@ -128,7 +92,6 @@ class VerificationMethods extends GetxController {
   Future<bool> verifyOTP({
     required String otp,
     required String token,
-    required BuildContext context,
   }) async {
     isloading.value = true;
     try {
@@ -145,7 +108,6 @@ class VerificationMethods extends GetxController {
         isloading.value = false;
         CustomSnackbar.showErrorSnackBar(
           "Error occurred whilst verifying your OTP",
-          context,
         );
         return false;
       }
@@ -153,7 +115,6 @@ class VerificationMethods extends GetxController {
         isloading.value = false;
         CustomSnackbar.showErrorSnackBar(
           "Wrong otp detected",
-          context,
         );
         return false;
       }
@@ -161,14 +122,9 @@ class VerificationMethods extends GetxController {
         isloading.value = false;
         CustomSnackbar.showErrorSnackBar(
           "OTP expired. Please request a new one",
-          context,
         );
         return false;
       }
-      CustomSnackbar.showSuccessSnackBar(
-        "OTP verification successful",
-        context,
-      );
       isloading.value = false;
       return true;
     } catch (e) {
@@ -182,7 +138,6 @@ class VerificationMethods extends GetxController {
     // Use a regular expression to find exactly four consecutive digits
     RegExp regExp = RegExp(r'\b\d{4}\b');
     Match? match = regExp.firstMatch(input);
-
     // If a match is found, return the matched string, otherwise return null
     if (match != null) {
       return match.group(0);

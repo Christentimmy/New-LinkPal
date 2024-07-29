@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/res/common_textfield.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class UpdateInterestScreen extends StatelessWidget {
   UpdateInterestScreen({super.key});
 
-  final TextEditingController _searchController = TextEditingController();
+  // final TextEditingController _searchController = TextEditingController();
   final _userController = Get.put(UserController());
 
   final List _allIntetrest = [
@@ -45,7 +44,6 @@ class UpdateInterestScreen extends StatelessWidget {
         _choosenValue.value,
       ],
       isSignUp: false,
-      context: context,
     );
     _isloading.value = false;
   }
@@ -62,7 +60,7 @@ class UpdateInterestScreen extends StatelessWidget {
             if (_choosenValue.value.isNotEmpty) {
               uploadInterest(context);
             } else {
-              CustomSnackbar.showErrorSnackBar("Pick one interest", context);
+              CustomSnackbar.showErrorSnackBar("Pick one interest");
             }
           },
           child: const Icon(Icons.check),
@@ -83,12 +81,12 @@ class UpdateInterestScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        CustomTextField(
-                          hintText: "Search",
-                          controller: _searchController,
-                          isObscureText: false,
-                          icon: Icons.search,
-                        ),
+                        // CustomTextField(
+                        //   hintText: "Search",
+                        //   controller: _searchController,
+                        //   isObscureText: false,
+                        //   icon: Icons.search,
+                        // ),
                         Expanded(
                           child: SingleChildScrollView(
                             child: Column(
@@ -115,7 +113,12 @@ class UpdateInterestScreen extends StatelessWidget {
                                               size: 17,
                                             ),
                                           ),
-                                          label: Text(_allIntetrest[index][1]),
+                                          label: Text(
+                                            _allIntetrest[index][1],
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          ),
                                           side: BorderSide(
                                             color: _selectedIndex.value == index
                                                 ? Colors.deepOrangeAccent

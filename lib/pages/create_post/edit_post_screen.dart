@@ -4,7 +4,6 @@ import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/models/post_model.dart';
 import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
@@ -21,6 +20,7 @@ class EditPostScreen extends StatefulWidget {
 
 class _EditPostScreenState extends State<EditPostScreen> {
   final _postController = Get.put(PostController());
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +40,21 @@ class _EditPostScreenState extends State<EditPostScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Get.back();
+          },
+          icon: const Icon(
+            Icons.arrow_back_ios,
+          ),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Edit Post",
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -54,6 +69,7 @@ class _EditPostScreenState extends State<EditPostScreen> {
                   itemCount: widget.postModel.files.length,
                   scrollDirection: Axis.horizontal,
                   itemBuilder: (context, index) {
+                    print(widget.postModel.files[index]);
                     return Container(
                       width: 80,
                       height: 80,
@@ -70,7 +86,6 @@ class _EditPostScreenState extends State<EditPostScreen> {
                           fit: BoxFit.cover,
                         ),
                         borderRadius: BorderRadius.circular(15),
-                        color: Colors.grey.shade300,
                       ),
                     );
                   },
@@ -94,21 +109,22 @@ class _EditPostScreenState extends State<EditPostScreen> {
                       _postController.editPost(
                         postId: widget.postModel.id,
                         textEdited: _textController.text,
-                        context: context,
+                        
                       );
                       FocusManager.instance.primaryFocus?.unfocus();
                     } else {
-                      CustomSnackbar.showErrorSnackBar("Fill the text", context);
+                      CustomSnackbar.showErrorSnackBar(
+                          "Fill the text");
                     }
                   },
                   child: _postController.isloading.value
-                      ? const Loader()
-                      : const Text(
+                      ? const Loader(color: Colors.deepOrangeAccent)
+                      : Text(
                           "Post Now",
                           style: TextStyle(
-                            color: AppColor.white,
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                 ),

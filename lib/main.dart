@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
+import 'package:linkingpal/controller/notification_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/swipe_controller.dart';
@@ -17,7 +18,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.put(ThemeController());
@@ -32,10 +32,9 @@ class MyApp extends StatelessWidget {
           Get.put(SwipeController());
           Get.put(InternetandConectivityChecker());
           Get.put(UserController());
-          Get.put(RetrieveController().getUserDetails(context));
-          final postContoller = Get.put(PostController());
-          postContoller.getAllPost(context: context);
-          postContoller.getAllUserPost(context: context);
+          Get.put(NotificationController());
+          Get.put(RetrieveController());
+          Get.put(PostController());
         }),
         debugShowCheckedModeBanner: false,
         getPages: RouteHandler.routes,

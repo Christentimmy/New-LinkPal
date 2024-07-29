@@ -265,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  country_picker:
+    dependency: "direct main"
+    description:
+      name: country_picker
+      sha256: "327f5e15a76352089a6b5057abb761ee5202e7516c9440d8d6a7524139f9b14e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.26"
   coverage:
     dependency: transitive
     description:
@@ -430,6 +438,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_advanced_avatar:
+    dependency: "direct main"
+    description:
+      name: flutter_advanced_avatar
+      sha256: "29f5d1586075a2ee5ce462fe25b9aa7179a157697260f542a05c5293a5bda8cc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -896,14 +912,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  liquid_pull_to_refresh:
-    dependency: "direct main"
-    description:
-      name: liquid_pull_to_refresh
-      sha256: "11e4cd8c5460085a31b479ec4e1cd063eb8e599f35684d57a44dafa1fd1f67f3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   loading_animation_widget:
     dependency: "direct main"
     description:
@@ -928,6 +936,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  mason:
+    dependency: "direct main"
+    description:
+      name: mason
+      sha256: "2508bb0bf51028fe6a433d694bd4d586d1ad99abb7699ee24d7ed3bfda0ea39e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0-dev.57"
+  mason_logger:
+    dependency: transitive
+    description:
+      name: mason_logger
+      sha256: "1fdf5c76870eb6fc3611ed6fbae1973a3794abe581ea5e22e68af2f73c688b93"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.16"
   matcher:
     dependency: transitive
     description:
@@ -968,6 +992,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.4.4"
+  motion:
+    dependency: "direct main"
+    description:
+      name: motion
+      sha256: "307e266730f56f53bafb2bc3d9622a8ef220cae2711402a2b42cbfd68d114d4f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  motion_platform_interface:
+    dependency: transitive
+    description:
+      name: motion_platform_interface
+      sha256: b1f18343564450158c0ec0f6707937544831367f5eafae57d9f15708e3bf0ad0
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  motion_web:
+    dependency: transitive
+    description:
+      name: motion_web
+      sha256: "848c98f852acb9447ff786f59edd33642e9ee92ef58f31e2aa3e9fd66d15e4c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  mustache_template:
+    dependency: transitive
+    description:
+      name: mustache_template
+      sha256: a46e26f91445bfb0b60519be280555b06792460b27b19e2b19ad5b9740df5d1c
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   nested:
     dependency: transitive
     description:
@@ -992,6 +1048,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  onesignal_flutter:
+    dependency: "direct main"
+    description:
+      name: onesignal_flutter
+      sha256: df9a469b1de7857edbd1384217245ef7b3b5ea73d8f714d8c2b0aeea765c0165
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.2"
   package_config:
     dependency: transitive
     description:
@@ -1192,14 +1256,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
-  restart_app:
-    dependency: "direct main"
-    description:
-      name: restart_app
-      sha256: b37daeb1c02fcab30e19d9e30b6fdd215bd53577efd927042eb77cf6f09daadb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.1"
   rxdart:
     dependency: transitive
     description:
@@ -1421,14 +1477,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  swipe_refresh:
-    dependency: "direct main"
-    description:
-      name: swipe_refresh
-      sha256: "7f155dd2c370d128cd77f4d73cf8e477b0413268d8554639e4211a98abc98438"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.2"
   syncfusion_flutter_core:
     dependency: transitive
     description:
@@ -1605,6 +1653,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  video_compress:
+    dependency: "direct main"
+    description:
+      name: video_compress
+      sha256: "407693726e674a1e1958801deb2d9daf5a5297707ba6d03375007012dae7389a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   video_player:
     dependency: "direct main"
     description:

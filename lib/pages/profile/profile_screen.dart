@@ -154,7 +154,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Obx(
                       () => Text(
-                        "${_retrieveController.userModel.value?.name ?? ""},  ${_userController.calculateAge(_retrieveController.userModel.value?.dob ?? "")}",
+                        "${_retrieveController.userModel.value?.name ?? ""},  ${_userController.calculateAge(
+                          _retrieveController.userModel.value?.dob ??
+                              DateTime.now().toString(),
+                        )}",
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -274,12 +277,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Obx(
-                  () => GestureDetector(
-                    onTap: () {
-                      Get.toNamed(AppRoutes.interest);
-                    },
-                    child: Container(
+                Obx(() {
+                  if (_retrieveController.userModel.value?.mood == null ||
+                      _retrieveController.userModel.value!.mood.isEmpty) {
+                    return Container(
                       height: 40,
                       constraints: const BoxConstraints(
                         minWidth: 30,
@@ -295,14 +296,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Text(
-                        _retrieveController.userModel.value!.mood.isEmpty
-                            ? "Null"
-                            : _retrieveController.userModel.value!.mood[0],
+                        "Empty",
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
-                    ),
-                  ),
-                ),
+                    );
+                  } else {
+                    return GestureDetector(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.interest);
+                      },
+                      child: Container(
+                        height: 40,
+                        constraints: const BoxConstraints(
+                          minWidth: 30,
+                        ),
+                        margin: const EdgeInsets.only(top: 8),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 1,
+                            color: Theme.of(context).primaryColorDark,
+                          ),
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Text(
+                          _retrieveController.userModel.value!.mood.isEmpty
+                              ? "Null"
+                              : _retrieveController.userModel.value!.mood[0],
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    );
+                  }
+                }),
                 const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
@@ -310,14 +337,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: Container(
                     height: 40,
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       border: Border.all(
                         width: 1,
                         color: Colors.blue,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       "Edit Profile",
@@ -358,7 +384,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     GestureDetector(
                       onTap: () async {
                         Get.toNamed(AppRoutes.allpost);
-                        await _postController.getAllUserPost(context: context);
+                        await _postController.getAllUserPost();
                       },
                       child: const Text(
                         "View all",
@@ -373,51 +399,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Obx(
                   () {
                     final allFiles = _postController.allUserPost;
-
+                    if(allFiles.isEmpty || allFiles == null){
+                      return Center(
+                        child: Lottie.asset(
+                          "assets/images/empty.json",
+                        ),
+                      );
+                    }
                     List displayFiles = [];
                     for (var element in allFiles) {
-                      final imageList = element.files.where((e) => _isImage(e)).toList();
+                      final imageList =
+                          element.files.where((e) => _isImage(e)).toList();
                       displayFiles.addAll(imageList);
                     }
-                   final images  = displayFiles.take(2).toList();
-                    return images.isEmpty
-                        ? Center(
-                            child: Lottie.network(
-                              "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                    final images = displayFiles.take(2).toList();
+
+                    if (images.isEmpty) {
+                      return Center(
+                        child: Lottie.asset(
+                          "assets/images/empty.json",
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      itemCount: images.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 5.0,
+                        mainAxisSpacing: 5.0,
+                        childAspectRatio: 0.6,
+                      ),
+                      itemBuilder: (context, index) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: CachedNetworkImage(
+                            imageUrl: images[index],
+                            height: double.infinity,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.grey.shade100,
+                              ),
                             ),
-                          )
-                        : GridView.builder(
-                            shrinkWrap: true,
-                            itemCount: images.length,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 5.0,
-                              mainAxisSpacing: 5.0,
-                              childAspectRatio: 0.6,
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(Icons.error),
                             ),
-                            itemBuilder: (context, index) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: CachedNetworkImage(
-                                  imageUrl: images[index],
-                                  height: double.infinity,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => Center(
-                                    child: CircularProgressIndicator(
-                                      color: Colors.grey.shade100,
-                                    ),
-                                  ),
-                                  errorWidget: (context, url, error) =>
-                                      const Center(
-                                    child: Icon(Icons.error),
-                                  ),
-                                ),
-                              );
-                            },
-                          );
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
                 const SizedBox(height: 10),

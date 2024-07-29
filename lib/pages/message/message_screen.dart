@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:linkingpal/controller/chat_controller.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/models/chat_list_model.dart';
-import 'package:linkingpal/theme/app_routes.dart';
+import 'package:linkingpal/pages/message/alt_chat_screen.dart';
 import 'package:lottie/lottie.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -16,18 +16,6 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   final _webSocketService = Get.find<SocketController>();
-
-  @override
-  void initState() {
-    // myMethod();
-    super.initState();
-  }
-
-  void myMethod() async {
-    for (var i = 0; i < _webSocketService.chatHistory.length; i++) {
-      print(i);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +116,8 @@ class _MessageScreenState extends State<MessageScreen> {
       child: ListView.builder(
         itemCount: _webSocketService.chatModelList.length,
         itemBuilder: (context, index) {
+        
+
           ChatListModel ch = _webSocketService.chatModelList[index];
           final List<UserChatListModel> users =
               ch.lastSentMessage.users.toList();
@@ -137,21 +127,24 @@ class _MessageScreenState extends State<MessageScreen> {
           if (users.isNotEmpty && ind != -1) {
             print("Receiver Id: ${users[ind].userId}");
           }
+
           return MessageCard(
             chatListModel: ch,
             ontap: () {
-              Get.toNamed(
-                AppRoutes.chat,
-                arguments: {
-                  "userId": users[ind].userId,
-                  "channedlId": ch.channel,
-                  "name": ch.name,
-                },
-              );
-              _webSocketService.socket?.emit("GET_MESSAGE", {
-                "channel_id": ch.channel,
-              });
-              _webSocketService.streamExistingChat(ch.channel);
+              // Get.toNamed(
+              //   AppRoutes.chat,
+              //   arguments: {
+              //     "userId": users[ind].userId,
+              //     "channedlId": ch.channel,
+              //     "name": ch.name,
+              //   },
+              // );
+              Get.to(()=> const AltChatScreen());
+
+              // _webSocketService.socket?.emit("GET_MESSAGE", {
+              //   "channel_id": ch.channel,
+              // });
+              // _webSocketService.streamExistingChat(ch.channel);
             },
           );
         },

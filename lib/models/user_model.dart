@@ -15,8 +15,8 @@ class UserModel {
   final String gender;
   final int mobileNumber;
   final String image;
-  final dynamic latitude;
-  final dynamic longitude;
+  final double latitude;
+  final double longitude;
   bool isMatchRequestSent;
 
   UserModel({
@@ -58,10 +58,20 @@ class UserModel {
       mood: json["mood"] ?? [],
       mobileNumber: json["mobile_number"] ?? 0,
       image: json["avatar"] ?? "",
-      latitude: json["latitude"] ?? 0.00,
-      longitude: json["longitude"] ?? 0.00,
+       latitude: _parseDouble(json["latitude"]),
+      longitude: _parseDouble(json["longitude"]),
       gender: json["gender"] ?? "",
     );
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value is double) {
+      return value;
+    } else if (value is String) {
+      return double.tryParse(value) ?? 0.0;
+    } else {
+      return 0.0;
+    }
   }
 
   factory UserModel.empty() {
@@ -81,8 +91,8 @@ class UserModel {
       mood: [],
       mobileNumber: 0,
       image: "",
-      latitude: "",
-      longitude: "",
+      latitude: 0.0,
+      longitude: 0.0,
       gender: "",
     );
   }

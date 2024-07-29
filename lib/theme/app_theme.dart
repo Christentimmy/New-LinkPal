@@ -88,8 +88,8 @@ final ThemeData lightTheme = ThemeData(
       color: Colors.black,
     ),
     headlineMedium: TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w700,
+      fontSize: 15,
+      fontWeight: FontWeight.w800,
       color: Colors.red,
     ),
   ),

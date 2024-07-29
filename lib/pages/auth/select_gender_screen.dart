@@ -7,7 +7,6 @@ import 'package:linkingpal/widgets/loading_widget.dart';
 
 // ignore: must_be_immutable
 class SelectGenderScreen extends StatelessWidget {
-
   SelectGenderScreen({super.key});
   final RxBool _isloading = false.obs;
 
@@ -42,16 +41,15 @@ class SelectGenderScreen extends StatelessWidget {
 
   final _userController = Get.put(UserController());
   RxString selectedGender = "".obs;
-  void updateGender(BuildContext  context) async {
+  Future<void> updateGender(BuildContext context) async {
     _isloading.value = true;
     await _userController.updateUserDetails(
-      context: context,
       gender: selectedGender.value.toLowerCase(),
       isSignUp: false,
     );
     _isloading.value = false;
     Get.offAllNamed(AppRoutes.dashboard, arguments: {
-      "startScreen"  : 0,
+      "startScreen": 0,
     });
   }
 
@@ -123,17 +121,19 @@ class SelectGenderScreen extends StatelessWidget {
           () => Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15),
             child: CustomButton(
-              ontap: () {
-                updateGender(context);
+              ontap: () async {
+                await updateGender(context);
               },
               child: _isloading.value
-                  ? const Loader()
-                  : const Text(
+                  ? const Loader(
+                    color: Colors.deepOrangeAccent,
+                  )
+                  : Text(
                       "Update",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
                       ),
                     ),
             ),

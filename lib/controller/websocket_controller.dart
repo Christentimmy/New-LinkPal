@@ -8,7 +8,7 @@ import 'package:linkingpal/widgets/snack_bar.dart';
 class WebSocketController extends GetxController {
   String baseUrl = "https://linkingpal.onrender.com/v1";
 
-  Future<String> getChannelId(String recieverId, BuildContext context) async {
+  Future<String> getChannelId(String recieverId) async {
     try {
       final token = await TokenStorage().getToken();
       final uri = Uri.parse("$baseUrl/chat/channel/$recieverId");
@@ -23,7 +23,6 @@ class WebSocketController extends GetxController {
       if (response.statusCode != 200) {
         CustomSnackbar.showErrorSnackBar(
           decoded["message"].toString(),
-          context,
         );
         return "";
       }

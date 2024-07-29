@@ -28,7 +28,7 @@ class _ReactedScreenState extends State<ReactedScreen> {
   }
 
   void getAllLikes() async {
-    await _postController.getSinglePost(widget.postModel.id, context);
+    await _postController.getSinglePost(widget.postModel.id);
   }
 
   @override

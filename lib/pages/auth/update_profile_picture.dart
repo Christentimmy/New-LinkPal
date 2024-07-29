@@ -9,8 +9,8 @@ import 'package:linkingpal/utility/image_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
-class UploadProfilePicture extends StatelessWidget {
-  UploadProfilePicture({super.key});
+class UpdateProfilePicture extends StatelessWidget {
+  UpdateProfilePicture({super.key});
 
   final Rx<XFile?> _image = Rx<XFile?>(null);
   final _userController = Get.put(UserController());
@@ -25,7 +25,7 @@ class UploadProfilePicture extends StatelessWidget {
 
   void uploadPic(BuildContext context) async {
     _isloading.value = true;
-    await _userController.uploadPicture(image: _image.value!, isSignUp: true);
+    await _userController.uploadPicture(image: _image.value!, isSignUp: false);
     _isloading.value = false;
   }
 

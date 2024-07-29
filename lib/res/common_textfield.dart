@@ -47,6 +47,10 @@ class CustomTextField extends StatelessWidget {
       textInputAction: action ?? TextInputAction.done,
       keyboardType: type,
       decoration: InputDecoration(
+        errorStyle: const TextStyle(
+          fontSize: 8,
+          fontWeight: FontWeight.w700,
+        ),
         labelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
@@ -73,7 +77,7 @@ class CustomTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide:  BorderSide(
+          borderSide: BorderSide(
             width: 1,
             color: Theme.of(context).primaryColor,
           ),
@@ -164,9 +168,9 @@ class CustomBioTextField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide:  BorderSide(
+          borderSide: BorderSide(
             width: 1,
-             color: Theme.of(context).primaryColor,
+            color: Theme.of(context).primaryColor,
           ),
         ),
         errorBorder: OutlineInputBorder(

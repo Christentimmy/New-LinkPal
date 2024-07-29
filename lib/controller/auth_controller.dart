@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -37,44 +36,82 @@ class AuthController extends GetxController {
 
       var token = response["token"];
       await TokenStorage().storeToken(token);
-
       final userModel = UserModel.fromJson(response["data"]);
 
-      if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
-        CustomSnackbar.showErrorSnackBar("Account not verified", context);
-        return Get.toNamed(AppRoutes.verificationChecker, arguments: {
+      // if (!userModel.isEmailVerified || !userModel.isPhoneVerified) {
+      //   CustomSnackbar.showErrorSnackBar("Account not verified");
+      //   return Get.toNamed(AppRoutes.verificationChecker, arguments: {
+      //     "onClickToProceed": () {
+      //       Get.toNamed(AppRoutes.dashboard, arguments: {
+      //         "startScreen": 0,
+      //       });
+      //     }
+      //   });
+      // }
+      // if (userModel.video.isEmpty) {
+      //   Get.toNamed(AppRoutes.updateVideo);
+      //   return CustomSnackbar.showErrorSnackBar("Video not uploaded");
+      // }
+      // if (userModel.gender.toLowerCase() == "null") {
+      //   Get.toNamed(AppRoutes.selectGender);
+      //   return CustomSnackbar.showErrorSnackBar(
+      //     "Fill out your gender",
+      //   );
+      // }
+
+      final retrieveController = Get.find<RetrieveController>();
+      final postController = Get.find<PostController>();
+
+      await retrieveController.getUserDetails();
+      postController.getAllPost();
+      postController.getAllUserPost();
+
+      authChecker(userModel);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Future<void> authChecker(UserModel user) async {
+    if (!user.isEmailVerified || !user.isPhoneVerified) {
+      return Get.toNamed(
+        AppRoutes.verificationChecker,
+        arguments: {
           "onClickToProceed": () {
             Get.toNamed(AppRoutes.dashboard, arguments: {
               "startScreen": 0,
             });
           }
-        });
-      }
-      if (userModel.video.isEmpty) {
-        Get.toNamed(AppRoutes.updateVideo);
-        return CustomSnackbar.showErrorSnackBar("Video not uploaded", context);
-      }
-      if (userModel.gender.toLowerCase() == "null") {
-        Get.toNamed(AppRoutes.selectGender);
-        return CustomSnackbar.showErrorSnackBar(
-          "Fill out your gender",
-          context,
-        );
-      }
+        },
+      );
+    }
 
-      final retrieveController = Get.find<RetrieveController>();
-      final postController = Get.find<PostController>();
+    if (user.image.isEmpty) {
+       CustomSnackbar.showErrorSnackBar("Video not uploaded");
+        return Get.toNamed(AppRoutes.updateProfilePicture);
+    }
 
-      await retrieveController.getUserDetails(context);
-      postController.getAllPost(context: context);
-      postController.getAllUserPost(context: context);
+    if (user.video.isEmpty) {
+      CustomSnackbar.showErrorSnackBar("Video not uploaded");
+      return Get.toNamed(AppRoutes.updateVideo);
+    }
 
-      Get.offAllNamed(AppRoutes.dashboard, arguments: {
+    if (user.gender.isEmpty) {
+      CustomSnackbar.showErrorSnackBar("Fill out your gender");
+      return Get.toNamed(AppRoutes.selectGender);
+    }
+
+    if (user.mood.isEmpty) {
+      CustomSnackbar.showErrorSnackBar("Fill out interest");
+      return Get.toNamed(AppRoutes.updateInterest);
+    }
+
+    if (Get.currentRoute != AppRoutes.dashboard) {
+      Get.offNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
-    } catch (e) {
-      debugPrint(e.toString());
     }
+
   }
 
   Future<void> signUpUSer({
@@ -87,55 +124,29 @@ class AuthController extends GetxController {
     required BuildContext context,
   }) async {
     try {
-      Object userObject = {
-        "name": name,
-        "email": email,
-        "mobile_number": mobileNumber,
-        "dob": dob.toUtc().toIso8601String(),
-        "password": password,
-        "bio": bio,
-      };
-
-      final responce = await http.post(
-        Uri.parse("$baseUrl/auth/signup"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: json.encode(userObject),
+      Stopwatch stopwatch = Stopwatch()..start();
+      final responce = await authService.signUpUser(
+        name: name,
+        email: email,
+        mobileNumber: mobileNumber,
+        dob: dob,
+        password: password,
+        bio: bio,
       );
 
-      var decodedResponseBody = json.decode(responce.body);
-      if (responce.statusCode == 409) {
-        return CustomSnackbar.showErrorSnackBar(
-          "Email already exist. Please login instead",
-          context,
-        );
-      }
-
-      if (responce.statusCode == 400) {
-        return CustomSnackbar.showErrorSnackBar(
-          decodedResponseBody["message"].toString(),
-          context,
-        );
-      }
-
-      if (responce.statusCode != 200) {
-        return CustomSnackbar.showErrorSnackBar(
-          "An Error occured, try again",
-          context,
-        );
-      }
-
-      var token = decodedResponseBody["token"];
+      var token = responce["token"];
       await TokenStorage().storeToken(token);
       final controller = Get.find<RetrieveController>();
-      await controller.getUserDetails(context);
+      await controller.getUserDetails();
 
       Get.toNamed(AppRoutes.verificationChecker, arguments: {
         "onClickToProceed": () {
           Get.toNamed(AppRoutes.uploadPicture);
         }
       });
+
+      stopwatch.stop();
+      print("Time execution: ${stopwatch.elapsed}");
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -145,34 +156,15 @@ class AuthController extends GetxController {
 
   Future<void> changePassword({
     required String password,
-    required BuildContext context,
   }) async {
     FocusManager.instance.primaryFocus?.unfocus();
     try {
-      final responce = await http.post(
-        Uri.parse("$baseUrl/auth/change-password"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: json.encode({"password": password}),
-      );
-      var decodedResponce = await json.decode(responce.body);
-
-      if (responce.statusCode != 200) {
-        return CustomSnackbar.showErrorSnackBar(
-          decodedResponce["message"].toString(),
-          context,
-        );
-      }
-
-      CustomSnackbar.showSuccessSnackBar(
-        "Password changed successfully",
-        context,
-      );
+      await authService.changePassword(password: password);
+      CustomSnackbar.showSuccessSnackBar("Password changed successfully");
       Get.toNamed(AppRoutes.dashboard);
     } catch (e) {
       debugPrint(e.toString());
-    } finally {}
+    }
   }
 
   Future<void> forgotPassword({
@@ -180,29 +172,16 @@ class AuthController extends GetxController {
     required BuildContext context,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/auth/forgot-password"),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode({"email": email}),
+      final response = await authService.forgotPassword(email: email);
+      String tempToken = await _verificationController.sendOTPEmail(
+        email: email,
       );
-      if (response.statusCode == 400) {
-        return CustomSnackbar.showErrorSnackBar("Bad request", context);
-      }
-      if (response.statusCode == 404) {
-        return CustomSnackbar.showErrorSnackBar("User Not Found", context);
-      }
 
-      var decodedResponce = await json.decode(response.body);
-      String tempToken =
-          await _verificationController.sendOTPEmail(email: email, context: context);
-
-      //todo: change the logic because the forgotpassword have otp
       String? extractedCode = _verificationController
-          .extractFourDigitCode(decodedResponce["message"].toString());
+          .extractFourDigitCode(response["message"].toString());
 
       CustomSnackbar.showSuccessSnackBar(
         "A password reset OTP has been sent to you $extractedCode",
-        context,
       );
 
       Get.toNamed(
@@ -223,8 +202,9 @@ class AuthController extends GetxController {
   Future<void> deleteAccount(BuildContext context) async {
     final String? token = await TokenStorage().getToken();
     if (token == null) {
-      CustomSnackbar.showErrorSnackBar("Invalid token, login again", context);
-      return Get.toNamed(AppRoutes.signin);
+      CustomSnackbar.showErrorSnackBar("Invalid token, login again");
+      Get.toNamed(AppRoutes.signin);
+      return;
     }
     try {
       final response = await http.delete(
@@ -234,18 +214,18 @@ class AuthController extends GetxController {
           "Content-Type": "application/json",
         },
       );
+      print(response.body);
       if (response.statusCode == 401) {
-        return CustomSnackbar.showErrorSnackBar("Unauthorized", context);
+        CustomSnackbar.showErrorSnackBar("Unauthorized");
+        return;
       }
 
-      CustomSnackbar.showSuccessSnackBar(
-          "Account deleted successfully", context);
+      CustomSnackbar.showSuccessSnackBar("Account deleted successfully");
       Get.offAllNamed(AppRoutes.signin);
     } catch (e) {
       debugPrint(e.toString());
     }
   }
-
 }
 
 

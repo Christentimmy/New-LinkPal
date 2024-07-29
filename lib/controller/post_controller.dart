@@ -25,24 +25,25 @@ class PostController extends GetxController {
   RxList<LikesModel> allLikes = <LikesModel>[].obs;
   RxList<CommentModel> commentModelsList = <CommentModel>[].obs;
 
-  // @override
-  // void onInit() {
-  //   super.onInit();
-  //   getAllUserPost();
-  //   getAllPost();
-  // }
+  @override
+ void onInit(){
+  super.onInit();
+  getAllPost();
+  getAllUserPost();
+ }
 
   Future<void> createPost({
     required TextEditingController textController,
     required List<XFile> pickedFiles,
     List<dynamic>? tags,
-    required BuildContext context,
   }) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar(
+        "Login Again",
+      );
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -80,12 +81,13 @@ class PostController extends GetxController {
       if (response.statusCode != 201) {
         return CustomSnackbar.showErrorSnackBar(
           decodedResponse["message"].toString(),
-          context,
         );
       }
-      CustomSnackbar.showSuccessSnackBar("Your post is now live!", context);
-      getAllPost(context: context);
-      getAllUserPost(context: context);
+      CustomSnackbar.showSuccessSnackBar(
+        "Your post is now live!",
+      );
+      getAllPost();
+      getAllUserPost();
       Get.offAllNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
@@ -98,15 +100,12 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> getAllPost({
-    required BuildContext context,
-  }) async {
+  Future<void> getAllPost() async {
     isloading.value = true;
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
-      return Get.toNamed(AppRoutes.signin);
+      return Get.offAllNamed(AppRoutes.signin);
     }
     try {
       final response = await http.get(
@@ -118,10 +117,10 @@ class PostController extends GetxController {
       );
       final decodedResponce = await json.decode(response.body);
       if (response.statusCode != 200) {
-        return CustomSnackbar.showErrorSnackBar(
-          decodedResponce["message"].toString(),
-          context,
-        );
+        // return CustomSnackbar.showErrorSnackBar(
+        //   decodedResponce["message"].toString(),
+        // );
+        return;
       }
       List<dynamic> postsFromData = decodedResponce["data"];
       List filterMap =
@@ -138,12 +137,12 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> getAllUserPost({required BuildContext context}) async {
+  Future<void> getAllUserPost() async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -159,7 +158,6 @@ class PostController extends GetxController {
       if (response.statusCode != 200) {
         return CustomSnackbar.showErrorSnackBar(
           decodedResponce["message"].toString(),
-          context,
         );
       }
 
@@ -180,12 +178,12 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> likeAPost(String postId, BuildContext context) async {
+  Future<void> likeAPost(String postId) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -225,12 +223,12 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> disLikeAPost(String postId, BuildContext context) async {
+  Future<void> disLikeAPost(String postId) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -306,14 +304,13 @@ class PostController extends GetxController {
   Future<void> commentOnPost(
     String postId,
     TextEditingController comment,
-    BuildContext context,
   ) async {
     isloading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -337,7 +334,6 @@ class PostController extends GetxController {
       if (response.statusCode != 200) {
         return CustomSnackbar.showErrorSnackBar(
           decodedResponce["message"].toString(),
-          context,
         );
       }
       List<dynamic> allFreshComments = decodedResponce["data"]["comments"];
@@ -378,14 +374,13 @@ class PostController extends GetxController {
   Future<void> editPost({
     required String postId,
     required String textEdited,
-    required BuildContext context,
   }) async {
     isloading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -404,7 +399,8 @@ class PostController extends GetxController {
       final decoded = json.decode(responce.body);
       if (responce.statusCode != 200) {
         return CustomSnackbar.showErrorSnackBar(
-            decoded["message"].toString(), context);
+          decoded["message"].toString(),
+        );
       }
       int index = allPost.indexWhere((element) => element.id == postId);
       int indexUser = allUserPost.indexWhere((element) => element.id == postId);
@@ -427,13 +423,13 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> getComments(String postId, BuildContext context) async {
+  Future<void> getComments(String postId) async {
     isCommentLoading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -468,13 +464,12 @@ class PostController extends GetxController {
   Future<void> deleteComment({
     required String commentId,
     required String postId,
-    required BuildContext context,
   }) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
     try {
@@ -508,13 +503,13 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> getSinglePost(String postId, BuildContext context) async {
+  Future<void> getSinglePost(String postId) async {
     isloading.value = true;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -545,12 +540,11 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> likeComement(String commentId, BuildContext context) async {
-    //token validation
+  Future<void> likeComement(String commentId) async {
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
     try {
@@ -576,12 +570,12 @@ class PostController extends GetxController {
     }
   }
 
-  Future<void> dislikeComement(String commentId, BuildContext context) async {
+  Future<void> dislikeComement(String commentId) async {
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
     try {
@@ -609,13 +603,15 @@ class PostController extends GetxController {
   }
 
   Future<void> editComment(
-      String commentId, String textComment, BuildContext context) async {
+    String commentId,
+    String textComment,
+  ) async {
     isloading.value = false;
     //token validation
     final tokenStorage = Get.put(TokenStorage());
     String? token = await tokenStorage.getToken();
     if (token!.isEmpty) {
-      CustomSnackbar.showErrorSnackBar("Login Again", context);
+      CustomSnackbar.showErrorSnackBar("Login Again");
       return Get.toNamed(AppRoutes.signin);
     }
 
@@ -635,7 +631,8 @@ class PostController extends GetxController {
       final decoded = json.decode(response.body);
       if (response.statusCode != 200) {
         CustomSnackbar.showErrorSnackBar(
-            decoded["message"].toString(), context);
+          decoded["message"].toString(),
+        );
       }
       int index =
           commentModelsList.indexWhere((element) => element.id == commentId);
@@ -649,6 +646,40 @@ class PostController extends GetxController {
       debugPrint(e.toString());
     } finally {
       isloading.value = false;
+    }
+  }
+
+  Future<void> refreshFeedSceen() async {
+    final tokenStorage = Get.put(TokenStorage());
+    String? token = await tokenStorage.getToken();
+    if (token!.isEmpty) {
+      CustomSnackbar.showErrorSnackBar("Login Again");
+      return Get.toNamed(AppRoutes.signin);
+    }
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/post/all"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+      final decodedResponce = await json.decode(response.body);
+      if (response.statusCode != 200) {
+        return CustomSnackbar.showErrorSnackBar(
+          decodedResponce["message"].toString(),
+        );
+      }
+      List<dynamic> postsFromData = decodedResponce["data"];
+      List filterMap =
+          postsFromData.where((e) => e.containsKey("created_by")).toList();
+      List<PostModel> postModels =
+          filterMap.map((e) => PostModel.fromJson(e)).toList();
+      postModels.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      allPost.clear();
+      allPost.addAll(postModels);
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 

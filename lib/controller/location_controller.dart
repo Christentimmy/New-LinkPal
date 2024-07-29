@@ -25,9 +25,7 @@ class LocationController extends GetxController {
     }
   }
 
-  Future<void> getCurrentCityandUpload({
-    required BuildContext context,
-  }) async {
+  Future<void> getCurrentCityandUpload() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
@@ -39,15 +37,14 @@ class LocationController extends GetxController {
       _userController.uploadLocation(
         lang: position.latitude,
         long: position.longitude,
-        context: context,
       );
       CustomSnackbar.showSuccessSnackBar(
         "Location Uploaded Successfully",
-        context,
+
       );
     } catch (e) {
       debugPrint(e.toString());
-      CustomSnackbar.showErrorSnackBar("An unexpected error occurred", context);
+      CustomSnackbar.showErrorSnackBar("An unexpected error occurred");
     }
   }
 }

@@ -3,15 +3,15 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/res/common_textfield.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
 
 class InterestScreen extends StatelessWidget {
   InterestScreen({super.key});
 
-  final TextEditingController _searchController = TextEditingController();
+  // final TextEditingController _searchController = TextEditingController();
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
 
@@ -45,7 +45,7 @@ class InterestScreen extends StatelessWidget {
   void uploadInterest(BuildContext context) async {
     _isloading.value = true;
     await _userController.uploadInterest(
-      context: context,
+
       interests: [
         _choosenValue.value,
       ],
@@ -53,8 +53,9 @@ class InterestScreen extends StatelessWidget {
     );
 
     // ignore: use_build_context_synchronously
-    await _postController.getAllPost(context: context);
-    await RetrieveController().getUserDetails(context);
+    await _postController.getAllPost();
+    await RetrieveController().getUserDetails();
+    SocketController().initializeSocket();
     _isloading.value = false;
   }
 
@@ -70,7 +71,7 @@ class InterestScreen extends StatelessWidget {
             if (_choosenValue.value.isNotEmpty) {
               uploadInterest(context);
             } else {
-              CustomSnackbar.showErrorSnackBar("Pick one interest", context);
+              CustomSnackbar.showErrorSnackBar("Pick one interest");
             }
           },
           child: const Icon(Icons.check),
@@ -91,12 +92,7 @@ class InterestScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        CustomTextField(
-                          hintText: "Search",
-                          controller: _searchController,
-                          isObscureText: false,
-                          icon: Icons.search,
-                        ),
+                       
                         Expanded(
                           child: SingleChildScrollView(
                             child: Column(

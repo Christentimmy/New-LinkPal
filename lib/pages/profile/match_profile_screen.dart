@@ -3,14 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/location_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/controller/websocket_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
 import 'package:lottie/lottie.dart';
 
+// ignore: must_be_immutable
 class MatchesProfileScreen extends StatefulWidget {
   final String userId;
+
   const MatchesProfileScreen({
     super.key,
     required this.userId,
@@ -24,18 +27,24 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
   final _retrieveController = Get.put(RetrieveController());
   final _locationController = Get.put(LocationController());
   final PageController _pageController = PageController();
-  final _webSocketController = Get.put(WebSocketController());
-  RxString channedId = "".obs;
+  // final _swipeController = Get.put(SwipeController());
+  final _socketController = Get.put(SocketController());
+  final _webController = Get.put(WebSocketController());
+  final RxString _channelId = "".obs;
+  final RxBool _isloading = false.obs;
 
   @override
   void initState() {
     super.initState();
-    _getDetails();
+    retrieve();
   }
 
-  Future<void> _getDetails() async {
-    await _retrieveController.getSpecificUserId(widget.userId, context);
-    channedId.value = await _webSocketController.getChannelId(widget.userId, context);
+  void retrieve() async {
+    _isloading.value = true;
+    await _retrieveController.getSpecificUserId(widget.userId);
+    _retrieveController.externalUserModel.refresh();
+    _channelId.value = await _webController.getChannelId(widget.userId);
+    _isloading.value = false;
   }
 
   @override
@@ -57,7 +66,7 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
       appBar: AppBar(
         title: Text(
           "User Profile",
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
       ),
       body: SafeArea(
@@ -186,26 +195,25 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Obx(
                               () => Text(
                                 _retrieveController
                                         .externalUserModel.value?.name ??
                                     "",
-                                style: Theme.of(context).textTheme.bodyLarge,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                             const Icon(
                               Icons.check_circle,
                               color: Colors.blue,
                               size: 20,
-                            )
+                            ),
                           ],
                         ),
-                        const SizedBox(height: 5),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Icon(
                               Icons.location_on,
@@ -258,32 +266,38 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                       ],
                     ),
                     const Spacer(),
-                    GestureDetector(
-                      onTap: () async {
-                        Get.toNamed(AppRoutes.chat, arguments: {
-                          "userId": widget.userId,
-                          "channedlId": channedId.value,
-                          "name":
-                              _retrieveController.externalUserModel.value?.name,
-                          //  "indexInsideChatList":
-                        });
-                      },
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.deepPurpleAccent,
-                        ),
-                        child: const Icon(
-                          Icons.message,
-                          color: Colors.white,
+                    Obx(
+                      () => GestureDetector(
+                        onTap: _isloading.value ? null : () {
+                          _socketController.socket?.emit("GET_MESSAGE", {
+                            "channel_id": _channelId.value,
+                          });
+                          _socketController
+                              .streamExistingChat(_channelId.value);
+                          Get.offNamed(AppRoutes.chat, arguments: {
+                            "userId": widget.userId,
+                            "channedlId": _channelId.value,
+                            "name": _retrieveController
+                                .externalUserModel.value?.name,
+                          });
+                        },
+                        child: Container(
+                          width: 55,
+                          height: 55,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.lightBlue,
+                          ),
+                          child: _isloading.value
+                              ? const Loader()
+                              : const Icon(Icons.message, color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
+                const SizedBox(height: 30),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
@@ -297,35 +311,11 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                     padding: const EdgeInsets.only(left: 8.0),
                     child: Text(
                       _retrieveController.externalUserModel.value?.bio ?? "",
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                // Padding(
-                //   padding: const EdgeInsets.only(left: 8.0),
-                //   child: Text(
-                //     "Interested In",
-                //     style: Theme.of(context).textTheme.bodyLarge,
-                //   ),
-                // ),
-                // Container(
-                //   height: 35,
-                //   width: 80,
-                //   margin: const EdgeInsets.only(left: 9, top: 8),
-                //   alignment: Alignment.center,
-                //   decoration: BoxDecoration(
-                //     color: Colors.blue.withOpacity(0.1),
-                //     borderRadius: BorderRadius.circular(40),
-                //   ),
-                //   child: const Text(
-                //     "Women",
-                //     style: TextStyle(
-                //       color: Colors.deepPurple,
-                //     ),
-                //   ),
-                // ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 25),
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Text(
@@ -334,34 +324,39 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                   ),
                 ),
                 Obx(
-                  () => Container(
-                    constraints: const BoxConstraints(
-                      minHeight: 35,
-                    ),
-                    margin: const EdgeInsets.only(left: 9, top: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Text(
-                      _retrieveController.externalUserModel.value?.mood[0]
-                              .toString() ??
-                          "null",
-                    ),
-                  ),
+                  () {
+                    final mood =
+                        _retrieveController.externalUserModel.value?.mood;
+                    return Container(
+                      constraints: const BoxConstraints(
+                        minHeight: 35,
+                      ),
+                      margin: const EdgeInsets.only(left: 9, top: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: mood != null && mood.isNotEmpty
+                          ? Text(
+                              mood[0],
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            )
+                          : Text(
+                              "Null",
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: Row(
                     children: [
-                      const Text(
+                      Text(
                         "Post",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const Spacer(),
                       GestureDetector(
@@ -385,52 +380,55 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
                     ],
                   ),
                 ),
-                Obx(() {
-                  if (_retrieveController.allPostFiles.isEmpty) {
-                    return Center(
-                      child: Lottie.network(
-                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
-                      ),
-                    );
-                  } else {
-                    final allPost = _retrieveController.allPostFiles;
-                    final images =
-                        allPost.where((file) => _isImage(file)).toList();
-                    final displayImages = images.take(3).toList();
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: displayImages.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 5.0,
-                        mainAxisSpacing: 5.0,
-                        childAspectRatio: 0.5,
-                      ),
-                      itemBuilder: (context, index) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: CachedNetworkImage(
-                            imageUrl: displayImages[index],
-                            height: double.infinity,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.grey.shade100,
-                              ),
+                Obx(
+                  () {
+                    final allFiles = _retrieveController.allPostFiles;
+                    final imageFiles =
+                        allFiles.where((file) => _isImage(file)).toList();
+
+                    // Limit the number of images to a maximum of 3
+                    final displayFiles = imageFiles.take(3).toList();
+
+                    return allFiles.isEmpty
+                        ? Center(
+                            child: Lottie.network(
+                              "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
                             ),
-                            errorWidget: (context, url, error) => const Center(
-                              child: Icon(Icons.error),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            itemCount: displayFiles.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 5.0,
+                              mainAxisSpacing: 5.0,
+                              childAspectRatio: 0.5,
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  
-                }),
+                            itemBuilder: (context, index) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                  imageUrl: displayFiles[index],
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.grey.shade100,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Center(
+                                    child: Icon(Icons.error),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                  },
+                ),
                 const SizedBox(height: 20),
               ],
             ),
@@ -440,24 +438,3 @@ class _MatchesProfileScreenState extends State<MatchesProfileScreen> {
     );
   }
 }
-
-//     GestureDetector(
-//       onTap: () async {
-//         String channelId = await _webSocketController
-//             .getChannelId(widget.userId);
-//             print(channelId);
-//         Get.toNamed(AppRoutes.chat);
-//       },
-//       child: Container(
-//         width: 50,
-//         height: 50,
-//         decoration: const BoxDecoration(
-//           shape: BoxShape.circle,
-//           color: Colors.deepPurpleAccent,
-//         ),
-//         child: const Icon(
-//           Icons.message,
-//           color: Colors.white,
-//         ),
-//       ),
-//     ),

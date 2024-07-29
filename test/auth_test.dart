@@ -1,196 +1,263 @@
-// // auth_test.dart
-// import 'package:get/get.dart';
-// import 'package:http/http.dart' as http;
-// import 'package:linkingpal/controller/auth_controller.dart';
-// import 'package:linkingpal/controller/date_controller.dart';
-// import 'package:mockito/annotations.dart';
-// import 'package:mockito/mockito.dart';
-// import 'package:test/test.dart';
-// import 'dart:convert';
-// import 'auth_test.mocks.dart';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'dart:convert';
+import 'package:linkingpal/services/auth_service.dart';
 
-// @GenerateMocks([http.Client])
-// void main() {
-//   late AuthController authController;
-//   late DateController dateController;
-//   late MockClient mockClient;
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  group('AuthService', () {
+    test('loginUser returns correct response data', () async {
+      // Create a mock client
+      final client = MockClient((request) async {
+        return http.Response(
+          json.encode({
+            'token': 'fake_token',
+            'user': {
+              'id': '123',
+              'email': 'test@example.com',
+            }
+          }),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
 
-//   setUp(() {
-//     mockClient = MockClient();
-//     authController = AuthController();
-//     authController.client = mockClient;
-//     dateController = DateController();
-//   });
-// // 
-//   tearDown(() {
-//     Get.reset();
-//   });
+      // Override the http.Client with the mock client
+      final authService = AuthService()..client = client;
 
-//   test("login with valid details", () async {
-//     // Arrange
-//     const email = "gojo@example.com";
-//     const password = "Timileyin@12";
-//     const isEmail = true;
-//     final url = Uri.parse("${authController.baseUrl}/auth/login");
+      final response = await authService.loginUser(
+        email: 'test@example.com',
+        password: 'password02',
+        isEmail: true,
+      );
 
-//     final responseBody = jsonEncode({
-//       "data": {
-//         "email": email,
-//         "id": "123",
-//         "is_email_verified": true,
-//         "is_phone_verified": true,
-//         "is_verified": true,
-//         "has_subscribed": true,
-//         "created_at": "2023-01-01",
-//         "updated_at": "2023-01-01",
-//         "video": "video_url",
-//         "name": "Test User",
-//         "bio": "Test Bio",
-//         "dob": "2000-01-01",
-//         "mood": [],
-//         "mobile_number": 1234567890,
-//         "avatar": "avatar_url",
-//         "latitude": "0.0",
-//         "longitude": "0.0",
-//         "gender": "Other",
-//       },
-//       "token": "fake_jwt_token"
-//     });
+      // Check if the response data matches the expected output
+      expect(response['token'], 'fake_token');
+      expect(response['user']['id'], '123');
+      expect(response['user']['email'], 'test@example.com');
+    });
 
-//     when(mockClient.post(
-//       url,
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode({
-//         "email": email,
-//         "password": password,
-//       }),
-//     )).thenAnswer((_) async => http.Response(responseBody, 200));
+    test('loginUser throws an exception for invalid credentials', () async {
+      // Create a mock client that returns a 401 error
+      final client = MockClient((request) async {
+        return http.Response('Invalid credentials', 401);
+      });
 
-//     // Act
-//     await authController.loginUser(
-//       email: email,
-//       password: password,
-//       isEmail: isEmail,
-//     );
+      // Override the http.Client with the mock client
+      final authService = AuthService()..client = client;
 
-//     // Assert
-//     verify(mockClient.post(
-//       url,
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode({
-//         "email": email,
-//         "password": password,
-//       }),
-//     )).called(1);
-//   });
+      // Expect an exception to be thrown
+      expect(
+        () async => await authService.loginUser(
+          email: 'test@example.com',
+          password: 'wrongpassword',
+          isEmail: true,
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            "description",
+            contains("Invalid"),
+          ),
+        ),
+      );
+    });
 
-//   test("login with invalid credentials returns error", () async {
-//     // Arrange
-//     const email = "gojo@example.com";
-//     const password = "wrongpassword";
-//     const isEmail = true;
-//     final url = Uri.parse("${authController.baseUrl}/auth/login");
+    test("loginUser with bad internet connection", () async {
+      final client = MockClient((_) async {
+        return Future.delayed(const Duration(seconds: 10), () {
+          return http.Response("Timeout", 200);
+        });
+      });
 
-//     when(mockClient.post(
-//       url,
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode({
-//         "email": email,
-//         "password": password,
-//       }),
-//     )).thenAnswer((_) async => http.Response('Invalid Credentials', 404));
+      final authService = AuthService()..client = client;
 
-//     // Act
-//     await authController.loginUser(
-//       email: email,
-//       password: password,
-//       isEmail: isEmail,
-//     );
+      expect(
+        () async => authService.loginUser(
+            email: "email", password: "password", isEmail: true),
+        throwsA(isA<Exception>().having(
+            (e) => e.toString(), "description", contains("Request Time out"))),
+      );
+    });
 
-//     // Assert
-//     verify(mockClient.post(
-//       url,
-//       headers: {'Content-Type': 'application/json'},
-//       body: jsonEncode({
-//         "email": email,
-//         "password": password,
-//       }),
-//     )).called(1);
-//   });
+    test("loginUser no internet", () async {
+      final client = MockClient(
+        (_) => throw const SocketException("no internet"),
+      );
 
-//   test("sign up user", () async {
-//     //arrange
-//     const email = "test5@gmail.com";
-//     const name = "Testing 1";
-//     const mobileNumber = "+08164559874";
-//     const bio = "Testing";
-//     DateTime dob = dateController.getDate(30, 12, 2002);
-//     final dobString = dob.toUtc().toIso8601String();
-//     const password = "Timileyin@12";
-//     final uri = Uri.parse("${authController.baseUrl}/auth/signup");
-//      final responseBody = jsonEncode({
-//       "data": {
-//         "email": email,
-//         "id": "123",
-//         "is_email_verified": true,
-//         "is_phone_verified": true,
-//         "is_verified": true,
-//         "has_subscribed": true,
-//         "created_at": "2023-01-01",
-//         "updated_at": "2023-01-01",
-//         "video": "video_url",
-//         "name": "Test User",
-//         "bio": "Test Bio",
-//         "dob": "2000-01-01",
-//         "mood": [],
-//         "mobile_number": 1234567890,
-//         "avatar": "avatar_url",
-//         "latitude": "0.0",
-//         "longitude": "0.0",
-//         "gender": "Other",
-//       },
-//       "token": "fake_jwt_token"
-//     });
+      final authService = AuthService()..client = client;
 
-//     when(
-//      mockClient.post(
-//         uri,
-//         headers: {'Content-Type': 'application/json'},
-//         body: json.encode({
-//           "email": email,
-//           "name": name,
-//           "mobile_number": mobileNumber,
-//           "bio": bio,
-//           "dob": dobString,
-//           "password": password,
-//         }),
-//       ),
-//     ).thenAnswer(
-//       (_) async {
-//         return http.Response(responseBody, 200);
-//       },
-//     );
-//     //act
-//     await authController.signUpUSer(
-//       name: name,
-//       email: email,
-//       mobileNumber: mobileNumber,
-//       dob: dob,
-//       password: password,
-//       bio: bio,
-//     );
-//     //assert
-//     verify(await mockClient.post(
-//       uri,
-//       headers: {'Content-Type': 'application/json'},
-//       body: json.encode({
-//         "email": email,
-//         "name": name,
-//         "mobile_number": mobileNumber,
-//         "bio": bio,
-//         "dob": dobString,
-//         "password": password,
-//       }),
-//     )).called(1);
-//   });
-// }
+      expect(
+        () async => authService.loginUser(
+          email: "email",
+          password: "password",
+          isEmail: true,
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            "description",
+            contains("No internet"),
+          ),
+        ),
+      );
+    });
+
+    test("signUp new user", () async {
+      final client = MockClient((request) async {
+        return http.Response(
+          json.encode({"name": "test", "id": "123"}),
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      });
+
+      final authService = AuthService()..client = client;
+
+      final response = await authService.signUpUser(
+        name: "name",
+        email: "email",
+        mobileNumber: "mobileNumber",
+        dob: DateTime.now(),
+        password: "password",
+        bio: "bio,",
+      );
+
+      expect(response["name"], "test");
+    });
+
+    test("signUser throws an exception", () async {
+      final client = MockClient((_) async {
+        return http.Response("Error occured", 409);
+      });
+
+      final authService = AuthService()..client = client;
+
+      expect(
+        () async => await authService.signUpUser(
+          name: "name",
+          email: "email",
+          mobileNumber: "mobileNumber",
+          dob: DateTime.now(),
+          password: "password",
+          bio: "bio",
+        ),
+        throwsException,
+      );
+    });
+
+    test("signUser empty response", () async {
+      final client = MockClient((_) async {
+        return http.Response("Empty response", 400);
+      });
+
+      final authService = AuthService()..client = client;
+
+      expect(
+        () async => await authService.signUpUser(
+          name: "name",
+          email: "email",
+          mobileNumber: "mobileNumber",
+          dob: DateTime.now(),
+          password: "password",
+          bio: "bio",
+        ),
+        throwsException,
+      );
+    });
+
+    test("signUser with no internet connection ", () async {
+      final client =
+          MockClient((_) => throw const SocketException("no network"));
+
+      final authService = AuthService()..client = client;
+
+      expect(
+        () async => authService.signUpUser(
+          name: "name",
+          email: "email",
+          mobileNumber: "mobileNumber",
+          dob: DateTime.now(),
+          password: "password",
+          bio: "bio",
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            "description",
+            contains("No internet connection"),
+          ),
+        ),
+      );
+    });
+
+    test("signUser with bad network", () async {
+      final client = MockClient((_) async {
+        return Future.delayed(
+          const Duration(seconds: 10),
+          () => http.Response("Request timeout", 200),
+        );
+      });
+
+      final authService = AuthService()..client = client;
+
+      expect(
+        () async => authService.signUpUser(
+          name: "name",
+          email: "email",
+          mobileNumber: "mobileNumber",
+          dob: DateTime.now(),
+          password: "password",
+          bio: "bio",
+        ),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            "description",
+            contains("Time out"),
+          ),
+        ),
+      );
+    });
+
+    test('changePassword empty response', () async {
+      final client = MockClient(
+        (_) async => http.Response("Empty response", 200),
+      );
+
+      final authService = AuthService()..client = client;
+
+      expect(
+        () async => authService.changePassword(password: "password"),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            "description",
+            contains("Empty"),
+          ),
+        ),
+      );
+    });
+
+    test("changePassword status code not 200", () async {
+      final client = MockClient((_) async {
+        return http.Response("error: Unauthorize operation", 400);
+      });
+
+      final authService = AuthService()..client = client;
+
+      expect(
+          () async => authService.changePassword(password: "password"),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              "description",
+              contains("error"),
+            ),
+          ));
+    });
+  });
+}

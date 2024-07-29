@@ -33,6 +33,12 @@ class SwipeController extends GetxController {
     _checkResetDailyLimit();
   }
 
+  void deleteSwipeData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove("swipeCount");
+    await prefs.remove("lastSwipeDate");
+  }
+
   void _checkResetDailyLimit() {
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now().toUtc());
     if (lastSwipeDate.value != today) {
@@ -42,16 +48,15 @@ class SwipeController extends GetxController {
     }
   }
 
-  bool swipe({required String receiverId, required BuildContext context}) {
+  bool swipe({required String receiverId}) {
     if (swipeCount.value <= 10) {
       swipeCount.value++;
       _saveSwipeData();
-      sendMatchRequest(receiverId: receiverId, context: context);
+      sendMatchRequest(receiverId: receiverId);
       return true;
     } else {
       CustomSnackbar.showErrorSnackBar(
         "You have reached your daily swipe limit",
-        context,
       );
       Get.toNamed(AppRoutes.premium);
       return false;
@@ -66,7 +71,6 @@ class SwipeController extends GetxController {
 
   Future<bool> sendMatchRequest({
     required String receiverId,
-    required BuildContext context,
   }) async {
     isloading.value = true;
     try {
@@ -84,11 +88,15 @@ class SwipeController extends GetxController {
       );
       final decodedResponse = json.decode(response.body);
       if (response.statusCode == 400) {
-        CustomSnackbar.showErrorSnackBar(decodedResponse["message"].toString(), context);
+        CustomSnackbar.showErrorSnackBar(
+          decodedResponse["message"].toString(),
+        );
         return true;
       }
       if (response.statusCode != 201) {
-        CustomSnackbar.showErrorSnackBar(decodedResponse["message"].toString(), context);
+        CustomSnackbar.showErrorSnackBar(
+          decodedResponse["message"].toString(),
+        );
         return false;
       }
 
@@ -104,6 +112,4 @@ class SwipeController extends GetxController {
       isloading.value = false;
     }
   }
-
-
 }

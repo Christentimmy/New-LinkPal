@@ -9,6 +9,8 @@ import 'package:linkingpal/res/common_button.dart';
 import 'package:linkingpal/res/common_textfield.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:country_picker/country_picker.dart';
+import 'package:linkingpal/widgets/snack_bar.dart';
 
 // ignore: must_be_immutable
 class SignUp extends StatelessWidget {
@@ -27,9 +29,11 @@ class SignUp extends StatelessWidget {
   final RxInt _selectedDay = (-2).obs;
   final RxInt _selectedMonth = (-2).obs;
   final RxInt _selectedYear = (-2).obs;
+  final RxString _countryCode = "".obs;
 
   void signUpUser(BuildContext context) async {
     _authController.isLoading.value = true;
+    String number = _countryCode + _phoneNumberController.text.trim();
     DateTime convertToDate = _dateController.getDate(
       _selectedDay.value,
       _selectedMonth.value,
@@ -39,7 +43,7 @@ class SignUp extends StatelessWidget {
       context: context,
       name: _fullNameController.text.trim(),
       email: _emailController.text.trim(),
-      mobileNumber: _phoneNumberController.text.trim(),
+      mobileNumber: number,
       dob: convertToDate,
       password: _passwordController.text,
       bio: _bioController.text.trim(),
@@ -158,17 +162,58 @@ class SignUp extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-                          CustomTextField(
-                            hintText: "Phone Number",
-                            controller: _phoneNumberController,
-                            isObscureText: false,
-                            icon: Icons.email,
-                            type: TextInputType.number,
-                            action: TextInputAction.next,
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  showCountryPicker(
+                                    context: context,
+                                    showPhoneCode: false,
+                                    onSelect: (Country country) {
+                                      _countryCode.value =
+                                          "+${country.phoneCode}";
+                                    },
+                                  );
+                                },
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    maxHeight: 50,
+                                    minWidth: 45,
+                                  ),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      width: 1,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  child: Obx(
+                                    () => _countryCode.value.isEmpty
+                                        ? const Text("+88")
+                                        : Text(
+                                            _countryCode.value,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: CustomTextField(
+                                  hintText: "Phone Number",
+                                  controller: _phoneNumberController,
+                                  isObscureText: false,
+                                  icon: Icons.email,
+                                  type: TextInputType.number,
+                                  action: TextInputAction.next,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -298,23 +343,32 @@ class SignUp extends StatelessWidget {
                           ),
                           Obx(
                             () => CustomButton(
-                              ontap: () {
-                                if (_formKey.value.currentState!.validate() &&
-                                    _selectedDay.value != -2 &&
-                                    _selectedMonth.value != -2 &&
-                                    _selectedYear.value != -2) {
-                                  signUpUser(context);
-                                }
-                                FocusManager.instance.primaryFocus?.unfocus();
-                              },
+                              ontap: _authController.isLoading.value
+                                  ? null
+                                  : () {
+                                      if (_formKey.value.currentState!
+                                              .validate() &&
+                                          _selectedDay.value != -2 &&
+                                          _selectedMonth.value != -2 &&
+                                          _selectedYear.value != -2) {
+                                        signUpUser(context);
+                                      } else {
+                                        CustomSnackbar.showErrorSnackBar(
+                                            "Fill out all fields");
+                                      }
+                                      FocusManager.instance.primaryFocus
+                                          ?.unfocus();
+                                    },
                               child: _authController.isLoading.value
                                   ? Loader(
-                                    color: Theme.of(context).scaffoldBackgroundColor,
-                                  )
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                    )
                                   : Text(
                                       "Sign Up",
                                       style: TextStyle(
-                                        color: Theme.of(context).scaffoldBackgroundColor,
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
                                         fontSize: 18,
                                       ),
                                     ),

@@ -65,11 +65,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         textController: _textController,
         pickedFiles: _filesList,
         tags: _tagList,
-        context: context,
+    
       );
       FocusManager.instance.primaryFocus?.unfocus();
     } else {
-      CustomSnackbar.showErrorSnackBar("Fill the text cannot be empty", context);
+      CustomSnackbar.showErrorSnackBar("Fill the text cannot be empty");
       _postController.isloading.value = false;
     }
   }

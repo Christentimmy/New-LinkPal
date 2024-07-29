@@ -3,15 +3,18 @@ import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
-import 'package:linkingpal/controller/chat_controller.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/models/chat_card_model.dart';
+import 'package:linkingpal/theme/app_theme.dart';
+import 'package:linkingpal/widgets/loading_widget.dart';
+import 'package:linkingpal/widgets/snack_bar.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String userId;
   final String channedlId;
   final String name;
   // final int userIndexInsideChatListArray;
-  ChatScreen({
+  const ChatScreen({
     super.key,
     required this.userId,
     required this.channedlId,
@@ -19,9 +22,31 @@ class ChatScreen extends StatelessWidget {
     // required this.userIndexInsideChatListArray,
   });
 
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
   final _textController = TextEditingController();
   final _retrieveController = Get.find<RetrieveController>();
   final _webSocketController = Get.find<SocketController>();
+
+  @override
+  void initState() {
+    super.initState();
+    if (_webSocketController.socket != null &&
+        _webSocketController.socket!.connected) {
+      _webSocketController.emitAndStream(widget.channedlId);
+    } else {
+      _webSocketController.initializeSocket();
+    }
+  }
+
+  @override
+  void dispose() {
+    _webSocketController.chatsList.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,17 +56,17 @@ class ChatScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             children: [
-              Header(name: name),
+              Header(name: widget.name),
               const SizedBox(height: 20),
               ChatList(
                 webSocketController: _webSocketController,
                 retrieveController: _retrieveController,
-                channelId: channedlId,
+                channelId: widget.channedlId,
               ),
               BottomTextField(
                 textController: _textController,
                 webSocketController: _webSocketController,
-                channelId: channedlId,
+                channelId: widget.channedlId,
               ),
             ],
           ),
@@ -65,63 +90,122 @@ class BottomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: TextFormField(
-              maxLines: null,
-              // cursorColor: Colors.white,
-              cursorColor: Theme.of(context).scaffoldBackgroundColor,
-              controller: textController,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).scaffoldBackgroundColor,
-                fontSize: 13,
-              ),
-              decoration: InputDecoration(
-                suffixIcon: GestureDetector(
-                  onTap: () {
-                    webSocketController.sendMessage(
-                      textController.text,
-                      channelId,
-                    );
-                    // webSocketController.streamExistingChat(channelId);
-                    textController.clear();
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    // _webSocketService.streamLatestChat(channelId.value);
-                  },
-                  child: Icon(
-                    Icons.send,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                  ),
+    return TextFormField(
+      controller: textController,
+      style: TextStyle(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        fontWeight: FontWeight.w700,
+        fontSize: 12,
+      ),
+      maxLines: 5,
+      minLines: 1,
+      obscureText: false,
+      textInputAction: TextInputAction.done,
+      keyboardType: TextInputType.text,
+      autovalidateMode: AutovalidateMode.disabled,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Theme.of(context).primaryColor.withOpacity(0.9),
+        suffixIcon: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (webSocketController.socket!.connected) {
+                  webSocketController.sendMessage(
+                    textController.text,
+                    channelId,
+                  );
+                  textController.clear();
+                  FocusManager.instance.primaryFocus?.unfocus();
+                } else {
+                  CustomSnackbar.showErrorSnackBar("Socket not connected");
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: AppColor.themeColor,
+                  shape: BoxShape.circle,
                 ),
-                hintText: "Type Here...",
-                hintStyle: const TextStyle(
+                child: const Icon(
+                  Icons.send,
                   color: Colors.white,
-                  fontSize: 11,
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide.none,
                 ),
               ),
             ),
-          ),
+          ],
         ),
-        Icon(
-          Icons.image,
-          color: Theme.of(context).primaryColor,
-          size: 30,
+        border: OutlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(50),
         ),
-      ],
+        hintStyle: TextStyle(
+          color: AppColor.textfieldText.withOpacity(0.5),
+          fontWeight: FontWeight.w400,
+          fontSize: 14.0,
+        ),
+        hintText: "Write here...",
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 5,
+        ),
+      ),
     );
+    // return Row(
+    //   children: [
+    //     Expanded(
+    //       child: Container(
+    //         decoration: BoxDecoration(
+    //           color: Theme.of(context).primaryColor,
+    //           borderRadius: BorderRadius.circular(10),
+    //         ),
+    //         child: TextFormField(
+    //           maxLines: null,
+    //           cursorColor: Theme.of(context).scaffoldBackgroundColor,
+    //           controller: textController,
+    //           style: TextStyle(
+    //             fontWeight: FontWeight.w700,
+    //             color: Theme.of(context).scaffoldBackgroundColor,
+    //             fontSize: 13,
+    //           ),
+    //           decoration: InputDecoration(
+    //             suffixIcon: GestureDetector(
+    //               onTap: () {
+    //                 webSocketController.sendMessage(
+    //                   textController.text,
+    //                   channelId,
+    //                 );
+    //                 textController.clear();
+    //                 FocusManager.instance.primaryFocus?.unfocus();
+    //               },
+    //               child: Icon(
+    //                 Icons.send,
+    //                 color: Theme.of(context).scaffoldBackgroundColor,
+    //               ),
+    //             ),
+    //             hintText: "Type Here...",
+    //             hintStyle: const TextStyle(
+    //               color: Colors.white,
+    //               fontSize: 11,
+    //             ),
+    //             enabledBorder: const OutlineInputBorder(
+    //               borderSide: BorderSide.none,
+    //             ),
+    //             focusedBorder: const OutlineInputBorder(
+    //               borderSide: BorderSide.none,
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //     Icon(
+    //       Icons.image,
+    //       color: Theme.of(context).primaryColor,
+    //       size: 30,
+    //     ),
+    //   ],
+    // );
   }
 }
 
@@ -148,6 +232,13 @@ class ChatList extends StatelessWidget {
     });
 
     return Obx(() {
+      if (_webSocketController.isloading.value) {
+        return const Expanded(
+          child: Center(
+            child: Loader(color: Colors.deepOrangeAccent),
+          ),
+        );
+      }
       if (_webSocketController.chatsList.isEmpty) {
         return const Expanded(
           child: Column(

@@ -38,7 +38,6 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
 
   void sendPhone() async {
     token.value = await _verificationController.sendOtpPhone(
-      context: context,
       phoneNumber:
           _retrieveController.userModel.value?.mobileNumber.toString() ?? "",
     );
@@ -97,9 +96,9 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                   PinCodeTextField(
                     hintCharacter: "",
                     keyboardType: TextInputType.number,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Colors.black,
                       fontSize: 20,
                     ),
                     length: 4,
@@ -126,13 +125,12 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                     onCompleted: (value) async {
                       _isVerify.value = await _verificationController.verifyOTP(
                         otp: value,
-                        context: context,
                         token: token.value,
                       );
 
                       if (_isVerify.value) {
                         final controller = Get.put(RetrieveController());
-                        await controller.getUserDetails(context);
+                        await controller.getUserDetails();
                         Navigator.pop(context);
                       }
                     },
@@ -159,7 +157,7 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                       ontap: () async {
                         if (_isVerify.value) {
                           final controller = Get.put(RetrieveController());
-                          await controller.getUserDetails(context);
+                          await controller.getUserDetails();
                           Navigator.pop(context);
                         }
                       },
@@ -194,7 +192,6 @@ class _VerificationScreenPhoneState extends State<VerificationScreenPhone> {
                                             .userModel.value?.mobileNumber
                                             .toString() ??
                                         "",
-                                        context: context,
                                   );
                                 },
                                 child: const Text(

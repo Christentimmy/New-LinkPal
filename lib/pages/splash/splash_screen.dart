@@ -4,6 +4,7 @@ import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/theme/app_routes.dart';
 
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -12,11 +13,12 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final _retrieveController = Get.put(RetrieveController());
+  final _retrieveController = Get.find<RetrieveController>();
+
 
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       await navigatior();
     });
     super.initState();
@@ -28,11 +30,12 @@ class _SplashScreenState extends State<SplashScreen> {
       Get.offNamed(AppRoutes.dashboard, arguments: {
         "startScreen": 0,
       });
-      _retrieveController.getUserDetails(context);
+      _retrieveController.getUserDetails();
     } else {
       Get.offNamed(AppRoutes.walkthrough);
     }
   }
+  
 
   @override
   Widget build(BuildContext context) {

@@ -4,14 +4,14 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:linkingpal/controller/internet_controller.dart';
-
+import 'package:linkingpal/controller/notification_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
-
 import 'package:linkingpal/pages/create_post/create_post_screen.dart';
 import 'package:linkingpal/pages/home/home_screen.dart';
 import 'package:linkingpal/pages/profile/profile_screen.dart';
 import 'package:linkingpal/pages/setting/setting_screen.dart';
 import 'package:linkingpal/pages/swipe/swipe_screen.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class DashBoardScreen extends StatefulWidget {
   final int? startscreen;
@@ -40,6 +40,8 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   @override
   void initState() {
     _currentIndex.value = widget.startscreen ?? 0;
+    OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+    NotificationController().requestPermission();
     super.initState();
   }
 

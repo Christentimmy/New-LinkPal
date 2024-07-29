@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
+import 'package:linkingpal/theme/app_routes.dart';
 import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -18,6 +19,7 @@ class IntroductionVideoScreen extends StatelessWidget {
   final Rx<File?> _videoFile = Rx<File?>(null);
   final _userController = Get.put(UserController());
   final RxBool _isLoading = false.obs;
+  final RxBool _isPick = false.obs;
   final RxBool _isVideoInitialized = false.obs;
 
   final Rx<VideoPlayerController?> _videoPlayerController =
@@ -25,7 +27,23 @@ class IntroductionVideoScreen extends StatelessWidget {
 
   final Rx<ChewieController?> _chewieController = Rx<ChewieController?>(null);
 
+  Future<int> getVideoDurationInSeconds(File videoFile) async {
+    VideoPlayerController controller = VideoPlayerController.file(videoFile);
+
+    // Initialize the controller
+    await controller.initialize();
+
+    // Get the duration in seconds
+    int durationInSeconds = controller.value.duration.inSeconds;
+
+    // Dispose of the controller when done
+    await controller.dispose();
+
+    return durationInSeconds;
+  }
+
   void pickUserVideo() async {
+    _isPick.value = true;
     File? videoSelected = await selectVideo();
     if (videoSelected != null) {
       _videoFile.value = videoSelected;
@@ -40,20 +58,26 @@ class IntroductionVideoScreen extends StatelessWidget {
               _isVideoInitialized.value = true;
             });
     }
+    _isPick.value = false;
   }
 
   void submitVideo(BuildContext context) async {
-    if (_videoFile.value != null) {
-      _isLoading.value = true;
-      await _userController.uploadVideo(
-        video: _videoFile.value!,
-        isSignUp: true,
-        context: context,
-      );
-      _isLoading.value = false;
-    } else {
-      CustomSnackbar.showErrorSnackBar("Select a video", context);
+    if (_videoFile.value == null) {
+      return CustomSnackbar.showErrorSnackBar("Select a video");
     }
+    int duration = await getVideoDurationInSeconds(_videoFile.value!);
+    if (duration > 10) {
+      return CustomSnackbar.showErrorSnackBar(
+        "Select video less than 10seconds",
+      );
+    }
+    _isLoading.value = true;
+    Get.toNamed(AppRoutes.personalDataFromUser);
+    _userController.uploadVideo(
+      video: _videoFile.value!,
+      isUpdateVideo: false,
+    );
+    _isLoading.value = false;
   }
 
   @override
@@ -71,7 +95,21 @@ class IntroductionVideoScreen extends StatelessWidget {
             children: [
               Obx(
                 () {
-                  if (_videoFile.value == null) {
+                  if (_isPick.value) {
+                    return Container(
+                      height: 500,
+                      width: 400,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: 2,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      child: const Loader(color: Colors.deepOrangeAccent),
+                    );
+                  } else if (_videoFile.value == null) {
                     return Container(
                       height: 500,
                       width: 400,
@@ -126,7 +164,7 @@ class IntroductionVideoScreen extends StatelessWidget {
                 height: 10,
               ),
               GestureDetector(
-                onTap: (){
+                onTap: () {
                   submitVideo(context);
                 },
                 child: Obx(

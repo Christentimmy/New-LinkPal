@@ -37,7 +37,6 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
   void sendEMail() async {
     token.value = await _verificationController.sendOTPEmail(
       email: _retrieveController.userModel.value?.email ?? "",
-      context: context,
     );
   }
 
@@ -45,11 +44,10 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
     _isVerify.value = await _verificationController.verifyOTP(
       otp: value,
       token: token.value,
-      context: context,
     );
     if (_isVerify.value) {
       final controller = Get.put(RetrieveController());
-      await controller.getUserDetails(context);
+      await controller.getUserDetails();
       Navigator.pop(context);
       // Get.toNamed(AppRoutes.verificationChecker, arguments: {
       //   "onClickToProceed": (){
@@ -118,9 +116,9 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                   PinCodeTextField(
                     hintCharacter: "",
                     keyboardType: TextInputType.number,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Colors.black,
                       fontSize: 20,
                     ),
                     length: 4,
@@ -173,7 +171,7 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                       ontap: () async {
                         if (_isVerify.value) {
                           final controller = Get.put(RetrieveController());
-                          await controller.getUserDetails(context);
+                          await controller.getUserDetails();
                           Navigator.pop(context);
                         }
                       },
@@ -206,7 +204,6 @@ class _VerificationScreenEmailState extends State<VerificationScreenEmail> {
                                     email: _retrieveController
                                             .userModel.value?.email ??
                                         "",
-                                    context: context,
                                   );
                                 },
                                 child: const Text(

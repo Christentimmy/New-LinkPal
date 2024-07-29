@@ -3,11 +3,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:linkingpal/controller/chat_controller.dart';
+import 'package:linkingpal/controller/auth_controller.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
 import 'package:linkingpal/models/comment_model.dart';
 import 'package:linkingpal/models/post_model.dart';
+import 'package:linkingpal/models/user_model.dart';
 import 'package:linkingpal/pages/home/full_details_of_post.dart';
 import 'package:linkingpal/pages/home/notification.dart';
 import 'package:linkingpal/pages/home/people_who_reacted.dart';
@@ -18,7 +20,6 @@ import 'package:linkingpal/theme/app_theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/video_play_widget.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -32,12 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
   final _retrieveController = Get.find<RetrieveController>();
   final _postController = Get.put(PostController());
   final _socketController = Get.put(SocketController());
-
-  final GlobalKey<LiquidPullToRefreshState> _refreshIndicatorKey =
-      GlobalKey<LiquidPullToRefreshState>();
+  final _authController = Get.put(AuthController());
 
   Future<void> _handleRefresh() async {
-    await _postController.getAllPost(context: context);
+    await _postController.refreshFeedSceen();
   }
 
   @override
@@ -48,65 +47,84 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void establish() {
     _socketController.initializeSocket();
+    Future.delayed(const Duration(seconds: 5), () {
+      _authController.authChecker(
+          _retrieveController.userModel.value ?? UserModel.empty());
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: LiquidPullToRefresh(
-          key: _refreshIndicatorKey,
+        child: RefreshIndicator(
           onRefresh: _handleRefresh,
-          showChildOpacityTransition: false,
-          height: 60,
-          animSpeedFactor: 3.0,
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: UserNameWidget(controller: _retrieveController),
-              ),
-              const SizedBox(height: 10),
-              Obx(
-                () {
-                  return _postController.isloading.value
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height / 1.5,
-                          child: const Loader(
-                            color: Colors.deepOrangeAccent,
-                          ),
-                        )
-                      : _postController.allPost.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height / 1.5,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Lottie.asset("assets/images/empty.json"),
-                                  const Text("Empty"),
-                                ],
-                              ),
-                            )
-                          : Expanded(
-                              child: ListView.builder(
-                                itemCount: _postController.allPost.length,
-                                itemBuilder: (context, index) {
-                                  final post =
-                                      _postController.allPost[index].obs;
-                                  return PostCardDisplay(
-                                    postModel: post,
-                                    retrieveController: _retrieveController,
-                                  );
-                                },
-                              ),
-                            );
-                },
-              ),
-            ],
+          child: HomeCard(
+            retrieveController: _retrieveController,
+            postController: _postController,
           ),
         ),
       ),
+    );
+  }
+}
+
+class HomeCard extends StatelessWidget {
+  const HomeCard({
+    super.key,
+    required RetrieveController retrieveController,
+    required PostController postController,
+  })  : _retrieveController = retrieveController,
+        _postController = postController;
+
+  final RetrieveController _retrieveController;
+  final PostController _postController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: UserNameWidget(controller: _retrieveController),
+        ),
+        const SizedBox(height: 10),
+        Obx(
+          () {
+            return _postController.isloading.value
+                ? SizedBox(
+                    height: MediaQuery.of(context).size.height / 1.5,
+                    child: const Loader(
+                      color: Colors.deepOrangeAccent,
+                    ),
+                  )
+                : _postController.allPost.isEmpty
+                    ? SizedBox(
+                        height: MediaQuery.of(context).size.height / 1.5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Lottie.asset("assets/images/empty.json"),
+                            const Text("Empty"),
+                          ],
+                        ),
+                      )
+                    : Expanded(
+                        child: ListView.builder(
+                          itemCount: _postController.allPost.length,
+                          itemBuilder: (context, index) {
+                            final post = _postController.allPost[index].obs;
+                            return PostCardDisplay(
+                              postModel: post,
+                              retrieveController: _retrieveController,
+                            );
+                          },
+                        ),
+                      );
+          },
+        ),
+      ],
     );
   }
 }
@@ -236,9 +254,10 @@ class PostCardDisplay extends StatelessWidget {
                                     ),
                                   ),
                                   ontap1: () {
-                                    Get.toNamed(AppRoutes.editPost, arguments: {
-                                      "model": postModel,
-                                    });
+                                    Get.offNamed(AppRoutes.editPost,
+                                        arguments: {
+                                          "model": postModel.value,
+                                        });
                                   },
                                   child2: Obx(
                                     () => _postController.isDeleteLoading.value
@@ -352,22 +371,12 @@ class PostCardDisplay extends StatelessWidget {
                       isLiked: postModel.value.isLikeByUser,
                       onTap: (isLiked) async {
                         if (isLiked) {
-                          _postController.disLikeAPost(
-                              postModel.value.id, context);
+                          _postController.disLikeAPost(postModel.value.id);
                         } else {
-                          _postController.likeAPost(
-                              postModel.value.id, context);
+                          _postController.likeAPost(postModel.value.id);
                         }
                         return !isLiked;
                       },
-                      // circleColor: const CircleColor(
-                      //   start: Colors.redAccent,
-                      //   end: Colors.redAccent,
-                      // ),
-                      // bubblesColor: const BubblesColor(
-                      //   dotPrimaryColor: Colors.redAccent,
-                      //   dotSecondaryColor: Colors.redAccent,
-                      // ),
                       likeBuilder: (bool isLiked) {
                         return Icon(
                           isLiked
@@ -379,29 +388,6 @@ class PostCardDisplay extends StatelessWidget {
                     ),
                   ),
                 ),
-                // GestureDetector(
-                //   onLongPress: () {
-                //     Get.to(() => ReactedScreen(postModel: postModel.value));
-                //   },
-                //   onTap: () {
-                //     if (postModel.value.isLikeByUser) {
-                //       _postController.disLikeAPost(
-                //         postModel.value.id,
-                //         context,
-                //       );
-                //     } else {
-                //       _postController.likeAPost(postModel.value.id, context);
-                //     }
-                //   },
-                //   child: postModel.value.isLikeByUser
-                //       ? const Icon(
-                //           FontAwesomeIcons.solidHeart,
-                //           color: Colors.redAccent,
-                //         )
-                //       : const Icon(
-                //           FontAwesomeIcons.heart,
-                //         ),
-                // ),
                 const SizedBox(width: 4),
                 Text(
                   postModel.value.likes.toString(),
@@ -410,7 +396,7 @@ class PostCardDisplay extends StatelessWidget {
                 const SizedBox(width: 15),
                 GestureDetector(
                   onTap: () {
-                    _postController.getComments(postModel.value.id, context);
+                    _postController.getComments(postModel.value.id);
                     showModalBottomSheet(
                       isScrollControlled: true,
                       enableDrag: true,
@@ -517,6 +503,17 @@ class _CommentScreenState extends State<CommentScreen> {
     widget.postController.commentModelsList.clear();
   }
 
+  void deleteComment({
+    required String commentsModId,
+    required int index,
+  }) async {
+    widget.postController.commentModelsList.removeAt(index);
+    await widget.postController.deleteComment(
+      commentId: commentsModId,
+      postId: widget.postModel.id,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -586,56 +583,14 @@ class _CommentScreenState extends State<CommentScreen> {
                                     height: MediaQuery.of(context).size.height /
                                         1.55,
                                     child: Center(
-                                      child: Lottie.network(
-                                        "https://lottie.host/bc7f161c-50b2-43c8-b730-99e81bf1a548/7FkZl8ywCK.json",
+                                      child: Lottie.asset(
+                                        "assets/images/empty.json",
                                         height: 200,
                                         width: 200,
                                       ),
                                     ),
                                   )
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
-                                    itemCount: widget.postController
-                                        .commentModelsList.length,
-                                    itemBuilder: (context, index) {
-                                      final commentsMod = widget.postController
-                                          .commentModelsList[index];
-
-                                      return widget.retrieveController.userModel
-                                                  .value!.id ==
-                                              commentsMod.createdBy.id
-                                          ? Dismissible(
-                                              key: ValueKey(
-                                                commentsMod.id,
-                                              ),
-                                              onDismissed: (direction) {
-                                                widget.postController
-                                                    .commentModelsList
-                                                    .removeAt(index);
-                                                widget.postController
-                                                    .deleteComment(
-                                                  commentId: commentsMod.id,
-                                                  postId: widget.postModel.id,
-                                                  context: context,
-                                                );
-                                              },
-                                              child: CommentCard(
-                                                commentModel: commentsMod,
-                                                postController:
-                                                    widget.postController,
-                                                postModel: widget.postModel,
-                                              ),
-                                            )
-                                          : CommentCard(
-                                              commentModel: commentsMod,
-                                              postController:
-                                                  widget.postController,
-                                              postModel: widget.postModel,
-                                            );
-                                    },
-                                  );
+                                : _builtComments();
                       },
                     ),
                   ],
@@ -675,7 +630,6 @@ class _CommentScreenState extends State<CommentScreen> {
                         widget.postController.commentOnPost(
                           widget.postModel.id,
                           _commentController,
-                          context,
                         );
                         FocusManager.instance.primaryFocus?.unfocus();
                       },
@@ -718,6 +672,52 @@ class _CommentScreenState extends State<CommentScreen> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _builtComments() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: widget.postController.commentModelsList.length,
+      itemBuilder: (context, index) {
+        final commentsMod = widget.postController.commentModelsList[index];
+        return widget.retrieveController.userModel.value!.id ==
+                commentsMod.createdBy.id
+            ? Dismissible(
+                key: ValueKey(commentsMod.id),
+                secondaryBackground: Container(
+                  color: Colors.red,
+                  alignment: Alignment.centerRight,
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 2),
+                      Text("Delete"),
+                    ],
+                  ),
+                ),
+                onDismissed: (direction) {
+                  deleteComment(
+                    commentsModId: commentsMod.id,
+                    index: index,
+                  );
+                },
+                child: CommentCard(
+                  commentModel: commentsMod,
+                  postController: widget.postController,
+                  postModel: widget.postModel,
+                ),
+              )
+            : CommentCard(
+                commentModel: commentsMod,
+                postController: widget.postController,
+                postModel: widget.postModel,
+              );
+      },
     );
   }
 }
@@ -814,11 +814,10 @@ class _CommentCardState extends State<CommentCard> {
                 onTap: () {
                   if (widget.commentModel.isLikeByUser) {
                     widget.postController
-                        .dislikeComement(widget.commentModel.id, context);
+                        .dislikeComement(widget.commentModel.id);
                     setState(() {});
                   } else {
-                    widget.postController
-                        .likeComement(widget.commentModel.id, context);
+                    widget.postController.likeComement(widget.commentModel.id);
                     setState(() {});
                   }
                 },
@@ -892,7 +891,7 @@ class UserNameWidget extends StatelessWidget {
           const Spacer(),
           GestureDetector(
             onTap: () {
-              Get.to(() => NotificationScreen());
+              Get.to(() => const NotificationScreen());
             },
             child: Container(
               height: 40,

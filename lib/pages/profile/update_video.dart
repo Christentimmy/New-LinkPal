@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linkingpal/controller/user_controller.dart';
 import 'package:linkingpal/res/common_button.dart';
-import 'package:linkingpal/theme/app_theme.dart';
 import 'package:linkingpal/utility/video_picker.dart';
 import 'package:linkingpal/widgets/loading_widget.dart';
 import 'package:linkingpal/widgets/snack_bar.dart';
@@ -19,13 +18,14 @@ class UpdateVideoScreen extends StatelessWidget {
   final _userController = Get.put(UserController());
   final RxBool _isloading = false.obs;
   final RxBool _isVideoInitialized = false.obs;
+  final RxBool _isPick = false.obs;
 
   final Rx<VideoPlayerController?> _videoPlayerController =
       Rx<VideoPlayerController?>(null);
-
   final Rx<ChewieController?> _chewieController = Rx<ChewieController?>(null);
 
   void pickUserVideo() async {
+    _isPick.value = true;
     File? videoSelected = await selectVideo();
     if (videoSelected != null) {
       _videoFile.value = videoSelected;
@@ -40,14 +40,14 @@ class UpdateVideoScreen extends StatelessWidget {
               _isVideoInitialized.value = true;
             });
     }
+    _isPick.value = false;
   }
 
   void submitVideo(BuildContext context) async {
     _isloading.value = true;
     await _userController.uploadVideo(
       video: _videoFile.value!,
-      isSignUp: false,
-      context: context,
+      isUpdateVideo: true,
     );
     _isloading.value = false;
   }
@@ -56,10 +56,10 @@ class UpdateVideoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Update Video"),
+        title:
+            Text("Update Video", style: Theme.of(context).textTheme.bodyLarge),
         centerTitle: true,
       ),
-      backgroundColor: AppColor.white,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         child: SingleChildScrollView(
@@ -68,7 +68,7 @@ class UpdateVideoScreen extends StatelessWidget {
             children: [
               Obx(
                 () {
-                  if (_videoFile.value == null) {
+                  if (_isPick.value) {
                     return Container(
                       height: 500,
                       width: 400,
@@ -77,7 +77,21 @@ class UpdateVideoScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           width: 2,
-                          color: Colors.black,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      child: const Loader(color: Colors.deepOrangeAccent),
+                    );
+                  } else if (_videoFile.value == null) {
+                    return Container(
+                      height: 500,
+                      width: 400,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          width: 2,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
                       child: const Text(
@@ -112,12 +126,12 @@ class UpdateVideoScreen extends StatelessWidget {
                 ontap: () {
                   pickUserVideo();
                 },
-                child: const Text(
+                child: Text(
                   "Select video",
                   style: TextStyle(
-                    color: AppColor.white,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
@@ -129,7 +143,7 @@ class UpdateVideoScreen extends StatelessWidget {
                   if (_videoFile.value != null) {
                     submitVideo(context);
                   } else {
-                    CustomSnackbar.showErrorSnackBar("Select a video", context);
+                    CustomSnackbar.showErrorSnackBar("Select a video");
                   }
                 },
                 child: Obx(
@@ -148,14 +162,9 @@ class UpdateVideoScreen extends StatelessWidget {
                         ? const Loader(
                             color: Colors.deepOrangeAccent,
                           )
-                        : const Text(
+                        : Text(
                             "Submit",
-                            style: TextStyle(
-                              color: AppColor.themeColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              decorationColor: AppColor.themeColor,
-                            ),
+                            style: Theme.of(context).textTheme.headlineMedium,
                           ),
                   ),
                 ),

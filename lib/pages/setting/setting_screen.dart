@@ -4,13 +4,14 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:linkingpal/controller/auth_controller.dart';
 import 'package:linkingpal/controller/filter_controller.dart';
+import 'package:linkingpal/controller/notification_controller.dart';
 import 'package:linkingpal/controller/post_controller.dart';
 import 'package:linkingpal/controller/retrieve_controller.dart';
+import 'package:linkingpal/controller/swipe_controller.dart';
 import 'package:linkingpal/controller/theme_controller.dart';
 import 'package:linkingpal/controller/token_storage_controller.dart';
 import 'package:linkingpal/controller/user_controller.dart';
-import 'package:linkingpal/controller/chat_controller.dart';
-// import 'package:restart_app/restart_app.dart';
+import 'package:linkingpal/controller/socket_controller.dart';
 import 'package:linkingpal/pages/setting/blocked_user_screen.dart';
 import 'package:linkingpal/pages/setting/change_password_screen.dart';
 import 'package:linkingpal/pages/setting/privacy_policy_screen.dart';
@@ -27,22 +28,22 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  final RxBool _isNotificationOn = false.obs;
   final _retrieveController = Get.find<RetrieveController>();
   final themeController = Get.put(ThemeController());
   final _authController = Get.put(AuthController());
   final _userController = Get.put(UserController());
   final _postController = Get.put(PostController());
-  // final _webSocketController = Get.put(ChatController());
+  final _notController = Get.find<NotificationController>();
   final _socketController = Get.put(SocketController());
   final RxBool _isloadingDelete = false.obs;
   final RxBool _isloadingLogOut = false.obs;
 
-  void deleteUser() async {
+  Future<void> deleteUser() async {
     _isloadingDelete.value = true;
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
+    SwipeController().deleteSwipeData();
     await _authController.deleteAccount(context);
     await TokenStorage().deleteToken();
     _socketController.disconnectSocket();
@@ -54,6 +55,7 @@ class _SettingScreenState extends State<SettingScreen> {
     _retrieveController.reset();
     _userController.reset();
     _postController.reset();
+    SwipeController().deleteSwipeData();
     await TokenStorage().deleteToken();
     _socketController.disconnectSocket();
     _isloadingLogOut.value = false;
@@ -108,10 +110,10 @@ class _SettingScreenState extends State<SettingScreen> {
                     const Spacer(),
                     Obx(
                       () => CupertinoSwitch(
-                        value: _isNotificationOn.value,
+                        value: _notController.isNotificationGranted.value,
                         activeColor: Theme.of(context).primaryColorDark,
                         onChanged: (newValue) {
-                          _isNotificationOn.value = newValue;
+                          _notController.toggleNotification();
                         },
                       ),
                     ),
@@ -245,7 +247,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                 ),
                         ),
                         ontap1: () async {
-                          await logOut();
+                          await deleteUser();
                         },
                         child2: Text(
                           "No",

@@ -12,6 +12,7 @@ import 'package:linkingpal/pages/auth/select_gender_screen.dart';
 import 'package:linkingpal/pages/auth/sign_in_screen.dart';
 import 'package:linkingpal/pages/auth/sign_up_screen.dart';
 import 'package:linkingpal/pages/auth/success_face_screen.dart';
+import 'package:linkingpal/pages/auth/update_profile_picture.dart';
 import 'package:linkingpal/pages/auth/upload_profile_picture.dart';
 import 'package:linkingpal/pages/auth/verification_checker_screen.dart';
 import 'package:linkingpal/pages/auth/verification_screen_for_email.dart';
@@ -91,6 +92,7 @@ class AppRoutes {
   static const String updateInterest = '/updateInterest';
   static const String userProfileScreen = '/userProfileScreen';
   static const String matchesRequest = '/matchesRequest';
+  static const String updateProfilePicture = '/updateProfilePicture';
 }
 
 class RouteHandler {
@@ -98,6 +100,10 @@ class RouteHandler {
     GetPage(
       name: AppRoutes.createPost,
       page: () => const CreatePostScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.updateProfilePicture,
+      page: () => UpdateProfilePicture(),
     ),
     GetPage(
       name: AppRoutes.matchesProfileScreen,

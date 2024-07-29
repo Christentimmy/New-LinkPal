@@ -19,7 +19,6 @@ class PersonalDataFromUser extends StatelessWidget {
   void updateUserDetail(BuildContext context) async {
     _isloading.value = true;
     await _userController.updateUserDetails(
-      context: context,
       isSignUp: true,
       gender: _genderSelected.value,
     );
@@ -249,7 +248,7 @@ class PersonalDataFromUser extends StatelessWidget {
                           _genderSelected.value.isNotEmpty) {
                         updateUserDetail(context);
                       } else {
-                        CustomSnackbar.showErrorSnackBar("Select required fields", context);
+                        CustomSnackbar.showErrorSnackBar("Select required fields");
                       }
                     },
                     child: _isloading.value

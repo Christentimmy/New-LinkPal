@@ -29,22 +29,23 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
   @override
   void initState() {
     super.initState();
-    _retrieveController.getUserDetails(context);
+    _retrieveController.getUserDetails();
   }
 
-  void verifier() async {
+  Future<void> verifier() async {
     _isloading.value = true;
     final controller = Get.put(RetrieveController());
-    await controller.getUserDetails(context);
+    await controller.getUserDetails();
+    print("EMail: ${controller.userModel.value?.isEmailVerified}");
+    print("Phone: ${controller.userModel.value?.isPhoneVerified}");
     if (!controller.userModel.value!.isEmailVerified &&
         !controller.userModel.value!.isPhoneVerified) {
       return CustomSnackbar.showErrorSnackBar(
         "Kindly verify your necessary details",
-        context,
       );
     } else {
       widget.onClickedToProceed();
-      await _locController.getCurrentCityandUpload(context: context);
+      await _locController.getCurrentCityandUpload();
     }
 
     _isloading.value = false;
@@ -97,7 +98,7 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                   title: Text(
                     "Email Verification",
                     style: GoogleFonts.montserrat(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color:  Colors.black,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -137,7 +138,7 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
                   title: Text(
                     "Phone Verification",
                     style: GoogleFonts.montserrat(
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                      color: Colors.black,
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
                     ),
@@ -162,8 +163,8 @@ class _VerificationCheckerScreenState extends State<VerificationCheckerScreen> {
             const SizedBox(height: 40),
             Obx(
               () => CustomButton(
-                ontap: () {
-                  verifier();
+                ontap: () async {
+                  await verifier();
                 },
                 child: _isloading.value
                     ? Loader(
